@@ -1,0 +1,270 @@
+{
+  "name": "SYBA Pipeline Sync — Apollo to HubSpot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "trigger-1",
+      "name": "Weekday 6AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 300],
+      "notes": "Runs Mon-Fri at 6AM ET. Simple pipeline: Apollo search → enrich → research → emails → HubSpot."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date",
+              "name": "today",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-date",
+      "name": "Set Today",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"VP Sales\", \"VP Distribution\", \"Benefits Director\", \"COO\", \"CTO\", \"CHRO\", \"VP Benefits\", \"Managing Partner\", \"CIO\"],\n  \"q_organization_keyword_tags\": [\"insurance\", \"family office\", \"wealth management\", \"law firm\", \"cybersecurity\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 10,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-search",
+      "name": "Apollo: Search All ICPs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [440, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "people",
+        "options": {}
+      },
+      "id": "split-people",
+      "name": "Split People Array",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop",
+      "name": "Process Each Lead",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are SYBA's sales AI. SYBA is an all-in-one personal cybersecurity platform with app + 24/7 support + $5M insurance (backed by Chubb). Partners: Jencap, Tokio Marine, PwC. Targets: insurance brokers, family offices, HR, law firms, wealth managers, MSPs.\\n\\nFor this prospect, generate JSON with:\\n- fit_score: 1-10 based on ICP match\\n- icp_segment: which SYBA segment they match\\n- cold_email: { subject, body } personalized email\\n- followup_email: { subject, body } day 3 follow-up\\n- linkedin_message: personalized LinkedIn request (<300 chars)\\n\\nAlways include a SYBA stat, mention Chubb/Jencap, and end with CTA: https://calendly.com/with-francis-at-syba-io/15min\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Prospect: {{ JSON.stringify($json) }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-email",
+      "name": "AI: Generate Emails",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1100, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $('Process Each Lead').item.json.email }}",
+        "additionalFields": {
+          "firstName": "={{ $('Process Each Lead').item.json.first_name }}",
+          "lastName": "={{ $('Process Each Lead').item.json.last_name }}",
+          "company": "={{ $('Process Each Lead').item.json.organization.name }}",
+          "jobTitle": "={{ $('Process Each Lead').item.json.title }}"
+        }
+      },
+      "id": "hubspot",
+      "name": "HubSpot: Upsert Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1320, 300],
+      "credentials": {
+        "hubspotApi": {
+          "id": "HUBSPOT_CREDENTIAL_ID",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Process Each Lead').item.json.email }}",
+        "subject": "={{ JSON.parse($('AI: Generate Emails').item.json.choices[0].message.content).cold_email.subject }}",
+        "emailType": "text",
+        "message": "={{ JSON.parse($('AI: Generate Emails').item.json.choices[0].message.content).cold_email.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "gmail-draft",
+      "name": "Gmail: Create Draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1320, 500],
+      "notes": "Creates Gmail draft instead of sending directly. Review before sending.",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# SYBA Pipeline Sync\n**Simple daily workflow: Apollo → AI Emails → HubSpot + Gmail Drafts**\n\nRuns Mon-Fri at 6 AM ET.\n\n## Flow:\n1. Search Apollo for leads across all SYBA ICP segments\n2. AI generates personalized cold email + follow-up + LinkedIn message\n3. Upsert contact to HubSpot\n4. Create Gmail draft (review before sending)\n5. Loop to next lead\n\n## Credentials Needed:\n- Apollo API Key (HTTP Header Auth)\n- OpenAI API Key (HTTP Header Auth)\n- HubSpot API\n- Gmail OAuth2",
+        "width": 420,
+        "height": 320,
+        "color": 4
+      },
+      "id": "note-readme",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-380, 160]
+    }
+  ],
+  "connections": {
+    "Weekday 6AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Today",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Today": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Search All ICPs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Search All ICPs": {
+      "main": [
+        [
+          {
+            "node": "Split People Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split People Array": {
+      "main": [
+        [
+          {
+            "node": "Process Each Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Each Lead": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Emails",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+        ]
+      ]
+    },
+    "AI: Generate Emails": {
+      "main": [
+        [
+          {
+            "node": "HubSpot: Upsert Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail: Create Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot: Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "Process Each Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "tags": [
+    {
+      "name": "SYBA"
+    },
+    {
+      "name": "Pipeline"
+    }
+  ]
+}

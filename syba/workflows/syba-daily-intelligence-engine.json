@@ -1,0 +1,736 @@
+{
+  "name": "SYBA Daily Intelligence Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-1",
+      "name": "Daily 5AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 400],
+      "notes": "Fires every day at 5:00 AM ET. Kicks off the full intelligence pipeline."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date",
+              "name": "today",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "syba_context",
+              "name": "syba_context",
+              "value": "SYBA is an all-in-one personal cybersecurity platform that prevents cyber events and protects families. Products: SYBA App (WiFi scanning, breach monitoring), 24/7 Cyber Support Team, $5M Cyber Insurance (backed by Chubb & Tokio Marine), Training Plans. Partnerships: Chubb, Tokio Marine Highland, Jencap Group (exclusive HNWI distributor), PwC Belgium Scale-up Track. Target ICPs: Insurance Brokers, Family Offices, Corporate HR/Benefits, Law Firms, Wealth Managers, MSPs. Key stats: $52B lost to identity theft 2022, 78% remote work, 56% more HNWI phishing, 49% attacks from home internet. CEO: Brigitte Vantieghem. Demo: https://calendly.com/with-francis-at-syba-io/15min",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-date-1",
+      "name": "Set Date & SYBA Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"cybersecurity breach OR ransomware attack OR identity theft OR HNWI cyber attack OR cyber insurance regulation {{ $json.today }}\",\n  \"limit\": 10\n}",
+        "options": {}
+      },
+      "id": "firecrawl-search",
+      "name": "Firecrawl: Cyber News Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [460, 400],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "notes": "Searches for today's cybersecurity news using Firecrawl. These become trigger events for personalized outreach.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FIRECRAWL_CREDENTIAL_ID",
+          "name": "Firecrawl API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a cyber threat intelligence analyst for SYBA, a personal cybersecurity startup. Extract the top 5 trigger events from today's cyber news that SYBA can use for sales outreach. For each event, provide: event_summary (1 sentence), icp_segment (one of: Insurance Brokers, Family Offices, Corporate HR, Law Firms, Wealth Managers, MSPs), email_hook (a cold email opening line using this event), urgency_score (1-10). Return JSON with key 'trigger_events' containing an array.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Today's cyber news search results: {{ JSON.stringify($json) }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-triggers",
+      "name": "AI: Extract Trigger Events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [700, 400],
+      "notes": "AI analyzes news and extracts 5 actionable trigger events mapped to SYBA's ICP segments.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"VP Sales\", \"VP Distribution\", \"Benefits Director\", \"Agency Principal\"],\n  \"organization_industry_tag_ids\": [\"insurance\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 5,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-insurance",
+      "name": "Apollo: Insurance Brokers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [960, 160],
+      "notes": "Searches Apollo for insurance broker decision-makers (VP Sales, Benefits Director, Agency Principal).",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"COO\", \"CTO\", \"Operations Director\", \"Chief of Staff\", \"Managing Director\"],\n  \"q_organization_keyword_tags\": [\"family office\", \"wealth management\", \"private wealth\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 5,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-family",
+      "name": "Apollo: Family Offices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [960, 340],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"CHRO\", \"VP Benefits\", \"Benefits Manager\", \"Total Rewards Director\", \"VP Human Resources\"],\n  \"organization_num_employees_ranges\": [\"201,1000\", \"1001,5000\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 5,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-hr",
+      "name": "Apollo: Corporate HR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [960, 520],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"Managing Partner\", \"CIO\", \"IT Director\", \"Chief Information Officer\"],\n  \"organization_industry_tag_ids\": [\"legal services\", \"law practice\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 5,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-law",
+      "name": "Apollo: Law Firms",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [960, 700],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "merge-leads",
+      "name": "Merge All Leads",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-leads",
+      "name": "Loop Through Leads",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1420, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.firecrawl.dev/v1/scrape",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.organization.website_url }}\",\n  \"formats\": [\"summary\"],\n  \"onlyMainContent\": true\n}",
+        "options": {}
+      },
+      "id": "firecrawl-company",
+      "name": "Firecrawl: Scrape Company Site",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1640, 400],
+      "notes": "Scrapes each prospect's company website to gather context for personalized outreach.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FIRECRAWL_CREDENTIAL_ID",
+          "name": "Firecrawl API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are SYBA's AI sales intelligence agent. Context: {{ $('Set Date & SYBA Context').item.json.syba_context }}\\n\\nToday's trigger events: {{ $('AI: Extract Trigger Events').item.json.choices[0].message.content }}\\n\\nGenerate a complete outreach package as JSON with these keys:\\n- prospect_brief: { summary (3-4 sentences), fit_score (1-10), icp_segment, matched_trigger_event }\\n- cold_email_direct: { subject, body } - direct value prop\\n- cold_email_story: { subject, body } - story/case-study angle\\n- cold_email_pain: { subject, body } - pain-point urgency\\n- followup_day3: { subject, body }\\n- followup_day7: { subject, body }\\n- followup_day14: { subject, body } - break-up email\\n- sales_script: { opening_hook, discovery_questions (array of 3), pitch, objection_handles (array of 3), close }\\n- linkedin_message: string (<300 chars)\\n\\nRules:\\n- Reference specific company details from the website scrape\\n- Include at least one SYBA stat per email\\n- Mention Chubb/Jencap/PwC as credibility signals\\n- End every email with CTA: https://calendly.com/with-francis-at-syba-io/15min\\n- Tone: authoritative but approachable, never fear-mongering\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Prospect data: {{ JSON.stringify($('Loop Through Leads').item.json) }}\\n\\nCompany website summary: {{ $json.data ? $json.data.summary : 'No summary available' }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-outreach",
+      "name": "AI: Generate Outreach Package",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1880, 400],
+      "notes": "AI generates full personalized outreach: brief, 3 cold email variants, follow-up sequence, sales script, LinkedIn message.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "outreach_data",
+              "name": "outreach_json",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            },
+            {
+              "id": "lead_email",
+              "name": "lead_email",
+              "value": "={{ $('Loop Through Leads').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "lead_name",
+              "name": "lead_first_name",
+              "value": "={{ $('Loop Through Leads').item.json.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "lead_last",
+              "name": "lead_last_name",
+              "value": "={{ $('Loop Through Leads').item.json.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "lead_company",
+              "name": "lead_company",
+              "value": "={{ $('Loop Through Leads').item.json.organization.name }}",
+              "type": "string"
+            },
+            {
+              "id": "lead_title",
+              "name": "lead_title",
+              "value": "={{ $('Loop Through Leads').item.json.title }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-outreach",
+      "name": "Set Outreach Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2100, 400]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $json.lead_email }}",
+        "additionalFields": {
+          "firstName": "={{ $json.lead_first_name }}",
+          "lastName": "={{ $json.lead_last_name }}",
+          "company": "={{ $json.lead_company }}",
+          "jobTitle": "={{ $json.lead_title }}"
+        }
+      },
+      "id": "hubspot-contact",
+      "name": "HubSpot: Upsert Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [2320, 300],
+      "notes": "Creates or updates contact in HubSpot with enriched prospect data.",
+      "credentials": {
+        "hubspotApi": {
+          "id": "HUBSPOT_CREDENTIAL_ID",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "deal",
+        "operation": "create",
+        "stage": "appointmentscheduled",
+        "additionalFields": {
+          "dealName": "=SYBA - {{ $json.lead_company }} - {{ $('Set Date & SYBA Context').item.json.today }}",
+          "pipeline": "default"
+        }
+      },
+      "id": "hubspot-deal",
+      "name": "HubSpot: Create Deal",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [2540, 300],
+      "notes": "Creates a new deal in HubSpot pipeline for each prospect.",
+      "credentials": {
+        "hubspotApi": {
+          "id": "HUBSPOT_CREDENTIAL_ID",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a LinkedIn content strategist for Brigitte Vantieghem, CEO of SYBA (syba.io). Context: {{ $('Set Date & SYBA Context').item.json.syba_context }}\\n\\nGenerate 3 LinkedIn posts as JSON with key 'posts':\\n1. thought_leadership: { title, content } - Tied to today's cyber news, positions SYBA as authority\\n2. educational: { title, content } - Teaches one actionable personal cybersecurity tip\\n3. engagement: { title, content } - Poll or question that sparks conversation\\n\\nFormat: Short paragraphs (1-2 lines). Line breaks between paragraphs. Open with a hook (stat or provocative question). Include 2-3 SYBA stats. End with soft CTA. Max 3 hashtags. Voice: authoritative, warm, data-driven.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Today's trigger events for content inspiration: {{ $('AI: Extract Trigger Events').item.json.choices[0].message.content }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-linkedin",
+      "name": "AI: LinkedIn Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [960, 920],
+      "notes": "Generates 3 daily LinkedIn posts: thought leadership, educational, and engagement.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Generate a concise HTML daily briefing email for Brigitte Vantieghem, CEO of SYBA. Use clean, modern HTML with inline styles (white background, dark text, blue accent #2563eb). Sections: 1) Today's Trigger Events (bullet list) 2) New Leads Added (table: name, company, title, fit score) 3) LinkedIn Content Ready (3 post previews) 4) Action Items (numbered list). Keep scannable. Include SYBA logo placeholder at top.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Date: {{ $('Set Date & SYBA Context').item.json.today }}\\n\\nTrigger Events: {{ $('AI: Extract Trigger Events').item.json.choices[0].message.content }}\\n\\nLinkedIn Content: {{ $json.choices[0].message.content }}\\n\\nLeads processed today: Data available in HubSpot.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "ai-summary",
+      "name": "AI: Daily Summary Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1200, 920],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "brigitte@syba.io",
+        "subject": "=SYBA Daily Intelligence — {{ $('Set Date & SYBA Context').item.json.today }}",
+        "emailType": "html",
+        "message": "={{ $json.choices[0].message.content }}",
+        "options": {}
+      },
+      "id": "gmail-summary",
+      "name": "Gmail: Send Daily Briefing",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1440, 920],
+      "notes": "Sends the daily briefing email to Brigitte. Swap with SMTP or Resend as needed.",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 1: Trigger Event Detection\n**What:** Searches for today's cybersecurity news using Firecrawl\n**Why:** These become the \"hooks\" for personalized outreach\n**Events tracked:** Data breaches, ransomware, HNWI attacks, regulations, cyberbullying",
+        "width": 400,
+        "height": 200
+      },
+      "id": "note-1",
+      "name": "Note: Phase 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [400, 140]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 2: Lead Discovery (Parallel)\n**What:** 4 parallel Apollo searches across SYBA's ICP segments\n**Segments:** Insurance Brokers, Family Offices, Corporate HR, Law Firms\n**Per segment:** 5 leads = 20 total daily\n\n**SETUP:** Replace APOLLO_CREDENTIAL_ID with your Apollo API credential",
+        "width": 420,
+        "height": 200
+      },
+      "id": "note-2",
+      "name": "Note: Phase 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [900, -60]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 3: Deep Research + AI Outreach\n**What:** For each lead:\n1. Scrapes company website via Firecrawl\n2. AI generates full outreach package:\n   - Prospect brief with fit score\n   - 3 cold email variants\n   - 3-email follow-up sequence\n   - Sales call script\n   - LinkedIn connection message\n\nAll personalized with company context + trigger events",
+        "width": 440,
+        "height": 260
+      },
+      "id": "note-3",
+      "name": "Note: Phase 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1580, 100]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 4: HubSpot CRM\n**What:** Upserts each lead into HubSpot:\n- Creates/updates contact with enriched data\n- Creates deal in pipeline\n- All outreach content available via notes\n\n**SETUP:** Replace HUBSPOT_CREDENTIAL_ID with your HubSpot credential",
+        "width": 400,
+        "height": 200
+      },
+      "id": "note-4",
+      "name": "Note: Phase 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [2260, 60]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 5: Content + Daily Report\n**What:** \n1. AI generates 3 LinkedIn posts for Brigitte\n2. Compiles daily summary email\n3. Sends briefing via Gmail\n\n**LinkedIn posts:** Thought leadership, Educational, Engagement\n**Email includes:** Trigger events, new leads, content ready, action items",
+        "width": 440,
+        "height": 220
+      },
+      "id": "note-5",
+      "name": "Note: Phase 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [900, 720]
+    },
+    {
+      "parameters": {
+        "content": "# SYBA Daily Intelligence Engine\n**Runs daily at 5 AM ET**\n\nFull pipeline: News → Triggers → Leads → Research → Outreach → CRM → Content → Report\n\n## Credentials Needed:\n1. **Firecrawl API** — for web scraping/search\n2. **OpenAI API** — for AI analysis and content generation\n3. **Apollo API** — for lead discovery and email enrichment\n4. **HubSpot API** — for CRM pipeline management\n5. **Gmail OAuth2** — for sending daily briefing\n\n## To Activate:\n1. Import this workflow into n8n\n2. Set up all 5 credentials above\n3. Replace credential IDs in each node\n4. Test with Manual Trigger first\n5. Activate the Schedule Trigger",
+        "width": 500,
+        "height": 360,
+        "color": 4
+      },
+      "id": "note-main",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-400, 200]
+    }
+  ],
+  "connections": {
+    "Daily 5AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Date & SYBA Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Date & SYBA Context": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Cyber News Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Cyber News Search": {
+      "main": [
+        [
+          {
+            "node": "AI: Extract Trigger Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Extract Trigger Events": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Insurance Brokers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo: Family Offices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo: Corporate HR",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo: Law Firms",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI: LinkedIn Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Insurance Brokers": {
+      "main": [
+        [
+          {
+            "node": "Merge All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Family Offices": {
+      "main": [
+        [
+          {
+            "node": "Merge All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Corporate HR": {
+      "main": [
+        [
+          {
+            "node": "Merge All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Law Firms": {
+      "main": [
+        [
+          {
+            "node": "Merge All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Leads": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Through Leads": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Scrape Company Site",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI: Daily Summary Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Scrape Company Site": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Outreach Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Outreach Package": {
+      "main": [
+        [
+          {
+            "node": "Set Outreach Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Outreach Data": {
+      "main": [
+        [
+          {
+            "node": "HubSpot: Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot: Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "HubSpot: Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot: Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: LinkedIn Content": {
+      "main": [
+        [
+          {
+            "node": "AI: Daily Summary Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Daily Summary Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Send Daily Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "SYBA"
+    },
+    {
+      "name": "Lead Generation"
+    },
+    {
+      "name": "AI Automation"
+    }
+  ]
+}

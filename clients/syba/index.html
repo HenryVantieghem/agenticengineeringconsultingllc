@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SYBA — Complete cybersecurity combining AI-powered prevention, 24/7 expert monitoring, and $5M cyber insurance. Total protection for your digital life.">
+  <title>SYBA | Complete Cybersecurity Protection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <style>
+    :root {
+      --black: #0A0A0B;
+      --white: #FAFAF9;
+      --accent: #e94560;
+      --accent-glow: #FF6B7D;
+      --muted: #8A8A8A;
+      --border: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,11,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      transition: all 0.3s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-glow) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(233,69,96,0.3);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(233,69,96,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s ease-out;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(48px, 8vw, 112px);
+      line-height: 0.95;
+      font-weight: 400;
+      max-width: 900px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease-out 0.1s both;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 56px;
+      animation: fadeUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      animation: fadeUp 0.8s ease-out 0.3s both;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(233,69,96,0.35);
+    }
+
+    .btn-ghost {
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--glass);
+    }
+
+    /* HERO SHIELD VISUAL */
+    .hero-visual {
+      margin-top: 72px;
+      animation: fadeUp 0.8s ease-out 0.4s both;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .hero-visual-stat {
+      text-align: center;
+      padding: 20px 28px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+    }
+
+    .hero-visual-stat .number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 28px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .hero-visual-stat .label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .hero-shield {
+      width: 64px;
+      height: 64px;
+      opacity: 0.15;
+    }
+
+    /* SCROLLING MARQUEE */
+    .marquee-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      overflow: hidden;
+    }
+
+    .marquee-track {
+      display: flex;
+      animation: scroll 25s linear infinite;
+      width: max-content;
+    }
+
+    .marquee-item {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 48px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .marquee-item .sep { color: var(--accent); margin-left: 48px; }
+
+    /* STATS SECTION */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 100px 48px;
+      gap: 48px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 40px 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      transition: all 0.4s;
+    }
+
+    .stat:hover {
+      border-color: rgba(233,69,96,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .stat-number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* SECTION DEFAULTS */
+    .section {
+      padding: 120px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      margin-bottom: 64px;
+      max-width: 700px;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    /* PRODUCTS GRID */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .product-card {
+      padding: 48px 36px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .product-card:hover::before { opacity: 1; }
+
+    .product-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-4px);
+    }
+
+    .product-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+      display: block;
+      color: var(--accent);
+    }
+
+    .product-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .product-card p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* HOW IT WORKS */
+    .solution-section {
+      background: linear-gradient(180deg, rgba(233,69,96,0.03) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .step {
+      padding: 48px 32px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+
+    .step:hover { background: var(--glass); }
+
+    .step-num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      text-align: center;
+      padding: 160px 48px;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(233,69,96,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-left {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-right a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.3s;
+    }
+
+    .footer-right a:hover { color: var(--white); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .nav-links { gap: 0; }
+      .hero { padding: 120px 24px 60px; }
+      .stats { grid-template-columns: 1fr; padding: 60px 24px; }
+      .section { padding: 80px 24px; }
+      .products-grid { grid-template-columns: 1fr; }
+      .how-it-works { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+      .hero-visual { flex-direction: column; gap: 16px; }
+      .cta-section { padding: 100px 24px; }
+      footer { flex-direction: column; gap: 24px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">SYBA<span>.</span></div>
+    <div class="nav-links">
+      <a href="#products">Products</a>
+      <a href="#partners">Partners</a>
+      <a href="#about">About</a>
+      <a href="login.html" class="nav-cta">Client Portal</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      PwC Belgium Scale-up Track
+    </div>
+    <h1>Complete<br>Cyber<em>security.</em></h1>
+    <p class="hero-sub">The only platform combining AI-powered prevention, 24/7 expert monitoring, and $5M cyber insurance. Total protection for your digital life.</p>
+    <div class="hero-actions">
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/with-francis-at-syba-io/15min'});return false;" class="btn-primary">Book a Demo</a>
+      <a href="login.html" class="btn-ghost">Client Portal &rarr;</a>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-visual-stat">
+        <div class="number">$5M</div>
+        <div class="label">Insurance</div>
+      </div>
+      <svg class="hero-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      <div class="hero-visual-stat">
+        <div class="number">24/7</div>
+        <div class="label">Monitoring</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section" id="partners">
+    <div class="marquee-track">
+      <span class="marquee-item">PwC Belgium <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Chubb <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Tokio Marine Highland <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Jencap Group <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">PwC Belgium <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Chubb <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Tokio Marine Highland <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Jencap Group <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">PwC Belgium <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Chubb <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Tokio Marine Highland <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Jencap Group <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">PwC Belgium <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Chubb <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Tokio Marine Highland <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Jencap Group <span class="sep">&#9670;</span></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number">$5M</div>
+      <div class="stat-label">Cyber Insurance Coverage<br>Chubb Backed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">24/7</div>
+      <div class="stat-label">Expert Security Team</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">Only 1</div>
+      <div class="stat-label">Selected for PwC<br>Scale-up Track</div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section class="section" id="products">
+    <div class="section-label">Products</div>
+    <h2 class="section-title">Everything you need to stay <em>protected.</em></h2>
+    <div class="products-grid">
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+        <h3>SYBA App</h3>
+        <p>All-in-one protection app for your devices. Real-time threat detection and prevention.</p>
+      </div>
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M14 12h4"/><circle cx="12" cy="12" r="1"/></svg>
+        <h3>Router Security</h3>
+        <p>Network-level protection that secures every connected device in your home or office.</p>
+      </div>
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <h3>24/7 Cyber Team</h3>
+        <p>Human security experts monitoring your digital presence around the clock.</p>
+      </div>
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        <h3>Cyber Insurance</h3>
+        <p>$5M coverage backed by Chubb. Complete financial protection against cyber threats.</p>
+      </div>
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <h3>Training Plan</h3>
+        <p>Customized cybersecurity training for your team. Stay ahead of emerging threats.</p>
+      </div>
+
+      <div class="product-card">
+        <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h3>Desktop Application</h3>
+        <p>Enterprise-grade security for your workstation. Advanced threat intelligence.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="solution-section" id="about">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Protected in minutes, not <em>months.</em></h2>
+      <div class="how-it-works">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Deploy SYBA</h3>
+          <p>Install our app and connect your devices. Setup takes minutes, not hours.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Get Protected</h3>
+          <p>Our AI + human team monitors 24/7. Threats are detected and neutralized instantly.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Stay Secure</h3>
+          <p>$5M insurance backs you up. If anything gets through, you're fully covered.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to stop<br>worrying about <em>cyber threats?</em></h2>
+    <p>Book a 15-minute demo and see how SYBA protects your digital life.</p>
+    <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/with-francis-at-syba-io/15min'});return false;" class="btn-primary">Book Your Free Demo</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      &copy; 2026 SYBA &middot; syba.io
+    </div>
+    <div class="footer-right">
+      <a href="mailto:brigittev@syba.io">brigittev@syba.io</a>
+      <a href="https://www.syba.io" target="_blank" rel="noopener">syba.io</a>
+    </div>
+  </footer>
+
+</body>
+</html>

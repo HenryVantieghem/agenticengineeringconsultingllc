@@ -1,6 +1,7 @@
 # Secrets
 .env
 .env.*
+.mcp.json
 
 # Dependencies
 node_modules/
@@ -25,3 +26,6 @@ site-verification.jpeg
 .venv/
 __pycache__/
 *.pyc
+
+# Google Workspace MCP (standalone repo, cloned separately)
+hardened-google-workspace-mcp/

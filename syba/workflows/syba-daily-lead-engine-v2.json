@@ -1,0 +1,812 @@
+{
+  "name": "SYBA Daily Lead Intelligence Engine v2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-1",
+      "name": "Daily 5AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 400],
+      "notes": "Fires every day at 5:00 AM ET. Kicks off the full 40-lead intelligence pipeline across 3 regions."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date",
+              "name": "today",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "syba_context",
+              "name": "syba_context",
+              "value": "SYBA is an all-in-one personal cybersecurity platform that PREVENTS cyber events and PROTECTS families. Founded by Brigitte Vantieghem LL.M. (CEO, Belgian). HQ: Belgium + US operations. Products: SYBA App (WiFi scanning, breach monitoring, social media checks), 24/7 Cyber Security Team, $5M Cyber Insurance (Chubb + Tokio Marine Highland), Training Plans, Desktop App with AI analytics. Partnerships: Chubb ($5M insurance), Tokio Marine Highland, Jencap Group (exclusive HNWI distributor), PwC Belgium Scale-up Track (only cybersecurity company selected for Defence & Resilience). 6 ICP Segments: Insurance Brokers, Family Offices, Corporate HR/Benefits, Law Firms, Wealth Managers, MSPs. Key Stats: $52B identity theft losses 2022, 78% US remote work, 56% more HNWI phishing, 49% attacks from home internet, 76% attacks target remote workers, 37% US teens cyberbullied, $500K-$10M per incident. Demo: https://calendly.com/with-francis-at-syba-io/15min | Website: https://www.syba.io",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-date",
+      "name": "Set Date & SYBA Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"cybersecurity breach OR ransomware attack OR identity theft OR HNWI cyber attack OR cyber insurance regulation OR NIS2 directive OR GDPR enforcement {{ $json.today }}\",\n  \"limit\": 10\n}",
+        "options": {}
+      },
+      "id": "firecrawl-news",
+      "name": "Firecrawl: Cyber News Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [480, 400],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "notes": "Searches for today's cybersecurity news. Results become trigger events for personalized outreach hooks.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FIRECRAWL_CREDENTIAL_ID",
+          "name": "Firecrawl API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a cyber threat intelligence analyst for SYBA, a personal cybersecurity startup. Extract the top 5 trigger events from today's cyber news for sales outreach. For each event provide: event_summary (1 sentence), affected_regions (array from: Belgium, Europe, USA), icp_segment (one of: Insurance Brokers, Family Offices, Corporate HR, Law Firms, Wealth Managers, MSPs), email_hook (a cold email opening line referencing this event), urgency_score (1-10). Return valid JSON with key trigger_events containing an array of 5 objects.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Today's cyber news search results: {{ JSON.stringify($json) }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-triggers",
+      "name": "AI: Extract Trigger Events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [720, 400],
+      "notes": "AI analyzes news and extracts 5 actionable trigger events mapped to SYBA ICP segments and regions.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"VP Sales\", \"VP Distribution\", \"Benefits Director\", \"Agency Principal\", \"COO\", \"CTO\", \"Operations Director\", \"Chief of Staff\", \"CHRO\", \"VP Benefits\", \"Benefits Manager\", \"Total Rewards Director\", \"Managing Partner\", \"CIO\", \"IT Director\", \"Compliance Officer\", \"Chief Compliance Officer\", \"Wealth Manager\", \"Practice Manager\", \"CEO\", \"Service Delivery Manager\"],\n  \"person_locations\": [\"Belgium\"],\n  \"per_page\": 20,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-belgium",
+      "name": "Apollo: Belgium (20 leads)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1000, 160],
+      "notes": "Searches Apollo for 20 decision-makers across all 6 ICP segments located in Belgium.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"VP Sales\", \"VP Distribution\", \"Benefits Director\", \"Agency Principal\", \"COO\", \"CTO\", \"Operations Director\", \"Chief of Staff\", \"CHRO\", \"VP Benefits\", \"Benefits Manager\", \"Total Rewards Director\", \"Managing Partner\", \"CIO\", \"IT Director\", \"Compliance Officer\", \"Chief Compliance Officer\", \"Wealth Manager\", \"Practice Manager\", \"CEO\", \"Service Delivery Manager\"],\n  \"person_locations\": [\"Netherlands\", \"France\", \"Germany\", \"United Kingdom\", \"Luxembourg\", \"Switzerland\", \"Ireland\", \"Spain\", \"Italy\", \"Sweden\", \"Denmark\", \"Norway\", \"Austria\"],\n  \"per_page\": 10,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-europe",
+      "name": "Apollo: Europe ex-Belgium (10 leads)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1000, 400],
+      "notes": "Searches Apollo for 10 decision-makers across 13 European countries (excluding Belgium).",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"person_titles\": [\"VP Sales\", \"VP Distribution\", \"Benefits Director\", \"Agency Principal\", \"COO\", \"CTO\", \"Operations Director\", \"Chief of Staff\", \"CHRO\", \"VP Benefits\", \"Benefits Manager\", \"Total Rewards Director\", \"Managing Partner\", \"CIO\", \"IT Director\", \"Compliance Officer\", \"Chief Compliance Officer\", \"Wealth Manager\", \"Practice Manager\", \"CEO\", \"Service Delivery Manager\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 10,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "apollo-usa",
+      "name": "Apollo: USA (10 leads)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1000, 640],
+      "notes": "Searches Apollo for 10 decision-makers in the United States across all 6 ICP segments.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "APOLLO_CREDENTIAL_ID",
+          "name": "Apollo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const people = $input.first().json.people || [];\nif (people.length === 0) {\n  return [{ json: { region_tag: 'Belgium', _no_results: true, first_name: 'No leads found', last_name: '', email: '', title: '', organization: {} } }];\n}\nreturn people.map(person => ({\n  json: { ...person, region_tag: 'Belgium' }\n}));"
+      },
+      "id": "code-belgium",
+      "name": "Process Belgium Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1260, 160],
+      "notes": "Extracts people array from Apollo response, tags each lead with region_tag: Belgium"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const people = $input.first().json.people || [];\nif (people.length === 0) {\n  return [{ json: { region_tag: 'Europe', _no_results: true, first_name: 'No leads found', last_name: '', email: '', title: '', organization: {} } }];\n}\nreturn people.map(person => ({\n  json: { ...person, region_tag: 'Europe' }\n}));"
+      },
+      "id": "code-europe",
+      "name": "Process Europe Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1260, 400],
+      "notes": "Extracts people array from Apollo response, tags each lead with region_tag: Europe"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const people = $input.first().json.people || [];\nif (people.length === 0) {\n  return [{ json: { region_tag: 'USA', _no_results: true, first_name: 'No leads found', last_name: '', email: '', title: '', organization: {} } }];\n}\nreturn people.map(person => ({\n  json: { ...person, region_tag: 'USA' }\n}));"
+      },
+      "id": "code-usa",
+      "name": "Process USA Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1260, 640],
+      "notes": "Extracts people array from Apollo response, tags each lead with region_tag: USA"
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "merge-be-eu",
+      "name": "Merge: Belgium + Europe",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1520, 280],
+      "notes": "Combines Belgium (20) and Europe (10) leads into single stream. Uses chained 2-input merges to avoid n8n 3-input merge bug."
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "merge-all",
+      "name": "Merge: All Regions",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1760, 400],
+      "notes": "Combines BE+EU stream with USA leads. Result: ~40 leads tagged by region."
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-leads",
+      "name": "Loop Through Leads",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2000, 400],
+      "notes": "Processes each lead one at a time: scrape website, generate outreach, push to HubSpot."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "website-check",
+              "leftValue": "={{ $json.organization?.website_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-website",
+      "name": "IF: Has Website URL",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2240, 400],
+      "notes": "Checks if the lead has a company website URL for scraping. YES → scrape, NO → skip."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.organization.website_url }}\",\n  \"formats\": [\"markdown\"],\n  \"onlyMainContent\": true,\n  \"waitFor\": 3000\n}",
+        "options": {}
+      },
+      "id": "firecrawl-scrape",
+      "name": "Firecrawl: Scrape Company Site",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2480, 280],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Scrapes the prospect's company website for context to personalize outreach.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FIRECRAWL_CREDENTIAL_ID",
+          "name": "Firecrawl API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "website_summary",
+              "name": "website_summary",
+              "value": "No company website available for research. Use the prospect's title, company name, and industry context for personalization instead.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "keepOnlySet": false
+        }
+      },
+      "id": "set-no-website",
+      "name": "Set: No Website Available",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2480, 520],
+      "notes": "Fallback when prospect has no company website. Passes through lead data with a note."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are SYBA's AI sales intelligence agent. SYBA is an all-in-one personal cybersecurity platform that PREVENTS cyber events and PROTECTS families.\\n\\nSYBA Context: {{ $('Set Date & SYBA Context').item.json.syba_context }}\\n\\nToday's trigger events: {{ $('AI: Extract Trigger Events').item.json.choices[0].message.content }}\\n\\nThis prospect is in the {{ $('Loop Through Leads').item.json.region_tag }} region.\\n\\nREGIONAL MESSAGING RULES:\\n- BELGIUM: Lead with PwC Belgium Scale-up Track recognition. Use GDPR and European data protection language. Mention that Brigitte Vantieghem (CEO) is a fellow Belgian business leader. Reference EU NIS2 directive and Belgian cyber regulations.\\n- EUROPE: Lead with Tokio Marine Highland and Chubb partnership credibility. Use GDPR angle throughout. Emphasize cross-border family protection for executives and their families. Reference EU NIS2 directive compliance.\\n- USA: Lead with $5M Chubb cyber insurance coverage. Use the 78% remote work and 49% home-internet attack stats prominently. Reference Jencap exclusive HNWI distribution partnership.\\n\\nGenerate a complete outreach package as valid JSON with these exact keys:\\n- prospect_brief: { summary (3-4 sentences), fit_score (1-10), icp_segment (one of the 6 ICPs), pain_points (array of 3 strings), sales_strategy (2-3 sentences) }\\n- cold_email: { subject, body } - personalized cold email using the framework: specific opening about their company, one stat hitting their pain point, how SYBA solves it, partnership credibility, CTA\\n- followup_day3: { subject, body } - new angle or stat, reference original email\\n- followup_day7: { subject, body } - share relevant insight or case study angle\\n- followup_day14: { subject, body } - break-up email with no-strings resource offer\\n- sales_script: { opening_hook, discovery_questions (array of 3), pitch (2-3 sentences), objection_handles (array of 3 objects with objection and response keys), close }\\n- linkedin_message: string under 300 characters\\n\\nRULES:\\n- Reference specific details from the company website data\\n- Include at least one SYBA stat per email\\n- Use region-appropriate partnership (Belgium=PwC, Europe=Tokio Marine/Chubb, USA=Jencap/Chubb)\\n- Every email CTA: Book a 15-min call at https://calendly.com/with-francis-at-syba-io/15min\\n- Tone: authoritative but approachable, data-driven, never fear-mongering\\n- Subject lines: specific to their industry and role, never generic\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Prospect data:\\nName: {{ $('Loop Through Leads').item.json.first_name }} {{ $('Loop Through Leads').item.json.last_name }}\\nTitle: {{ $('Loop Through Leads').item.json.title }}\\nCompany: {{ $('Loop Through Leads').item.json.organization ? $('Loop Through Leads').item.json.organization.name : 'Unknown' }}\\nIndustry: {{ $('Loop Through Leads').item.json.organization ? ($('Loop Through Leads').item.json.organization.industry || 'Not specified') : 'Unknown' }}\\nRegion: {{ $('Loop Through Leads').item.json.region_tag }}\\nEmail: {{ $('Loop Through Leads').item.json.email }}\\n\\nCompany website data: {{ $json.data ? ($json.data.markdown ? $json.data.markdown.substring(0, 2000) : 'Scraped but no content extracted') : ($json.website_summary || 'No website data available') }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "ai-outreach",
+      "name": "AI: Generate Full Outreach Package",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2720, 400],
+      "notes": "GPT-4o generates full personalized outreach: prospect brief, cold email, 3 follow-ups, sales script, LinkedIn message. Region-aware messaging.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.processedLeads) staticData.processedLeads = [];\n\nconst lead = $('Loop Through Leads').item.json;\nlet outreach = {};\ntry {\n  outreach = JSON.parse($json.choices[0].message.content);\n} catch (e) {\n  outreach = { error: 'Failed to parse outreach JSON', raw: $json.choices[0].message.content };\n}\n\nstaticData.processedLeads.push({\n  first_name: lead.first_name || '',\n  last_name: lead.last_name || '',\n  email: lead.email || '',\n  company: (lead.organization && lead.organization.name) || 'Unknown',\n  title: lead.title || '',\n  region: lead.region_tag || 'Unknown',\n  website_url: (lead.organization && lead.organization.website_url) || '',\n  outreach: outreach\n});\n\nreturn $input.item;"
+      },
+      "id": "code-accumulate",
+      "name": "Accumulate Lead Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2960, 400],
+      "notes": "Stores each processed lead + outreach package in workflow static data for the final briefing compilation."
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $('Loop Through Leads').item.json.email }}",
+        "additionalFields": {
+          "firstName": "={{ $('Loop Through Leads').item.json.first_name }}",
+          "lastName": "={{ $('Loop Through Leads').item.json.last_name }}",
+          "company": "={{ $('Loop Through Leads').item.json.organization ? $('Loop Through Leads').item.json.organization.name : '' }}",
+          "jobTitle": "={{ $('Loop Through Leads').item.json.title }}"
+        }
+      },
+      "id": "hubspot-contact",
+      "name": "HubSpot: Upsert Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [3200, 340],
+      "notes": "Creates or updates contact in HubSpot CRM with enriched prospect data from Apollo.",
+      "credentials": {
+        "hubspotApi": {
+          "id": "HUBSPOT_CREDENTIAL_ID",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "deal",
+        "operation": "create",
+        "stage": "appointmentscheduled",
+        "additionalFields": {
+          "dealName": "=SYBA - {{ $('Loop Through Leads').item.json.organization ? $('Loop Through Leads').item.json.organization.name : 'Unknown' }} - {{ $('Loop Through Leads').item.json.region_tag }} - {{ $('Set Date & SYBA Context').item.json.today }}",
+          "pipeline": "default"
+        }
+      },
+      "id": "hubspot-deal",
+      "name": "HubSpot: Create Deal",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [3440, 340],
+      "notes": "Creates a new deal in HubSpot pipeline for each prospect. Deal name includes region tag.",
+      "credentials": {
+        "hubspotApi": {
+          "id": "HUBSPOT_CREDENTIAL_ID",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst allLeads = staticData.processedLeads || [];\ndelete staticData.processedLeads;\n\nconst briefingLeads = allLeads.map((lead, idx) => ({\n  rank: idx + 1,\n  name: (lead.first_name + ' ' + lead.last_name).trim(),\n  email: lead.email,\n  company: lead.company,\n  title: lead.title,\n  region: lead.region,\n  fit_score: (lead.outreach && lead.outreach.prospect_brief && lead.outreach.prospect_brief.fit_score) || 0,\n  icp_segment: (lead.outreach && lead.outreach.prospect_brief && lead.outreach.prospect_brief.icp_segment) || 'Unknown',\n  summary: (lead.outreach && lead.outreach.prospect_brief && lead.outreach.prospect_brief.summary) || '',\n  pain_points: (lead.outreach && lead.outreach.prospect_brief && lead.outreach.prospect_brief.pain_points) || [],\n  sales_strategy: (lead.outreach && lead.outreach.prospect_brief && lead.outreach.prospect_brief.sales_strategy) || '',\n  cold_email_subject: (lead.outreach && lead.outreach.cold_email && lead.outreach.cold_email.subject) || '',\n  cold_email_body: (lead.outreach && lead.outreach.cold_email && lead.outreach.cold_email.body) || '',\n  sales_hook: (lead.outreach && lead.outreach.sales_script && lead.outreach.sales_script.opening_hook) || '',\n  linkedin_message: (lead.outreach && lead.outreach.linkedin_message) || '',\n  followup_day3_subject: (lead.outreach && lead.outreach.followup_day3 && lead.outreach.followup_day3.subject) || '',\n  followup_day7_subject: (lead.outreach && lead.outreach.followup_day7 && lead.outreach.followup_day7.subject) || '',\n  followup_day14_subject: (lead.outreach && lead.outreach.followup_day14 && lead.outreach.followup_day14.subject) || ''\n}));\n\nbriefingLeads.sort((a, b) => b.fit_score - a.fit_score);\n\nreturn [{\n  json: {\n    all_leads: briefingLeads,\n    total_count: allLeads.length,\n    belgium_leads: briefingLeads.filter(l => l.region === 'Belgium'),\n    europe_leads: briefingLeads.filter(l => l.region === 'Europe'),\n    usa_leads: briefingLeads.filter(l => l.region === 'USA'),\n    top_10: briefingLeads.slice(0, 10),\n    belgium_count: briefingLeads.filter(l => l.region === 'Belgium').length,\n    europe_count: briefingLeads.filter(l => l.region === 'Europe').length,\n    usa_count: briefingLeads.filter(l => l.region === 'USA').length\n  }\n}];"
+      },
+      "id": "code-get-leads",
+      "name": "Get All Processed Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2240, 760],
+      "notes": "After loop completes: reads all accumulated lead data from workflow static data, sorts by fit score, and prepares briefing-ready summary."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are SYBA's daily intelligence briefing compiler. Generate a comprehensive, beautifully formatted HTML email briefing for Brigitte and Francis.\\n\\nUse clean, modern HTML with inline styles:\\n- Font: -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif\\n- Page background: #f4f4f8\\n- Card backgrounds: #ffffff with border-radius: 12px and box-shadow: 0 2px 8px rgba(0,0,0,0.08)\\n- Primary color: #1a1a2e (SYBA dark navy)\\n- Accent: #e94560 (SYBA coral)\\n- Success: #16a34a (green for high fit scores 9-10)\\n- Info: #2563eb (blue for scores 7-8)\\n- Warning: #eab308 (yellow for scores 5-6)\\n- Danger: #ef4444 (red for scores below 5)\\n- Text: #1a1a2e\\n\\nEMAIL SECTIONS (all required):\\n\\n1. HEADER: SYBA Daily Lead Intelligence Briefing with date, total lead count, average fit score\\n\\n2. EXECUTIVE SUMMARY: 2-3 sentences on leads per region, standout prospects, key trigger events\\n\\n3. TOP 10 HIGHEST-FIT PROSPECTS: Detailed cards with name, title, company, region badge (color-coded), fit score badge, prospect summary, pain points as bullets, ready-to-send cold email (subject + body in light-gray copyable block), key sales talking point\\n\\n4. BELGIUM LEADS TABLE: All Belgium leads with columns # Name Company Title FitScore ICP EmailSubject\\n\\n5. EUROPE LEADS TABLE: Same format for Europe leads\\n\\n6. USA LEADS TABLE: Same format for USA leads\\n\\n7. TRIGGER EVENTS: Bullet list with ICP mapping and conversation openers\\n\\n8. ACTION ITEMS: Numbered list - top 5 to email today, LinkedIn connections to send, follow-ups due\\n\\n9. FOOTER: Generated by SYBA AI Sales Engine | Agentic Engineering Consulting\\n\\nMake it scannable, professional, immediately actionable. Use table borders, alternating row colors, clear section headers. Brigitte and Francis should open this and know exactly what to do.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Date: {{ $('Set Date & SYBA Context').item.json.today }}\\n\\nTrigger Events: {{ $('AI: Extract Trigger Events').item.json.choices[0].message.content }}\\n\\nTotal leads processed: {{ $json.total_count }}\\nBelgium: {{ $json.belgium_count }} | Europe: {{ $json.europe_count }} | USA: {{ $json.usa_count }}\\n\\nTop 10 prospects (sorted by fit score):\\n{{ JSON.stringify($json.top_10) }}\\n\\nAll Belgium leads:\\n{{ JSON.stringify($json.belgium_leads) }}\\n\\nAll Europe leads:\\n{{ JSON.stringify($json.europe_leads) }}\\n\\nAll USA leads:\\n{{ JSON.stringify($json.usa_leads) }}\"\n    }\n  ],\n  \"temperature\": 0.5\n}",
+        "options": {}
+      },
+      "id": "ai-briefing",
+      "name": "AI: Compile Master Briefing Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2520, 760],
+      "notes": "GPT-4o compiles all processed lead data into a comprehensive HTML briefing email with sections for top prospects, regional tables, trigger events, and action items.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "brigittev@syba.io, francis@syba.io",
+        "subject": "=SYBA Daily Lead Intelligence — {{ $('Set Date & SYBA Context').item.json.today }} — {{ $('Get All Processed Leads').item.json.total_count }} New Leads",
+        "emailType": "html",
+        "message": "={{ $json.choices[0].message.content }}",
+        "options": {}
+      },
+      "id": "gmail-send",
+      "name": "Gmail: Send Briefing",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2800, 760],
+      "notes": "Sends the master briefing email to Brigitte and Francis. NOT auto-sending to leads — this is the internal briefing.",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# SYBA Daily Lead Intelligence Engine v2\n**Runs daily at 5 AM ET**\n\n## Pipeline:\nNews → Triggers → 3-Region Apollo Search (40 leads) → Deep Research → AI Outreach → HubSpot CRM → Master Briefing Email\n\n## Regions:\n- Belgium: 20 leads (home market)\n- Europe ex-Belgium: 10 leads (13 countries)\n- USA: 10 leads\n\n## What Gets Delivered:\nHTML briefing email to brigittev@syba.io + francis@syba.io with:\n- Top 10 highest-fit prospect cards with ready-to-send emails\n- Regional lead tables (Belgium, Europe, USA)\n- Today's trigger events with conversation openers\n- Action items for the day\n\n## Credentials Needed:\n1. **Firecrawl** — HTTP Header Auth (news search + company scraping)\n2. **OpenAI** — HTTP Header Auth (GPT-4o for outreach, GPT-4o-mini for triggers)\n3. **Apollo** — HTTP Header Auth (lead discovery)\n4. **HubSpot** — API Key (CRM pipeline)\n5. **Gmail** — OAuth2 (briefing email delivery)\n\n## IMPORTANT: This does NOT auto-send emails to leads.\nIt generates personalized email DRAFTS and delivers them to the team.",
+        "width": 520,
+        "height": 520,
+        "color": 4
+      },
+      "id": "note-main",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-420, 120]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 1: Trigger Event Detection\n**What:** Firecrawl searches today's cyber news, AI extracts 5 trigger events\n**Why:** These hooks personalize outreach with real-world events\n**Events:** Breaches, ransomware, HNWI attacks, GDPR/NIS2, regulations",
+        "width": 400,
+        "height": 160
+      },
+      "id": "note-phase1",
+      "name": "Note: Phase 1 — Triggers",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [420, 200]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 2: 3-Region Lead Discovery\n**What:** 3 parallel Apollo searches by region\n**Belgium (20):** Home market, PwC angle\n**Europe (10):** 13 countries, GDPR/NIS2 angle\n**USA (10):** Chubb/Jencap angle\n\nAll 6 ICPs searched per region (21 title variants)\nChained 2-input merges to avoid n8n merge bug",
+        "width": 440,
+        "height": 200
+      },
+      "id": "note-phase2",
+      "name": "Note: Phase 2 — Apollo Searches",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [940, -60]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 3: Deep Research + AI Outreach (Loop)\n**What:** For each of ~40 leads:\n1. Check if company website exists\n2. Scrape website via Firecrawl (or skip)\n3. GPT-4o generates region-aware outreach package:\n   - Prospect brief + fit score\n   - Cold email + 3 follow-ups\n   - Sales call script with objection handling\n   - LinkedIn connection message\n4. Accumulate data for final briefing\n\nRegional messaging: Belgium=PwC, Europe=GDPR, USA=Chubb/$5M",
+        "width": 460,
+        "height": 300
+      },
+      "id": "note-phase3",
+      "name": "Note: Phase 3 — Outreach Loop",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [2160, 40]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 4: HubSpot CRM Push\n**What:** Each lead gets:\n- Contact upserted with name, email, company, title\n- Deal created in pipeline with region tag\n\n**SETUP:** Configure HubSpot API credential\nPipeline stages should match SYBA sales process",
+        "width": 400,
+        "height": 180
+      },
+      "id": "note-phase4",
+      "name": "Note: Phase 4 — HubSpot",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [3140, 100]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 5: Master Briefing Email\n**What:** After all 40 leads processed:\n1. Code node retrieves all accumulated lead data\n2. GPT-4o compiles comprehensive HTML briefing\n3. Gmail sends to brigittev@syba.io + francis@syba.io\n\n**Sections:** Executive summary, Top 10 prospects, Regional tables, Trigger events, Action items\n\n**NOT auto-sending to leads — this is for Brigitte & Francis to review and act on.**",
+        "width": 460,
+        "height": 240
+      },
+      "id": "note-phase5",
+      "name": "Note: Phase 5 — Briefing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [2180, 560]
+    }
+  ],
+  "connections": {
+    "Daily 5AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Date & SYBA Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Date & SYBA Context": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Cyber News Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Cyber News Search": {
+      "main": [
+        [
+          {
+            "node": "AI: Extract Trigger Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Extract Trigger Events": {
+      "main": [
+        [
+          {
+            "node": "Apollo: Belgium (20 leads)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo: Europe ex-Belgium (10 leads)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo: USA (10 leads)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Belgium (20 leads)": {
+      "main": [
+        [
+          {
+            "node": "Process Belgium Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: Europe ex-Belgium (10 leads)": {
+      "main": [
+        [
+          {
+            "node": "Process Europe Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo: USA (10 leads)": {
+      "main": [
+        [
+          {
+            "node": "Process USA Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Belgium Leads": {
+      "main": [
+        [
+          {
+            "node": "Merge: Belgium + Europe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Europe Leads": {
+      "main": [
+        [
+          {
+            "node": "Merge: Belgium + Europe",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge: Belgium + Europe": {
+      "main": [
+        [
+          {
+            "node": "Merge: All Regions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process USA Leads": {
+      "main": [
+        [
+          {
+            "node": "Merge: All Regions",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge: All Regions": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Through Leads": {
+      "main": [
+        [
+          {
+            "node": "IF: Has Website URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get All Processed Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Has Website URL": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl: Scrape Company Site",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: No Website Available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl: Scrape Company Site": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Full Outreach Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: No Website Available": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Full Outreach Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Full Outreach Package": {
+      "main": [
+        [
+          {
+            "node": "Accumulate Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulate Lead Data": {
+      "main": [
+        [
+          {
+            "node": "HubSpot: Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot: Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "HubSpot: Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot: Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Processed Leads": {
+      "main": [
+        [
+          {
+            "node": "AI: Compile Master Briefing Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Compile Master Briefing Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Send Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

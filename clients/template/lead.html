@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lead Detail — Lead Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/config.js"></script>
+  <script>document.documentElement.style.setProperty('--client-accent', CONFIG.accentColor);</script>
+</head>
+<body data-page="lead">
+
+  <!-- Mobile hamburger -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-name" id="sidebarClientName"></span>
+        <span class="sidebar-logo-sub">Lead Intelligence</span>
+      </div>
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="nav-link" data-nav="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="leads.html" class="nav-link active" data-nav="leads">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Leads
+        </a>
+        <a href="briefings.html" class="nav-link" data-nav="briefings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Briefings
+        </a>
+      </nav>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" id="logoutBtn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <!-- Back link -->
+    <a href="leads.html" class="back-link">&larr; Back to Leads</a>
+
+    <!-- Lead Info Card -->
+    <section class="lead-detail-card glass-card" id="leadInfo" aria-label="Lead information">
+      <div class="lead-detail-header">
+        <div>
+          <h1 class="lead-detail-name" id="leadName">--</h1>
+          <p class="lead-detail-title" id="leadTitle">--</p>
+          <p class="lead-detail-company" id="leadCompany">--</p>
+        </div>
+        <div class="lead-detail-score">
+          <span class="fit-badge fit-badge-lg" id="leadFitScore">--</span>
+        </div>
+      </div>
+      <div class="lead-detail-meta">
+        <span class="tag" id="leadRegion">--</span>
+        <span class="tag" id="leadICP">--</span>
+      </div>
+      <div class="lead-detail-fields">
+        <div class="detail-field">
+          <span class="detail-field-label">Website</span>
+          <a class="detail-field-value" id="leadWebsite" href="#" target="_blank" rel="noopener">--</a>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Email</span>
+          <span class="detail-field-value" id="leadEmail">--</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Source</span>
+          <span class="detail-field-value" id="leadSource">--</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Created</span>
+          <span class="detail-field-value" id="leadCreated">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prospect Brief -->
+    <section class="content-section" aria-label="Prospect brief">
+      <h2 class="section-heading">Prospect Brief</h2>
+      <div class="brief-card glass-card">
+        <div class="brief-summary" id="briefSummary">
+          <p class="text-muted">Loading...</p>
+        </div>
+        <div class="brief-pain-points" id="briefPainPoints">
+          <!-- Populated by JS -->
+        </div>
+        <div class="brief-strategy" id="briefStrategy">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Cold Email -->
+    <section class="content-section" aria-label="Cold email">
+      <h2 class="section-heading">Cold Email</h2>
+      <div class="email-card glass-card">
+        <p class="email-subject"><strong>Subject:</strong> <span id="coldEmailSubject">--</span></p>
+        <div class="email-body" id="coldEmailBody">
+          <p class="text-muted">Loading...</p>
+        </div>
+        <button type="button" class="btn-accent btn-sm" id="copyColdEmail" data-copy="cold-email">Copy Email</button>
+      </div>
+    </section>
+
+    <!-- Follow-Up Emails -->
+    <section class="content-section" aria-label="Follow-up emails">
+      <h2 class="section-heading">Follow-Up Emails</h2>
+
+      <details class="collapsible glass-card" data-followup="day3">
+        <summary class="collapsible-trigger">Day 3 Follow-Up</summary>
+        <div class="collapsible-body">
+          <p class="email-subject"><strong>Subject:</strong> <span id="followup3Subject">--</span></p>
+          <div class="email-body" id="followup3Body">
+            <p class="text-muted">Loading...</p>
+          </div>
+          <button type="button" class="btn-accent btn-sm" data-copy="followup-3">Copy Email</button>
+        </div>
+      </details>
+
+      <details class="collapsible glass-card" data-followup="day7">
+        <summary class="collapsible-trigger">Day 7 Follow-Up</summary>
+        <div class="collapsible-body">
+          <p class="email-subject"><strong>Subject:</strong> <span id="followup7Subject">--</span></p>
+          <div class="email-body" id="followup7Body">
+            <p class="text-muted">Loading...</p>
+          </div>
+          <button type="button" class="btn-accent btn-sm" data-copy="followup-7">Copy Email</button>
+        </div>
+      </details>
+
+      <details class="collapsible glass-card" data-followup="day14">
+        <summary class="collapsible-trigger">Day 14 Follow-Up</summary>
+        <div class="collapsible-body">
+          <p class="email-subject"><strong>Subject:</strong> <span id="followup14Subject">--</span></p>
+          <div class="email-body" id="followup14Body">
+            <p class="text-muted">Loading...</p>
+          </div>
+          <button type="button" class="btn-accent btn-sm" data-copy="followup-14">Copy Email</button>
+        </div>
+      </details>
+    </section>
+
+    <!-- Sales Script -->
+    <section class="content-section" aria-label="Sales script">
+      <details class="collapsible">
+        <summary class="collapsible-trigger section-heading">Sales Script</summary>
+        <div class="collapsible-body glass-card" id="salesScript">
+          <div class="script-section">
+            <h3 class="script-label">Opening Hook</h3>
+            <p id="scriptOpening" class="script-text">--</p>
+          </div>
+          <div class="script-section">
+            <h3 class="script-label">Discovery Questions</h3>
+            <ol class="script-list" id="scriptQuestions">
+              <!-- Populated by JS -->
+            </ol>
+          </div>
+          <div class="script-section">
+            <h3 class="script-label">Pitch</h3>
+            <p id="scriptPitch" class="script-text">--</p>
+          </div>
+          <div class="script-section">
+            <h3 class="script-label">Objection Handles</h3>
+            <table class="data-table data-table-compact" id="scriptObjections">
+              <thead>
+                <tr>
+                  <th>Objection</th>
+                  <th>Response</th>
+                </tr>
+              </thead>
+              <tbody id="scriptObjectionsBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="script-section">
+            <h3 class="script-label">Close</h3>
+            <p id="scriptClose" class="script-text">--</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- LinkedIn Message -->
+    <section class="content-section" aria-label="LinkedIn message">
+      <h2 class="section-heading">LinkedIn Message</h2>
+      <div class="email-card glass-card">
+        <div class="email-body" id="linkedinMessage">
+          <p class="text-muted">Loading...</p>
+        </div>
+        <div class="linkedin-footer">
+          <span class="char-count" id="linkedinCharCount">0 characters</span>
+          <button type="button" class="btn-accent btn-sm" id="copyLinkedIn" data-copy="linkedin">Copy Message</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (async function() {
+      document.getElementById('sidebarClientName').textContent = CONFIG.clientName;
+
+      // Sidebar toggle
+      const toggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      toggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+      });
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await logout();
+        window.location.href = 'index.html';
+      });
+
+      // Get lead ID from URL params
+      const params = new URLSearchParams(window.location.search);
+      const leadId = params.get('id');
+      if (!leadId) {
+        window.location.href = 'leads.html';
+        return;
+      }
+
+      // Auth + render
+      await initAuth();
+      await renderLeadDetail(leadId);
+    })();
+  </script>
+</body>
+</html>
