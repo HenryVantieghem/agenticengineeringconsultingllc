@@ -305,68 +305,12 @@
         fetchLatestBriefing()
       ]);
 
-      // Stats cards
-      const statsEl = document.getElementById('stats-grid');
-      if (statsEl) {
-        statsEl.innerHTML = `
-          <div class="stat-card">
-            <div class="stat-card__value">${stats.totalLeads}</div>
-            <div class="stat-card__label">Today's Leads</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__value">${stats.avgFitScore}</div>
-            <div class="stat-card__label">Avg Fit Score</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__value">${escapeHtml(stats.topRegion)}</div>
-            <div class="stat-card__label">Top Region</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__value">${topLeads.length}</div>
-            <div class="stat-card__label">Hot Leads</div>
-          </div>
-        `;
-      }
+      renderStatsCards(stats, topLeads);
+      renderTopLeadsCards(topLeads);
+      renderBriefingCard(briefing);
 
-      // Top leads
-      const leadsEl = document.getElementById('top-leads');
-      if (leadsEl) {
-        if (topLeads.length === 0) {
-          leadsEl.innerHTML = '<p class="empty-state">No leads generated today yet.</p>';
-        } else {
-          leadsEl.innerHTML = topLeads.map(lead => `
-            <a href="lead.html?id=${lead.id}" class="lead-card">
-              <div class="lead-card__header">
-                <div class="lead-card__name">${escapeHtml(fullName(lead))}</div>
-                <span class="score-badge ${scoreClass(lead.fit_score)}">${lead.fit_score}</span>
-              </div>
-              <div class="lead-card__meta">
-                <span>${escapeHtml(lead.company || '')}</span>
-                ${lead.title ? '<span class="dot-sep"></span><span>' + escapeHtml(lead.title) + '</span>' : ''}
-              </div>
-              <div class="lead-card__footer">
-                <span class="region-tag">${escapeHtml(lead.region || '')}</span>
-                ${lead.email ? '<button class="btn-copy" onclick="event.preventDefault();App.copyToClipboard(\'' + escapeHtml(lead.email) + '\')">Copy Email</button>' : ''}
-              </div>
-            </a>
-          `).join('');
-        }
-      }
-
-      // Latest briefing
-      const briefingEl = document.getElementById('latest-briefing');
-      if (briefingEl && briefing) {
-        briefingEl.innerHTML = `
-          <div class="briefing-card briefing-card--expanded">
-            <div class="briefing-card__header">
-              <span class="briefing-card__date">${formatDate(briefing.created_at)}</span>
-            </div>
-            <div class="briefing-card__content">${briefing.content_html || escapeHtml(briefing.content || '')}</div>
-          </div>
-        `;
-      } else if (briefingEl) {
-        briefingEl.innerHTML = '<p class="empty-state">No briefings yet.</p>';
-      }
+      // Start listening for realtime updates
+      setupDashboardRealtime();
 
     } catch (err) {
       console.error('Dashboard render error:', err);
@@ -387,6 +331,9 @@
     // Bind filter controls
     bindFilters();
     await loadLeads();
+
+    // Start listening for realtime updates
+    setupLeadsRealtime();
   }
 
   function bindFilters() {
@@ -619,6 +566,9 @@
     if (!session) return;
 
     await loadBriefings();
+
+    // Start listening for realtime updates
+    setupBriefingsRealtime();
   }
 
   async function loadBriefings() {
@@ -667,6 +617,217 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Realtime Subscriptions
+  // ---------------------------------------------------------------------------
+
+  let _realtimeChannel = null;
+  let _realtimeDebounceTimer = null;
+
+  /**
+   * Subscribe to Supabase Realtime changes on leads and/or briefings.
+   * Debounces rapid inserts (e.g. 40 leads from /syba-daily) into a single
+   * re-render after 500ms of quiet.
+   *
+   * @param {Object} opts
+   * @param {Function} [opts.onLeadChange]     – callback when leads table changes
+   * @param {Function} [opts.onBriefingChange]  – callback when briefings table changes
+   */
+  function setupRealtime(opts = {}) {
+    // Tear down any previous subscription
+    teardownRealtime();
+
+    const sb = Auth.getClient();
+    if (!sb) return;
+
+    const channelName = 'dashboard-realtime-' + Date.now();
+    let channel = sb.channel(channelName);
+
+    if (opts.onLeadChange) {
+      channel = channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads' },
+        _debounceHandler('lead', opts.onLeadChange)
+      );
+    }
+
+    if (opts.onBriefingChange) {
+      channel = channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'briefings' },
+        _debounceHandler('briefing', opts.onBriefingChange)
+      );
+    }
+
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('[Realtime] Subscribed to live updates');
+      }
+    });
+
+    _realtimeChannel = channel;
+  }
+
+  /** Debounce rapid events into a single callback after 500ms of quiet. */
+  const _pendingCallbacks = {};
+  function _debounceHandler(key, callback) {
+    return (payload) => {
+      _pendingCallbacks[key] = callback;
+      clearTimeout(_realtimeDebounceTimer);
+      _realtimeDebounceTimer = setTimeout(() => {
+        Object.values(_pendingCallbacks).forEach(cb => {
+          try { cb(payload); } catch (e) { console.error('[Realtime] Callback error:', e); }
+        });
+        // Clear pending after flush
+        Object.keys(_pendingCallbacks).forEach(k => delete _pendingCallbacks[k]);
+      }, 500);
+    };
+  }
+
+  function teardownRealtime() {
+    if (_realtimeChannel) {
+      const sb = Auth.getClient();
+      if (sb) sb.removeChannel(_realtimeChannel);
+      _realtimeChannel = null;
+    }
+    clearTimeout(_realtimeDebounceTimer);
+  }
+
+  /**
+   * Pulse animation on an element to draw attention to new data.
+   */
+  function pulseElement(el) {
+    if (!el) return;
+    el.classList.add('realtime-pulse');
+    el.addEventListener('animationend', () => el.classList.remove('realtime-pulse'), { once: true });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Realtime-aware page renderers
+  // ---------------------------------------------------------------------------
+
+  /** Dashboard: subscribe to leads + briefings, re-render on change. */
+  function setupDashboardRealtime() {
+    setupRealtime({
+      onLeadChange: async (payload) => {
+        showToast('New leads received — refreshing...');
+        try {
+          const [stats, topLeads] = await Promise.all([
+            fetchTodayStats(),
+            fetchTopLeads(5)
+          ]);
+          renderStatsCards(stats, topLeads);
+          renderTopLeadsCards(topLeads);
+          pulseElement(document.getElementById('stats-grid'));
+          pulseElement(document.getElementById('top-leads'));
+        } catch (e) { console.error('[Realtime] Dashboard lead refresh error:', e); }
+      },
+      onBriefingChange: async () => {
+        showToast('New briefing available');
+        try {
+          const briefing = await fetchLatestBriefing();
+          renderBriefingCard(briefing);
+          pulseElement(document.getElementById('latest-briefing'));
+        } catch (e) { console.error('[Realtime] Dashboard briefing refresh error:', e); }
+      }
+    });
+  }
+
+  /** Leads page: subscribe to leads, re-render table on change. */
+  function setupLeadsRealtime() {
+    setupRealtime({
+      onLeadChange: async () => {
+        showToast('New leads received — refreshing table...');
+        try {
+          await loadLeads();
+          pulseElement(document.getElementById('leadsTable'));
+        } catch (e) { console.error('[Realtime] Leads table refresh error:', e); }
+      }
+    });
+  }
+
+  /** Briefings page: subscribe to briefings, re-render list on change. */
+  function setupBriefingsRealtime() {
+    setupRealtime({
+      onBriefingChange: async () => {
+        showToast('New briefing received');
+        try {
+          await loadBriefings();
+          pulseElement(document.getElementById('briefings-list'));
+        } catch (e) { console.error('[Realtime] Briefings refresh error:', e); }
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Extracted render helpers (used by both initial render + realtime updates)
+  // ---------------------------------------------------------------------------
+
+  function renderStatsCards(stats, topLeads) {
+    const statsEl = document.getElementById('stats-grid');
+    if (!statsEl) return;
+    statsEl.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-card__value">${stats.totalLeads}</div>
+        <div class="stat-card__label">Today's Leads</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${stats.avgFitScore}</div>
+        <div class="stat-card__label">Avg Fit Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${escapeHtml(stats.topRegion)}</div>
+        <div class="stat-card__label">Top Region</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${topLeads.length}</div>
+        <div class="stat-card__label">Hot Leads</div>
+      </div>
+    `;
+  }
+
+  function renderTopLeadsCards(topLeads) {
+    const leadsEl = document.getElementById('top-leads');
+    if (!leadsEl) return;
+    if (topLeads.length === 0) {
+      leadsEl.innerHTML = '<p class="empty-state">No leads generated today yet.</p>';
+    } else {
+      leadsEl.innerHTML = topLeads.map(lead => `
+        <a href="lead.html?id=${lead.id}" class="lead-card">
+          <div class="lead-card__header">
+            <div class="lead-card__name">${escapeHtml(fullName(lead))}</div>
+            <span class="score-badge ${scoreClass(lead.fit_score)}">${lead.fit_score}</span>
+          </div>
+          <div class="lead-card__meta">
+            <span>${escapeHtml(lead.company || '')}</span>
+            ${lead.title ? '<span class="dot-sep"></span><span>' + escapeHtml(lead.title) + '</span>' : ''}
+          </div>
+          <div class="lead-card__footer">
+            <span class="region-tag">${escapeHtml(lead.region || '')}</span>
+            ${lead.email ? '<button class="btn-copy" onclick="event.preventDefault();App.copyToClipboard(\'' + escapeHtml(lead.email) + '\')">Copy Email</button>' : ''}
+          </div>
+        </a>
+      `).join('');
+    }
+  }
+
+  function renderBriefingCard(briefing) {
+    const briefingEl = document.getElementById('latest-briefing');
+    if (!briefingEl) return;
+    if (briefing) {
+      briefingEl.innerHTML = `
+        <div class="briefing-card briefing-card--expanded">
+          <div class="briefing-card__header">
+            <span class="briefing-card__date">${formatDate(briefing.created_at)}</span>
+          </div>
+          <div class="briefing-card__content">${briefing.content_html || escapeHtml(briefing.content || '')}</div>
+        </div>
+      `;
+    } else {
+      briefingEl.innerHTML = '<p class="empty-state">No briefings yet.</p>';
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Expose public API
   // ---------------------------------------------------------------------------
 
@@ -676,6 +837,12 @@
     renderLeadsTable,
     renderLeadDetail,
     renderBriefings,
+
+    // Realtime
+    setupDashboardRealtime,
+    setupLeadsRealtime,
+    setupBriefingsRealtime,
+    teardownRealtime,
 
     // Data (for advanced use)
     fetchTodayStats,
