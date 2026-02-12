@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+
+# Generated data
+leads/
+
+# Planning docs
+.planning/
+
+# Netlify state
+.netlify/
+
+# Playwright artifacts
+.playwright-mcp/
+site-verification.jpeg
+
+# Python venvs (hardened-google-workspace-mcp)
+.venv/
+__pycache__/
+*.pyc

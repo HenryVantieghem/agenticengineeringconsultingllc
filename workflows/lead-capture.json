@@ -1,0 +1,147 @@
+{
+  "name": "Lead Capture - Form to CRM + Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-capture",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook - Form Submission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "webhookId": "lead-capture-webhook"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Name": "={{ $json.body.name }}",
+            "Email": "={{ $json.body.email }}",
+            "Phone": "={{ $json.body.phone }}",
+            "Business": "={{ $json.body.business }}",
+            "Message": "={{ $json.body.message }}",
+            "Status": "New"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000002",
+      "name": "Google Sheets - Add Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [500, 340],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "1",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "henry@agenticengineering.com",
+        "subject": "=New Lead: {{ $json.body.name }} — {{ $json.body.business }}",
+        "emailType": "html",
+        "message": "=<h2>New Lead Captured</h2>\n<table style=\"border-collapse:collapse;width:100%;max-width:600px;font-family:sans-serif;\">\n  <tr style=\"background:#f4f4f4;\"><td style=\"padding:10px;font-weight:bold;\">Name</td><td style=\"padding:10px;\">{{ $json.body.name }}</td></tr>\n  <tr><td style=\"padding:10px;font-weight:bold;\">Email</td><td style=\"padding:10px;\">{{ $json.body.email }}</td></tr>\n  <tr style=\"background:#f4f4f4;\"><td style=\"padding:10px;font-weight:bold;\">Phone</td><td style=\"padding:10px;\">{{ $json.body.phone }}</td></tr>\n  <tr><td style=\"padding:10px;font-weight:bold;\">Business</td><td style=\"padding:10px;\">{{ $json.body.business }}</td></tr>\n  <tr style=\"background:#f4f4f4;\"><td style=\"padding:10px;font-weight:bold;\">Message</td><td style=\"padding:10px;\">{{ $json.body.message }}</td></tr>\n</table>\n<br/>\n<p><strong>Status:</strong> New — follow up ASAP</p>",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000003",
+      "name": "Gmail - Notify Owner",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [760, 220],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2",
+          "name": "Gmail Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Thanks for reaching out — we'll be in touch!",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:sans-serif;max-width:600px;\">\n  <p>Hi {{ $json.body.name }},</p>\n  <p>Thanks for contacting us! We received your message and will get back to you within 1 business day.</p>\n  <p>If you'd like to schedule a call right away, pick a time that works for you:</p>\n  <p style=\"text-align:center;margin:24px 0;\">\n    <a href=\"https://calendly.com/agenticengineering/intro\" style=\"background:#2563eb;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;\">Book a Free Consultation</a>\n  </p>\n  <p>Talk soon,<br/><strong>Agentic Engineering Consulting</strong><br/>Auburn, AL</p>\n</div>",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000004",
+      "name": "Gmail - Auto-Reply to Lead",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [760, 460],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2",
+          "name": "Gmail Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Form Submission": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Add Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Add Lead": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Notify Owner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail - Auto-Reply to Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Lead Generation",
+      "id": "1"
+    },
+    {
+      "name": "Client Template",
+      "id": "2"
+    }
+  ],
+  "triggerCount": 1,
+  "versionId": "1"
+}

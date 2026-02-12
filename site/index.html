@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered phone answering and automation for Auburn, Alabama businesses. Never miss a call again. Book a free demo.">
+  <title>Agentic Engineering Consulting | AI Automation for Auburn Businesses</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <style>
+    :root {
+      --black: #0A0A0B;
+      --white: #FAFAF9;
+      --cream: #F5F0EB;
+      --accent: #E8533F;
+      --accent-glow: #FF6B57;
+      --muted: #8A8A8A;
+      --border: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,11,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      transition: all 0.3s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-glow) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(232,83,63,0.3);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(232,83,63,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s ease-out;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(48px, 8vw, 112px);
+      line-height: 0.95;
+      font-weight: 400;
+      max-width: 900px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease-out 0.1s both;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 56px;
+      animation: fadeUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      animation: fadeUp 0.8s ease-out 0.3s both;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(232,83,63,0.35);
+    }
+
+    .btn-ghost {
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--glass);
+    }
+
+    .hero-phone {
+      margin-top: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: fadeUp 0.8s ease-out 0.4s both;
+    }
+
+    .hero-phone .label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hero-phone .number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 32px;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .hero-phone .hint {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* SCROLLING MARQUEE */
+    .marquee-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      overflow: hidden;
+    }
+
+    .marquee-track {
+      display: flex;
+      animation: scroll 30s linear infinite;
+      width: max-content;
+    }
+
+    .marquee-item {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 48px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .marquee-item .sep { color: var(--accent); margin-left: 48px; }
+
+    /* STATS SECTION */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 100px 48px;
+      gap: 48px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 40px 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      transition: all 0.4s;
+    }
+
+    .stat:hover {
+      border-color: rgba(232,83,63,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .stat-number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* PROBLEM SECTION */
+    .section {
+      padding: 120px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      margin-bottom: 64px;
+      max-width: 700px;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .problem-card {
+      padding: 48px 36px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .problem-card:hover::before { opacity: 1; }
+
+    .problem-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-4px);
+    }
+
+    .problem-icon {
+      font-size: 36px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .problem-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .problem-card p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* SOLUTION SECTION */
+    .solution-section {
+      background: linear-gradient(180deg, rgba(232,83,63,0.03) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+
+    .step {
+      padding: 48px 32px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+
+    .step:hover { background: var(--glass); }
+
+    .step-num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .price-card {
+      padding: 48px 36px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+    }
+
+    .price-card.featured {
+      border-color: var(--accent);
+      background: rgba(232,83,63,0.04);
+    }
+
+    .price-card.featured::after {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: var(--white);
+      font-size: 10px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 100px;
+    }
+
+    .price-tier {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .price-amount {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      margin-bottom: 4px;
+    }
+
+    .price-amount span { font-size: 20px; color: var(--muted); font-family: 'Satoshi', sans-serif; }
+
+    .price-desc {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .price-features {
+      list-style: none;
+      margin-bottom: 36px;
+    }
+
+    .price-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: rgba(250,250,249,0.7);
+      font-weight: 300;
+    }
+
+    .price-features li::before {
+      content: '\2192';
+      color: var(--accent);
+      margin-right: 12px;
+    }
+
+    .price-btn {
+      display: block;
+      text-align: center;
+      padding: 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+    }
+
+    .price-card .price-btn {
+      border: 1px solid var(--border);
+      color: var(--white);
+    }
+
+    .price-card .price-btn:hover {
+      background: var(--glass);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .price-card.featured .price-btn {
+      background: var(--accent);
+      border: none;
+      color: var(--white);
+    }
+
+    .price-card.featured .price-btn:hover {
+      background: var(--accent-glow);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(232,83,63,0.3);
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      text-align: center;
+      padding: 160px 48px;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,83,63,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-left {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-right a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.3s;
+    }
+
+    .footer-right a:hover { color: var(--white); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 60px; }
+      .stats { grid-template-columns: 1fr; padding: 60px 24px; }
+      .section { padding: 80px 24px; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .how-it-works { grid-template-columns: 1fr 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+      footer { flex-direction: column; gap: 24px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Agentic<span>.</span></div>
+    <div class="nav-links">
+      <a href="#problem">The Problem</a>
+      <a href="#how">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="nav-cta">Try the AI Demo</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Auburn, Alabama's AI Automation Partner
+    </div>
+    <h1>Your phones are ringing.<br>Nobody's <em>answering.</em></h1>
+    <p class="hero-sub">We build AI systems that answer every call, book every appointment, and recover every dollar you're losing to voicemail. 24/7. No staff required.</p>
+    <div class="hero-actions">
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Book a 10-Minute Demo</a>
+      <a href="#problem" class="btn-ghost">See What You're Losing</a>
+    </div>
+    <div class="hero-phone" id="demo">
+      <span class="label">See it in action</span>
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="number" style="text-decoration: none; cursor: pointer;">Schedule Your Free Demo &rarr;</a>
+      <span class="hint">10 minutes. No commitment. See your ROI.</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <span class="marquee-item">Dental Practices <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Law Firms <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">HVAC & Plumbing <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Real Estate <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Medical Offices <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Property Management <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Auto Repair <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Veterinarians <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Dental Practices <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Law Firms <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">HVAC & Plumbing <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Real Estate <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Medical Offices <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Property Management <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Auto Repair <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">Veterinarians <span class="sep">&#9670;</span></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number">62%</div>
+      <div class="stat-label">of your calls go unanswered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">85%</div>
+      <div class="stat-label">of those callers never call back</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">$4,500</div>
+      <div class="stat-label">lost per month for a 5-person team</div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section class="section" id="problem">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Every missed call is a customer choosing your competitor.</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <span class="problem-icon">&#128222;</span>
+        <h3>Missed Calls, Lost Revenue</h3>
+        <p>You're on a job, in a meeting, or with a patient. The phone rings. Nobody answers. That $500 client just called the next business on Google.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">&#127769;</span>
+        <h3>After-Hours Dead Zone</h3>
+        <p>Your best leads call at 7pm, on weekends, during lunch. Traditional answering services cost $300-$1,000/month and still miss the nuance of your business.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">&#128257;</span>
+        <h3>Staff Drowning in Repetition</h3>
+        <p>"What are your hours?" "Do you take insurance?" "Can I schedule an appointment?" Your team answers the same questions 50 times a day instead of doing real work.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="solution-section" id="how">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Set up in days. Pays for itself in weeks.</h2>
+      <div class="how-it-works">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>We Learn Your Business</h3>
+          <p>Your services, hours, FAQ, booking process, and how you talk to customers. We build an AI that sounds like your best receptionist.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>AI Goes Live on Your Line</h3>
+          <p>Every call gets answered instantly, 24/7. Appointments get booked. Emergencies get routed. You get a text summary of every interaction.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Automations Kick In</h3>
+          <p>Missed-call text-backs, review requests after appointments, lead capture to your CRM, and weekly performance reports. All on autopilot.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>You Watch Revenue Grow</h3>
+          <p>More calls answered means more appointments booked means more revenue captured. Most clients see ROI within the first month.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="section-label">Investment</div>
+    <h2 class="section-title">Less than one missed appointment per month.</h2>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">$497<span>/mo</span></div>
+        <div class="price-desc">+ $299 one-time setup</div>
+        <ul class="price-features">
+          <li>AI receptionist &mdash; 24/7 call answering</li>
+          <li>Appointment booking to your calendar</li>
+          <li>Custom FAQ handling for your business</li>
+          <li>Text summary after every call</li>
+          <li>Call log dashboard</li>
+        </ul>
+        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tier">Growth</div>
+        <div class="price-amount">$997<span>/mo</span></div>
+        <div class="price-desc">+ $499 one-time setup</div>
+        <ul class="price-features">
+          <li>Everything in Starter</li>
+          <li>Missed-call text-back automation</li>
+          <li>Post-appointment review requests</li>
+          <li>Lead capture to your CRM</li>
+          <li>Weekly performance reports</li>
+        </ul>
+        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Premium</div>
+        <div class="price-amount">$1,497<span>/mo</span></div>
+        <div class="price-desc">+ $997 one-time setup</div>
+        <ul class="price-features">
+          <li>Everything in Growth</li>
+          <li>AI chatbot on your website</li>
+          <li>Social media auto-posting</li>
+          <li>Monthly strategy call</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOKING SECTION -->
+  <section class="section" id="booking" style="text-align: center;">
+    <div class="section-label">Book Your Demo</div>
+    <h2 class="section-title" style="margin-left: auto; margin-right: auto;">10 minutes that could save you<br>$4,500 a month.</h2>
+    <div class="calendly-inline-widget" data-url="https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min?hide_gdpr_banner=1" style="min-width:320px;height:700px;margin:0 auto;max-width:900px;"></div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to stop<br>losing <em>money?</em></h2>
+    <p>Book a 10-minute demo and see exactly how much revenue you're leaving on the table.</p>
+    <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Book Your Free Demo</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      &copy; 2026 Agentic Engineering Consulting &middot; Auburn, Alabama
+    </div>
+    <div class="footer-right">
+      <a href="mailto:henry@agenticengineering.com">henry@agenticengineering.com</a>
+    </div>
+  </footer>
+
+</body>
+</html>
