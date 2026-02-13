@@ -102,8 +102,7 @@
       .from('leads')
       .select('id, fit_score, region')
       .eq('client_id', clientId)
-      .gte('created_date', today)
-      .lt('created_date', today + 'T23:59:59.999Z');
+      .eq('created_date', today);
 
     if (error) throw error;
 
@@ -134,8 +133,7 @@
       .from('leads')
       .select('id, first_name, last_name, company, title, fit_score, region, email')
       .eq('client_id', clientId)
-      .gte('created_date', today)
-      .lt('created_date', today + 'T23:59:59.999Z')
+      .eq('created_date', today)
       .order('fit_score', { ascending: false })
       .limit(limit);
 
@@ -182,7 +180,7 @@
     if (filters.region) query = query.eq('region', filters.region);
     if (filters.icp_segment) query = query.eq('icp_segment', filters.icp_segment);
     if (filters.dateFrom) query = query.gte('created_date', filters.dateFrom);
-    if (filters.dateTo) query = query.lte('created_date', filters.dateTo + 'T23:59:59.999Z');
+    if (filters.dateTo) query = query.lte('created_date', filters.dateTo);
     if (filters.minFitScore) query = query.gte('fit_score', filters.minFitScore);
 
     const { data, error, count } = await query;
@@ -256,7 +254,7 @@
     if (filters.region) query = query.eq('region', filters.region);
     if (filters.icp_segment) query = query.eq('icp_segment', filters.icp_segment);
     if (filters.dateFrom) query = query.gte('created_date', filters.dateFrom);
-    if (filters.dateTo) query = query.lte('created_date', filters.dateTo + 'T23:59:59.999Z');
+    if (filters.dateTo) query = query.lte('created_date', filters.dateTo);
     if (filters.minFitScore) query = query.gte('fit_score', filters.minFitScore);
 
     const { data, error } = await query;
@@ -445,6 +443,10 @@
   // Rendering — Lead Detail
   // ---------------------------------------------------------------------------
 
+  /**
+   * Populate the lead.html template elements with data from Supabase.
+   * lead.html uses individual element IDs rather than a single container.
+   */
   async function renderLeadDetail() {
     const session = await Auth.initAuth();
     if (!session) return;
@@ -455,104 +457,119 @@
       return;
     }
 
-    const container = document.getElementById('lead-detail');
-    if (!container) return;
-
     try {
       const lead = await fetchLeadDetail(id);
       const outreach = lead.outreach_packages?.[0] || lead.outreach_packages || null;
 
-      container.innerHTML = `
-        <div class="detail-header">
-          <div>
-            <h1 class="detail-name">${escapeHtml(fullName(lead))}</h1>
-            <p class="detail-meta">
-              ${escapeHtml(lead.title || '')}${lead.title && lead.company ? ' at ' : ''}${escapeHtml(lead.company || '')}
-            </p>
-          </div>
-          <span class="score-badge score-badge--lg ${scoreClass(lead.fit_score)}">${lead.fit_score}</span>
-        </div>
+      // Helper to safely set text/html by element ID
+      function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text || '--';
+      }
+      function setHtml(id, html) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html || '';
+      }
 
-        <div class="detail-tags">
-          <span class="region-tag">${escapeHtml(lead.region || '')}</span>
-          ${lead.icp_segment ? '<span class="icp-tag">' + escapeHtml(lead.icp_segment) + '</span>' : ''}
-          <span class="date-tag">${formatDate(lead.created_date)}</span>
-        </div>
+      // Lead info card
+      setText('leadName', fullName(lead));
+      setText('leadTitle', lead.title || '--');
+      setText('leadCompany', lead.company || '--');
+      setText('leadRegion', lead.region || '--');
+      setText('leadICP', lead.icp_segment || '--');
+      setText('leadEmail', lead.email || '--');
+      setText('leadSource', lead.source || '--');
+      setText('leadCreated', formatDate(lead.created_date));
 
-        ${lead.email ? `
-        <div class="detail-section">
-          <div class="detail-section__header">Contact</div>
-          <div class="detail-row">
-            <span>${escapeHtml(lead.email)}</span>
-            <button class="btn-copy" onclick="App.copyToClipboard('${escapeHtml(lead.email)}')">Copy</button>
-          </div>
-          ${lead.phone ? '<div class="detail-row"><span>' + escapeHtml(lead.phone) + '</span></div>' : ''}
-          ${lead.linkedin_url ? '<div class="detail-row"><a href="' + escapeHtml(lead.linkedin_url) + '" target="_blank" rel="noopener">LinkedIn Profile</a></div>' : ''}
-        </div>
-        ` : ''}
+      // Fit score badge
+      const fitEl = document.getElementById('leadFitScore');
+      if (fitEl) {
+        fitEl.textContent = lead.fit_score || '--';
+        fitEl.classList.add(scoreClass(lead.fit_score));
+      }
 
-        ${lead.prospect_brief ? `
-        <div class="detail-section">
-          <div class="detail-section__header">Prospect Brief</div>
-          <div class="detail-section__body">${escapeHtml(lead.prospect_brief)}</div>
-        </div>
-        ` : ''}
+      // Website link
+      const websiteEl = document.getElementById('leadWebsite');
+      if (websiteEl && lead.website_url) {
+        websiteEl.textContent = lead.website_url.replace(/^https?:\/\//, '');
+        websiteEl.href = lead.website_url;
+      }
 
-        ${outreach ? renderOutreach(outreach) : ''}
-      `;
+      // Prospect brief
+      if (lead.prospect_brief) {
+        setHtml('briefSummary', '<p>' + escapeHtml(lead.prospect_brief) + '</p>');
+      } else {
+        setHtml('briefSummary', '<p class="text-muted">No prospect brief available.</p>');
+      }
+
+      // Outreach package
+      if (outreach) {
+        // Cold email
+        setText('coldEmailSubject', outreach.email_subject || '--');
+        if (outreach.email_body) {
+          setHtml('coldEmailBody', '<p>' + escapeHtml(outreach.email_body).replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>');
+        }
+
+        // Follow-ups
+        if (outreach.followup_1) {
+          setHtml('followup3Body', '<p>' + escapeHtml(outreach.followup_1).replace(/\n/g, '<br>') + '</p>');
+        }
+        if (outreach.followup_2) {
+          setHtml('followup7Body', '<p>' + escapeHtml(outreach.followup_2).replace(/\n/g, '<br>') + '</p>');
+        }
+        if (outreach.followup_3) {
+          setHtml('followup14Body', '<p>' + escapeHtml(outreach.followup_3).replace(/\n/g, '<br>') + '</p>');
+        }
+
+        // Sales script
+        if (outreach.sales_script) {
+          const scriptEl = document.getElementById('salesScript');
+          if (scriptEl) {
+            // Replace the structured script sections with the full script text
+            scriptEl.innerHTML = '<div class="script-section"><p class="script-text">' +
+              escapeHtml(outreach.sales_script).replace(/\n\n/g, '</p><p class="script-text">').replace(/\n/g, '<br>') +
+              '</p></div>';
+          }
+        }
+
+        // LinkedIn message
+        if (outreach.linkedin_message) {
+          setHtml('linkedinMessage', '<p>' + escapeHtml(outreach.linkedin_message) + '</p>');
+          const charCount = document.getElementById('linkedinCharCount');
+          if (charCount) charCount.textContent = outreach.linkedin_message.length + ' characters';
+        }
+      }
+
+      // Wire up copy buttons
+      const copyCold = document.getElementById('copyColdEmail');
+      if (copyCold && outreach) {
+        copyCold.addEventListener('click', () => {
+          copyToClipboard('Subject: ' + (outreach.email_subject || '') + '\n\n' + (outreach.email_body || ''));
+        });
+      }
+      const copyLI = document.getElementById('copyLinkedIn');
+      if (copyLI && outreach) {
+        copyLI.addEventListener('click', () => {
+          copyToClipboard(outreach.linkedin_message || '');
+        });
+      }
+
+      // Wire up followup copy buttons
+      document.querySelectorAll('[data-copy^="followup"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.copy;
+          const text = key === 'followup-3' ? outreach?.followup_1
+            : key === 'followup-7' ? outreach?.followup_2
+            : outreach?.followup_3;
+          if (text) copyToClipboard(text);
+        });
+      });
+
     } catch (err) {
       console.error('Lead detail error:', err);
-      container.innerHTML = '<p class="empty-state">Lead not found.</p>';
+      const nameEl = document.getElementById('leadName');
+      if (nameEl) nameEl.textContent = 'Lead not found';
     }
-  }
-
-  function renderOutreach(pkg) {
-    let html = '';
-
-    if (pkg.email_subject && pkg.email_body) {
-      html += `
-        <div class="detail-section">
-          <div class="detail-section__header">
-            Cold Email
-            <button class="btn-copy" onclick="App.copyToClipboard(document.getElementById('email-block').innerText)">Copy</button>
-          </div>
-          <div id="email-block" class="detail-section__body outreach-block">
-            <div class="outreach-subject"><strong>Subject:</strong> ${escapeHtml(pkg.email_subject)}</div>
-            <div class="outreach-body">${escapeHtml(pkg.email_body)}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    if (pkg.followup_1 || pkg.followup_2 || pkg.followup_3) {
-      html += `
-        <div class="detail-section">
-          <div class="detail-section__header collapsible" onclick="this.parentElement.classList.toggle('detail-section--collapsed')">
-            Follow-up Sequence
-            <span class="collapse-icon"></span>
-          </div>
-          <div class="detail-section__body">
-            ${pkg.followup_1 ? '<div class="followup-block"><div class="followup-label">Follow-up 1</div><div class="outreach-body">' + escapeHtml(pkg.followup_1) + '</div><button class="btn-copy" onclick="App.copyToClipboard(\'' + escapeHtml(pkg.followup_1).replace(/'/g, "\\'") + '\')">Copy</button></div>' : ''}
-            ${pkg.followup_2 ? '<div class="followup-block"><div class="followup-label">Follow-up 2</div><div class="outreach-body">' + escapeHtml(pkg.followup_2) + '</div><button class="btn-copy" onclick="App.copyToClipboard(\'' + escapeHtml(pkg.followup_2).replace(/'/g, "\\'") + '\')">Copy</button></div>' : ''}
-            ${pkg.followup_3 ? '<div class="followup-block"><div class="followup-label">Follow-up 3</div><div class="outreach-body">' + escapeHtml(pkg.followup_3) + '</div><button class="btn-copy" onclick="App.copyToClipboard(\'' + escapeHtml(pkg.followup_3).replace(/'/g, "\\'") + '\')">Copy</button></div>' : ''}
-          </div>
-        </div>
-      `;
-    }
-
-    if (pkg.sales_script) {
-      html += `
-        <div class="detail-section">
-          <div class="detail-section__header">
-            Sales Script
-            <button class="btn-copy" onclick="App.copyToClipboard(document.getElementById('script-block').innerText)">Copy</button>
-          </div>
-          <div id="script-block" class="detail-section__body outreach-block">${escapeHtml(pkg.sales_script)}</div>
-        </div>
-      `;
-    }
-
-    return html;
   }
 
   // ---------------------------------------------------------------------------

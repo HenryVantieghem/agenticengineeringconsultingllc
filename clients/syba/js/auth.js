@@ -94,12 +94,29 @@
   }
 
   /**
-   * Extract client_id from the user's metadata.
+   * Extract client_id (UUID) by resolving the slug stored in user metadata.
+   * Caches the result so we only query the clients table once per session.
    */
+  let _resolvedClientId = null;
   async function getClientId() {
+    if (_resolvedClientId) return _resolvedClientId;
+
     const session = await getSession();
     if (!session || !session.user) return null;
-    return session.user.user_metadata?.client_id || null;
+
+    const slug = session.user.user_metadata?.client_id || null;
+    if (!slug) return null;
+
+    const client = getSupabaseClient();
+    const { data, error } = await client
+      .from('clients')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (error || !data) return null;
+    _resolvedClientId = data.id;
+    return _resolvedClientId;
   }
 
   /**

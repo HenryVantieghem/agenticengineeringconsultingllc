@@ -1,6 +1,7 @@
 -- ============================================================
 -- 001_initial_schema.sql
 -- Agentic Engineering Consulting — Initial Database Schema
+-- Applied via Supabase MCP on 2026-02-12
 -- ============================================================
 
 -- ============================================================
@@ -33,27 +34,30 @@ CREATE TABLE leads (
   first_name text,
   last_name text,
   email text,
+  phone text,
   title text,
   company text,
   region text,
   icp_segment text,
   fit_score int CHECK (fit_score BETWEEN 1 AND 10),
   website_url text,
+  linkedin_url text,
+  prospect_brief text,
   source text,
   created_date date DEFAULT CURRENT_DATE,
   created_at timestamptz DEFAULT now()
 );
 
--- outreach_packages: AI-generated outreach per lead
+-- outreach_packages: AI-generated outreach per lead (flat text columns)
 CREATE TABLE outreach_packages (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   lead_id uuid NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
-  prospect_brief jsonb,
-  cold_email jsonb,
-  followup_day3 jsonb,
-  followup_day7 jsonb,
-  followup_day14 jsonb,
-  sales_script jsonb,
+  email_subject text,
+  email_body text,
+  followup_1 text,
+  followup_2 text,
+  followup_3 text,
+  sales_script text,
   linkedin_message text,
   created_at timestamptz DEFAULT now()
 );
@@ -62,8 +66,10 @@ CREATE TABLE outreach_packages (
 CREATE TABLE briefings (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   client_id uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  title text,
   date date DEFAULT CURRENT_DATE,
-  html_content text,
+  content text,
+  content_html text,
   total_leads int,
   avg_fit_score numeric(3,1),
   trigger_events jsonb DEFAULT '[]',
@@ -106,27 +112,35 @@ ALTER TABLE outreach_packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE briefings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trigger_events ENABLE ROW LEVEL SECURITY;
 
--- Clients: users see only their own client
+-- JWT stores client_id as slug inside user_metadata
+-- Use auth.jwt()->'user_metadata'->>'client_id' to extract it
+
 CREATE POLICY "Users see own client" ON clients
-  FOR SELECT USING (id::text = auth.jwt()->>'client_id');
+  FOR SELECT USING (slug = (auth.jwt()->'user_metadata'->>'client_id'));
 
--- Leads: users see only leads for their client
 CREATE POLICY "Users see own leads" ON leads
-  FOR SELECT USING (client_id::text = auth.jwt()->>'client_id');
-
--- Outreach: users see outreach for their client's leads
-CREATE POLICY "Users see own outreach" ON outreach_packages
   FOR SELECT USING (
-    lead_id IN (SELECT id FROM leads WHERE client_id::text = auth.jwt()->>'client_id')
+    client_id IN (SELECT id FROM clients WHERE slug = (auth.jwt()->'user_metadata'->>'client_id'))
   );
 
--- Briefings: users see only their client's briefings
-CREATE POLICY "Users see own briefings" ON briefings
-  FOR SELECT USING (client_id::text = auth.jwt()->>'client_id');
+CREATE POLICY "Users see own outreach" ON outreach_packages
+  FOR SELECT USING (
+    lead_id IN (
+      SELECT l.id FROM leads l
+      JOIN clients c ON l.client_id = c.id
+      WHERE c.slug = (auth.jwt()->'user_metadata'->>'client_id')
+    )
+  );
 
--- Trigger events: users see only their client's events
+CREATE POLICY "Users see own briefings" ON briefings
+  FOR SELECT USING (
+    client_id IN (SELECT id FROM clients WHERE slug = (auth.jwt()->'user_metadata'->>'client_id'))
+  );
+
 CREATE POLICY "Users see own trigger events" ON trigger_events
-  FOR SELECT USING (client_id::text = auth.jwt()->>'client_id');
+  FOR SELECT USING (
+    client_id IN (SELECT id FROM clients WHERE slug = (auth.jwt()->'user_metadata'->>'client_id'))
+  );
 
 -- Service role (Henry's Claude Code) can do everything
 CREATE POLICY "Service role full access clients" ON clients FOR ALL USING (auth.role() = 'service_role');
@@ -134,6 +148,12 @@ CREATE POLICY "Service role full access leads" ON leads FOR ALL USING (auth.role
 CREATE POLICY "Service role full access outreach" ON outreach_packages FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Service role full access briefings" ON briefings FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Service role full access trigger_events" ON trigger_events FOR ALL USING (auth.role() = 'service_role');
+
+-- ============================================================
+-- REALTIME
+-- ============================================================
+
+ALTER publication supabase_realtime ADD TABLE leads, briefings;
 
 -- ============================================================
 -- SEED DATA — SYBA as first client
