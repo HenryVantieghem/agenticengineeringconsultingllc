@@ -34,9 +34,35 @@
 
 ---
 
-## Project Scaffolding Tools
+## Project Templates & Scaffolding Tools
 
-### 4. shurutech/iOSKickstart
+### 4. proSamik/ios-app-with-widget (WidgetKit + SwiftData)
+- **Repo:** https://github.com/proSamik/ios-app-with-widget
+- **License:** Open Source
+- **Type:** Complete iOS app with Home Screen Widget
+- **Stack:** SwiftUI, SwiftData, WidgetKit, App Groups
+- **Features:**
+  - Text editor for composing and saving content
+  - History/archive with chronological viewing
+  - Swipe-to-delete management
+  - Home Screen widget with live data
+  - Widget navigation (browse items via arrows)
+  - Timestamp display per entry
+  - App Groups for app-widget data synchronization
+  - SharedModelContainer singleton for bidirectional data sync
+  - @Model annotations with SwiftData macros
+  - Tab-based navigation (Write/History)
+- **Architecture:**
+  - Shared data model with SwiftData @Model
+  - SharedModelContainer singleton for persistence
+  - Reusable components (QuoteDisplayView)
+  - Widget timeline provider for updates
+  - App Group container for cross-target data
+- **Best For:** Any app that needs Home Screen widgets, content-based apps, journaling apps, productivity apps
+- **Why Important:** WidgetKit is a massive ASO advantage — apps with widgets get more home screen visibility and higher retention. This is the reference implementation for app-widget data sharing patterns.
+- **Rating:** A-Tier (best WidgetKit reference for Swift + SwiftData)
+
+### 5. shurutech/iOSKickstart
 - **Repo:** https://github.com/shurutech/iOSKickstart
 - **License:** Open Source
 - **Type:** CLI-based SwiftUI app generator
