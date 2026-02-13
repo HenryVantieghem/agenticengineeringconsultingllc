@@ -76,17 +76,33 @@
       </div>
     </section>
 
-    <!-- Top Leads -->
-    <section class="content-section" aria-label="Highest-fit leads">
-      <div class="section-header">
-        <h2 class="section-heading">Highest-Fit Leads</h2>
-      </div>
-      <div class="leads-mini-grid" id="top-leads">
+    <!-- Two-column layout: Leads + Pipeline -->
+    <div class="dashboard-grid">
+      <!-- Top Leads -->
+      <section class="content-section" aria-label="Highest-fit leads">
+        <div class="section-header">
+          <h2 class="section-heading">Highest-Fit Leads</h2>
+          <a href="leads.html" class="section-link">View all &rarr;</a>
+        </div>
+        <div class="leads-mini-grid" id="top-leads">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Pipeline Breakdown -->
+      <section class="content-section" aria-label="Pipeline breakdown">
+        <h2 class="section-heading">Pipeline by ICP Segment</h2>
+        <div class="pipeline-breakdown" id="pipeline-breakdown">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Trigger Events -->
+    <section class="content-section" aria-label="Trigger events">
+      <h2 class="section-heading">Trigger Events &mdash; Sales Intelligence</h2>
+      <div class="trigger-events-grid" id="trigger-events">
         <!-- Populated by JS -->
-      </div>
-      <div class="empty-state" id="topLeadsEmpty" hidden>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <p>No leads yet. Run the daily command to generate leads.</p>
       </div>
     </section>
 
@@ -94,7 +110,7 @@
     <section class="content-section" aria-label="Latest briefing">
       <div id="latest-briefing">
         <details class="collapsible">
-          <summary class="collapsible-trigger section-heading">Latest Briefing Preview</summary>
+          <summary class="collapsible-trigger section-heading">Latest Intelligence Brief</summary>
           <div class="collapsible-body briefing-content">
             <p class="text-muted">No briefing available yet.</p>
           </div>

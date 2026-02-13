@@ -2259,6 +2259,143 @@ input, select {
   50% { opacity: 0.4; }
 }
 
+/* ---------------------------------------------------------------------------
+   Dashboard Grid + Pipeline + Trigger Events
+   --------------------------------------------------------------------------- */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-link {
+  font-size: 13px;
+  color: var(--client-accent, #e94560);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.section-link:hover { opacity: 0.7; }
+
+/* Pipeline breakdown bars */
+.pipeline-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pipeline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pipeline-row__label {
+  width: 140px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.pipeline-row__bar-wrap {
+  flex: 1;
+  height: 24px;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.pipeline-row__bar {
+  height: 100%;
+  background: var(--client-accent, #e94560);
+  border-radius: var(--radius-sm);
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+
+.pipeline-row__count {
+  width: 32px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Trigger events */
+.trigger-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.trigger-event-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.trigger-event-card:hover {
+  border-color: var(--client-accent, #e94560);
+}
+
+.trigger-event__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.trigger-event__icp {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.trigger-event__summary {
+  font-size: 14px;
+  color: var(--white);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.trigger-event__hook {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ICP tag in lead cards */
+.icp-tag {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255,255,255,0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
 @media print {
   body::before { display: none; }
   .sidebar { display: none; }

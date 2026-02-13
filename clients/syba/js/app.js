@@ -92,19 +92,22 @@
   }
 
   /**
-   * Stats for today: totalLeads, avgFitScore, topRegion
+   * Stats: totalLeads, avgFitScore, topRegion, outreachCount, briefingCount
+   * Shows ALL leads (not just today's) so data persists across days.
    */
   async function fetchTodayStats() {
     const { sb, clientId } = await getClientSupabase();
-    const today = todayISO();
 
-    const { data, error } = await sb
-      .from('leads')
-      .select('id, fit_score, region')
-      .eq('client_id', clientId)
-      .eq('created_date', today);
+    // Fetch leads and outreach count in parallel
+    const [leadsResult, outreachResult, briefingsResult, eventsResult] = await Promise.all([
+      sb.from('leads').select('id, fit_score, region, icp_segment').eq('client_id', clientId),
+      sb.from('outreach_packages').select('id', { count: 'exact', head: true }),
+      sb.from('briefings').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
+      sb.from('trigger_events').select('id, event_summary, icp_segment, urgency_score, email_hook').eq('client_id', clientId).order('urgency_score', { ascending: false }).limit(5)
+    ]);
 
-    if (error) throw error;
+    if (leadsResult.error) throw leadsResult.error;
+    const data = leadsResult.data;
 
     const totalLeads = data.length;
     const avgFitScore = totalLeads > 0
@@ -119,21 +122,34 @@
     const topRegion = Object.entries(regionCounts)
       .sort((a, b) => b[1] - a[1])[0]?.[0] || '--';
 
-    return { totalLeads, avgFitScore, topRegion };
+    // ICP breakdown
+    const icpCounts = {};
+    data.forEach(l => {
+      if (l.icp_segment) icpCounts[l.icp_segment] = (icpCounts[l.icp_segment] || 0) + 1;
+    });
+
+    return {
+      totalLeads,
+      avgFitScore,
+      topRegion,
+      regionCounts,
+      icpCounts,
+      outreachCount: outreachResult.count || 0,
+      briefingCount: briefingsResult.count || 0,
+      triggerEvents: eventsResult.data || []
+    };
   }
 
   /**
-   * Top leads by fit_score for today.
+   * Top leads by fit_score (all time, not just today).
    */
   async function fetchTopLeads(limit = 5) {
     const { sb, clientId } = await getClientSupabase();
-    const today = todayISO();
 
     const { data, error } = await sb
       .from('leads')
-      .select('id, first_name, last_name, company, title, fit_score, region, email')
+      .select('id, first_name, last_name, company, title, fit_score, region, email, icp_segment')
       .eq('client_id', clientId)
-      .eq('created_date', today)
       .order('fit_score', { ascending: false })
       .limit(limit);
 
@@ -784,29 +800,69 @@
     if (!statsEl) return;
     statsEl.innerHTML = `
       <div class="stat-card">
-        <div class="stat-card__value">${stats.totalLeads}</div>
-        <div class="stat-card__label">Today's Leads</div>
+        <div class="stat-card__value accent-text">${stats.totalLeads}</div>
+        <div class="stat-card__label">Total Leads</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${stats.outreachCount}</div>
+        <div class="stat-card__label">Emails Drafted</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__value">${stats.avgFitScore}</div>
         <div class="stat-card__label">Avg Fit Score</div>
       </div>
       <div class="stat-card">
+        <div class="stat-card__value">${stats.briefingCount}</div>
+        <div class="stat-card__label">Intelligence Briefs</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-card__value">${escapeHtml(stats.topRegion)}</div>
         <div class="stat-card__label">Top Region</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__value">${topLeads.length}</div>
-        <div class="stat-card__label">Hot Leads</div>
+        <div class="stat-card__value">${stats.triggerEvents.length}</div>
+        <div class="stat-card__label">Trigger Events</div>
       </div>
     `;
+
+    // Render trigger events if container exists
+    const eventsEl = document.getElementById('trigger-events');
+    if (eventsEl && stats.triggerEvents.length > 0) {
+      eventsEl.innerHTML = stats.triggerEvents.map(evt => `
+        <div class="trigger-event-card">
+          <div class="trigger-event__header">
+            <span class="score-badge ${scoreClass(evt.urgency_score)}">${evt.urgency_score}</span>
+            <span class="trigger-event__icp">${escapeHtml(evt.icp_segment || '')}</span>
+          </div>
+          <p class="trigger-event__summary">${escapeHtml(evt.event_summary || '')}</p>
+          <p class="trigger-event__hook">${escapeHtml(evt.email_hook || '')}</p>
+        </div>
+      `).join('');
+    } else if (eventsEl) {
+      eventsEl.innerHTML = '<p class="empty-state">No trigger events yet.</p>';
+    }
+
+    // Render pipeline breakdown if container exists
+    const pipelineEl = document.getElementById('pipeline-breakdown');
+    if (pipelineEl && Object.keys(stats.icpCounts).length > 0) {
+      const sorted = Object.entries(stats.icpCounts).sort((a, b) => b[1] - a[1]);
+      pipelineEl.innerHTML = sorted.map(([segment, count]) => `
+        <div class="pipeline-row">
+          <span class="pipeline-row__label">${escapeHtml(segment)}</span>
+          <div class="pipeline-row__bar-wrap">
+            <div class="pipeline-row__bar" style="width:${Math.round(count / stats.totalLeads * 100)}%"></div>
+          </div>
+          <span class="pipeline-row__count">${count}</span>
+        </div>
+      `).join('');
+    }
   }
 
   function renderTopLeadsCards(topLeads) {
     const leadsEl = document.getElementById('top-leads');
     if (!leadsEl) return;
     if (topLeads.length === 0) {
-      leadsEl.innerHTML = '<p class="empty-state">No leads generated today yet.</p>';
+      leadsEl.innerHTML = '<p class="empty-state">No leads generated yet.</p>';
     } else {
       leadsEl.innerHTML = topLeads.map(lead => `
         <a href="lead.html?id=${lead.id}" class="lead-card">
@@ -820,7 +876,7 @@
           </div>
           <div class="lead-card__footer">
             <span class="region-tag">${escapeHtml(lead.region || '')}</span>
-            ${lead.email ? '<button class="btn-copy" onclick="event.preventDefault();App.copyToClipboard(\'' + escapeHtml(lead.email) + '\')">Copy Email</button>' : ''}
+            ${lead.icp_segment ? '<span class="icp-tag">' + escapeHtml(lead.icp_segment) + '</span>' : ''}
           </div>
         </a>
       `).join('');

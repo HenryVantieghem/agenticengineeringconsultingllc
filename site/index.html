@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI-powered phone answering and automation for Auburn, Alabama businesses. Never miss a call again. Book a free demo.">
-  <title>Agentic Engineering Consulting | AI Automation for Auburn Businesses</title>
+  <meta name="description" content="20 researched leads delivered to your inbox every morning. AI-powered prospect intelligence, personalized outreach, and a live dashboard. $300 setup + $200/mo.">
+  <title>Agentic Engineering | AI Lead Intelligence for Growing Businesses</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
   <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
@@ -211,33 +211,12 @@
       background: var(--glass);
     }
 
-    .hero-phone {
-      margin-top: 64px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      animation: fadeUp 0.8s ease-out 0.4s both;
-    }
-
-    .hero-phone .label {
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .hero-phone .number {
-      font-family: 'Instrument Serif', serif;
-      font-size: 32px;
-      color: var(--accent);
-      letter-spacing: 2px;
-    }
-
-    .hero-phone .hint {
-      font-size: 13px;
+    .hero-note {
+      margin-top: 48px;
+      font-size: 14px;
       color: var(--muted);
       font-weight: 300;
+      animation: fadeUp 0.8s ease-out 0.4s both;
     }
 
     /* SCROLLING MARQUEE */
@@ -427,7 +406,7 @@
       font-weight: 300;
     }
 
-    /* PRICING */
+    /* PRICING (legacy classes kept for compatibility) */
     .pricing-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -540,6 +519,132 @@
       box-shadow: 0 8px 30px rgba(232,83,63,0.3);
     }
 
+    /* AI LEAD INTELLIGENCE SECTION */
+    .lead-intel-section {
+      background: linear-gradient(180deg, rgba(232,83,63,0.04) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lead-intel-card {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 48px;
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      background: rgba(232,83,63,0.03);
+      text-align: center;
+      position: relative;
+    }
+
+    .lead-intel-card::after {
+      content: 'SIMPLE PRICING';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: var(--white);
+      font-size: 11px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      padding: 6px 20px;
+      border-radius: 100px;
+    }
+
+    .lead-intel-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .lead-intel-card .lead-intel-sub {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 36px;
+      font-weight: 300;
+      line-height: 1.6;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .lead-intel-pricing {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .lead-intel-price {
+      text-align: center;
+    }
+
+    .lead-intel-price .amount {
+      font-family: 'Instrument Serif', serif;
+      font-size: 48px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .lead-intel-price .amount span {
+      font-size: 18px;
+      color: var(--muted);
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .lead-intel-price .price-type {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .lead-intel-features {
+      list-style: none;
+      text-align: left;
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .lead-intel-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: rgba(250,250,249,0.8);
+      font-weight: 300;
+    }
+
+    .lead-intel-features li::before {
+      content: '\2713';
+      color: var(--accent);
+      margin-right: 12px;
+      font-weight: 700;
+    }
+
+    .lead-intel-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lead-intel-actions .free-lead-link {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 300;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .lead-intel-actions .free-lead-link:hover {
+      color: var(--white);
+    }
+
     /* CTA SECTION */
     .cta-section {
       text-align: center;
@@ -638,6 +743,10 @@
       .hero-actions { flex-direction: column; width: 100%; }
       .btn-primary, .btn-ghost { width: 100%; text-align: center; }
       footer { flex-direction: column; gap: 24px; text-align: center; }
+      .lead-intel-card { padding: 48px 24px; }
+      .lead-intel-pricing { gap: 24px; }
+      .lead-intel-price .amount { font-size: 40px; }
+      .lead-intel-features { max-width: 100%; }
     }
   </style>
 </head>
@@ -650,7 +759,7 @@
       <a href="#problem">The Problem</a>
       <a href="#how">How It Works</a>
       <a href="#pricing">Pricing</a>
-      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="nav-cta">Try the AI Demo</a>
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="nav-cta">Get 5 Free Leads</a>
     </div>
   </nav>
 
@@ -658,19 +767,15 @@
   <section class="hero">
     <div class="hero-badge">
       <span class="dot"></span>
-      Auburn, Alabama's AI Automation Partner
+      AI-Powered Lead Intelligence
     </div>
-    <h1>Your phones are ringing.<br>Nobody's <em>answering.</em></h1>
-    <p class="hero-sub">We build AI systems that answer every call, book every appointment, and recover every dollar you're losing to voicemail. 24/7. No staff required.</p>
+    <h1>Your competitors are finding customers. <em>You&rsquo;re waiting.</em></h1>
+    <p class="hero-sub">We build an AI engine that researches, scores, and writes personalized outreach for 20 ideal prospects &mdash; delivered to your inbox and dashboard every morning. You just send.</p>
     <div class="hero-actions">
-      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Book a 10-Minute Demo</a>
-      <a href="#problem" class="btn-ghost">See What You're Losing</a>
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Get 5 Free Leads</a>
+      <a href="#how" class="btn-ghost">See How It Works</a>
     </div>
-    <div class="hero-phone" id="demo">
-      <span class="label">See it in action</span>
-      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="number" style="text-decoration: none; cursor: pointer;">Schedule Your Free Demo &rarr;</a>
-      <span class="hint">10 minutes. No commitment. See your ROI.</span>
-    </div>
+    <p class="hero-note">No credit card required. See real leads for YOUR business.</p>
   </section>
 
   <!-- MARQUEE -->
@@ -678,7 +783,7 @@
     <div class="marquee-track">
       <span class="marquee-item">Dental Practices <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Law Firms <span class="sep">&#9670;</span></span>
-      <span class="marquee-item">HVAC & Plumbing <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">HVAC &amp; Plumbing <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Real Estate <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Medical Offices <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Property Management <span class="sep">&#9670;</span></span>
@@ -686,7 +791,7 @@
       <span class="marquee-item">Veterinarians <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Dental Practices <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Law Firms <span class="sep">&#9670;</span></span>
-      <span class="marquee-item">HVAC & Plumbing <span class="sep">&#9670;</span></span>
+      <span class="marquee-item">HVAC &amp; Plumbing <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Real Estate <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Medical Offices <span class="sep">&#9670;</span></span>
       <span class="marquee-item">Property Management <span class="sep">&#9670;</span></span>
@@ -698,38 +803,38 @@
   <!-- STATS -->
   <div class="stats">
     <div class="stat">
-      <div class="stat-number">62%</div>
-      <div class="stat-label">of your calls go unanswered</div>
+      <div class="stat-number">20</div>
+      <div class="stat-label">researched leads delivered daily</div>
     </div>
     <div class="stat">
-      <div class="stat-number">85%</div>
-      <div class="stat-label">of those callers never call back</div>
+      <div class="stat-number">&lt; $10</div>
+      <div class="stat-label">per qualified lead vs $50+ on LinkedIn</div>
     </div>
     <div class="stat">
-      <div class="stat-number">$4,500</div>
-      <div class="stat-label">lost per month for a 5-person team</div>
+      <div class="stat-number">$200</div>
+      <div class="stat-label">per month. Less than one closed deal.</div>
     </div>
   </div>
 
   <!-- PROBLEM -->
   <section class="section" id="problem">
     <div class="section-label">The Problem</div>
-    <h2 class="section-title">Every missed call is a customer choosing your competitor.</h2>
+    <h2 class="section-title">You know your service is great. But nobody knows you exist.</h2>
     <div class="problem-grid">
       <div class="problem-card">
-        <span class="problem-icon">&#128222;</span>
-        <h3>Missed Calls, Lost Revenue</h3>
-        <p>You're on a job, in a meeting, or with a patient. The phone rings. Nobody answers. That $500 client just called the next business on Google.</p>
+        <span class="problem-icon">&#128269;</span>
+        <h3>No Pipeline, No Predictability</h3>
+        <p>You rely on word of mouth, Google, and hope. Some months are great. Others, you&rsquo;re wondering where the next client is coming from.</p>
       </div>
       <div class="problem-card">
-        <span class="problem-icon">&#127769;</span>
-        <h3>After-Hours Dead Zone</h3>
-        <p>Your best leads call at 7pm, on weekends, during lunch. Traditional answering services cost $300-$1,000/month and still miss the nuance of your business.</p>
+        <span class="problem-icon">&#9200;</span>
+        <h3>Outreach Takes Hours</h3>
+        <p>Finding prospects, researching companies, writing emails, following up &mdash; it&rsquo;s a full-time job. And you already have one.</p>
       </div>
       <div class="problem-card">
-        <span class="problem-icon">&#128257;</span>
-        <h3>Staff Drowning in Repetition</h3>
-        <p>"What are your hours?" "Do you take insurance?" "Can I schedule an appointment?" Your team answers the same questions 50 times a day instead of doing real work.</p>
+        <span class="problem-icon">&#128184;</span>
+        <h3>Leads Are Expensive</h3>
+        <p>LinkedIn Sales Navigator costs $100/mo for raw data. Apollo charges per contact. HubSpot starts at $800/mo. And you still have to do the research yourself.</p>
       </div>
     </div>
   </section>
@@ -738,91 +843,79 @@
   <section class="solution-section" id="how">
     <div class="section" style="max-width: 1200px; margin: 0 auto;">
       <div class="section-label">How It Works</div>
-      <h2 class="section-title">Set up in days. Pays for itself in weeks.</h2>
+      <h2 class="section-title">Your AI sales engine, live in 24 hours.</h2>
       <div class="how-it-works">
         <div class="step">
           <div class="step-num">01</div>
-          <h3>We Learn Your Business</h3>
-          <p>Your services, hours, FAQ, booking process, and how you talk to customers. We build an AI that sounds like your best receptionist.</p>
+          <h3>We Analyze Your Business</h3>
+          <p>Give us your website. Our AI scrapes it, identifies your ideal customers, maps your competitive landscape, and builds your lead profile.</p>
         </div>
         <div class="step">
           <div class="step-num">02</div>
-          <h3>AI Goes Live on Your Line</h3>
-          <p>Every call gets answered instantly, 24/7. Appointments get booked. Emergencies get routed. You get a text summary of every interaction.</p>
+          <h3>Leads Start Flowing</h3>
+          <p>Every morning, 20 researched prospects land in your inbox and dashboard. Each with a full intelligence brief, fit score, and ready-to-send outreach email.</p>
         </div>
         <div class="step">
           <div class="step-num">03</div>
-          <h3>Automations Kick In</h3>
-          <p>Missed-call text-backs, review requests after appointments, lead capture to your CRM, and weekly performance reports. All on autopilot.</p>
+          <h3>You Send, We Research</h3>
+          <p>Pick your top leads, hit send on the pre-written emails. We handle the research, follow-ups, and pipeline tracking automatically.</p>
         </div>
         <div class="step">
           <div class="step-num">04</div>
-          <h3>You Watch Revenue Grow</h3>
-          <p>More calls answered means more appointments booked means more revenue captured. Most clients see ROI within the first month.</p>
+          <h3>Watch Your Pipeline Grow</h3>
+          <p>Track every prospect in your live dashboard. See who opened, who replied, and who&rsquo;s ready to close. Real-time, no manual data entry.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- PRICING -->
-  <section class="section" id="pricing">
-    <div class="section-label">Investment</div>
-    <h2 class="section-title">Less than one missed appointment per month.</h2>
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-tier">Starter</div>
-        <div class="price-amount">$497<span>/mo</span></div>
-        <div class="price-desc">+ $299 one-time setup</div>
-        <ul class="price-features">
-          <li>AI receptionist &mdash; 24/7 call answering</li>
-          <li>Appointment booking to your calendar</li>
-          <li>Custom FAQ handling for your business</li>
-          <li>Text summary after every call</li>
-          <li>Call log dashboard</li>
+  <section class="lead-intel-section" id="pricing">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">Investment</div>
+      <h2 class="section-title">Less than one closed deal pays for a full year.</h2>
+      <div class="lead-intel-card">
+        <h3>AI Lead Intelligence Platform</h3>
+        <p class="lead-intel-sub">20 researched leads delivered daily. Full prospect briefs, personalized outreach, and a live dashboard &mdash; all powered by AI.</p>
+        <div class="lead-intel-pricing">
+          <div class="lead-intel-price">
+            <div class="amount">$300</div>
+            <div class="price-type">One-Time Setup</div>
+          </div>
+          <div class="lead-intel-price">
+            <div class="amount">$200<span>/mo</span></div>
+            <div class="price-type">Monthly</div>
+          </div>
+        </div>
+        <ul class="lead-intel-features">
+          <li>20 AI-researched leads delivered daily</li>
+          <li>Full prospect intelligence briefs</li>
+          <li>Ready-to-send personalized outreach emails</li>
+          <li>3-email follow-up sequences per lead</li>
+          <li>Live lead dashboard (your own URL)</li>
+          <li>Fit scoring and trigger event alerts</li>
+          <li>Month-to-month, cancel anytime</li>
         </ul>
-        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
-      </div>
-      <div class="price-card featured">
-        <div class="price-tier">Growth</div>
-        <div class="price-amount">$997<span>/mo</span></div>
-        <div class="price-desc">+ $499 one-time setup</div>
-        <ul class="price-features">
-          <li>Everything in Starter</li>
-          <li>Missed-call text-back automation</li>
-          <li>Post-appointment review requests</li>
-          <li>Lead capture to your CRM</li>
-          <li>Weekly performance reports</li>
-        </ul>
-        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
-      </div>
-      <div class="price-card">
-        <div class="price-tier">Premium</div>
-        <div class="price-amount">$1,497<span>/mo</span></div>
-        <div class="price-desc">+ $997 one-time setup</div>
-        <ul class="price-features">
-          <li>Everything in Growth</li>
-          <li>AI chatbot on your website</li>
-          <li>Social media auto-posting</li>
-          <li>Monthly strategy call</li>
-          <li>Priority support</li>
-        </ul>
-        <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="price-btn">Get Started</a>
+        <div class="lead-intel-actions">
+          <a href="https://buy.stripe.com/bJe7sK0O92mn1HZ9xEfjG02" class="btn-primary">Get Started &mdash; $300 Setup</a>
+          <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="free-lead-link">or get 5 free leads first &rarr;</a>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- BOOKING SECTION -->
   <section class="section" id="booking" style="text-align: center;">
-    <div class="section-label">Book Your Demo</div>
-    <h2 class="section-title" style="margin-left: auto; margin-right: auto;">10 minutes that could save you<br>$4,500 a month.</h2>
+    <div class="section-label">See Your Leads</div>
+    <h2 class="section-title" style="margin-left: auto; margin-right: auto;">5 free leads, researched for YOUR business. No strings.</h2>
     <div class="calendly-inline-widget" data-url="https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min?hide_gdpr_banner=1" style="min-width:320px;height:700px;margin:0 auto;max-width:900px;"></div>
   </section>
 
   <!-- CTA -->
   <section class="cta-section">
-    <h2>Ready to stop<br>losing <em>money?</em></h2>
-    <p>Book a 10-minute demo and see exactly how much revenue you're leaving on the table.</p>
-    <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Book Your Free Demo</a>
+    <h2>Ready to stop <em>guessing?</em></h2>
+    <p>Get 5 free leads for your business. See real prospects with real outreach &mdash; before you pay anything.</p>
+    <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Get My Free Leads</a>
   </section>
 
   <!-- FOOTER -->

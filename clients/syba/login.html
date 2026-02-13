@@ -10,15 +10,9 @@
   <script src="js/config.js"></script>
   <script>document.documentElement.style.setProperty('--client-accent', CONFIG.accentColor);</script>
   <style>
-    .auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-    .auth-tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: transparent; border: none; cursor: pointer; transition: all 0.2s; }
-    .auth-tab.active { color: var(--white); background: rgba(255,255,255,0.06); }
-    .auth-tab:hover:not(.active) { color: var(--white); }
-    .auth-form { display: none; flex-direction: column; gap: 16px; }
-    .auth-form.active { display: flex; }
+    .auth-form { display: flex; flex-direction: column; gap: 16px; }
     .back-to-site { display: block; text-align: center; margin-top: 24px; font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .back-to-site:hover { color: var(--white); }
-    .signup-success { text-align: center; color: var(--success); font-size: 14px; display: none; padding: 16px; }
     .login-card__powered { text-align: center; font-size: 11px; letter-spacing: 1px; color: var(--muted); margin-bottom: 32px; font-weight: 400; }
     .login-card__powered strong { color: rgba(250,250,249,0.6); font-weight: 600; }
   </style>
@@ -31,14 +25,8 @@
     <div class="login-card__subtitle">Lead Intelligence</div>
     <div class="login-card__powered">Powered by <strong>Agentic Engineering</strong></div>
 
-    <!-- Tabs -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabSignIn" type="button">Sign In</button>
-      <button class="auth-tab" id="tabSignUp" type="button">Sign Up</button>
-    </div>
-
     <!-- Sign In Form -->
-    <form id="signInForm" class="auth-form active" autocomplete="on">
+    <form id="signInForm" class="auth-form" autocomplete="on">
       <div class="form-group">
         <label for="signInEmail">Email</label>
         <input
@@ -65,52 +53,6 @@
       <button type="submit" class="btn-login" id="signInBtn">Sign In</button>
     </form>
 
-    <!-- Sign Up Form -->
-    <form id="signUpForm" class="auth-form" autocomplete="on">
-      <div class="form-group">
-        <label for="signUpEmail">Email</label>
-        <input
-          type="email"
-          id="signUpEmail"
-          name="email"
-          placeholder="you@company.com"
-          required
-          autocomplete="email"
-        >
-      </div>
-      <div class="form-group">
-        <label for="signUpPassword">Password</label>
-        <input
-          type="password"
-          id="signUpPassword"
-          name="new-password"
-          placeholder="Create a password"
-          required
-          autocomplete="new-password"
-          minlength="6"
-        >
-      </div>
-      <div class="form-group">
-        <label for="signUpConfirm">Confirm Password</label>
-        <input
-          type="password"
-          id="signUpConfirm"
-          name="confirm-password"
-          placeholder="Confirm your password"
-          required
-          autocomplete="new-password"
-          minlength="6"
-        >
-      </div>
-      <div class="login-error" id="signUpError" role="alert" aria-live="polite"></div>
-      <button type="submit" class="btn-login" id="signUpBtn">Create Account</button>
-    </form>
-
-    <!-- Sign Up Success Message -->
-    <div class="signup-success" id="signUpSuccess">
-      Check your email for a confirmation link to complete your registration.
-    </div>
-
     <!-- Back link -->
     <a href="index.html" class="back-to-site">&larr; Back to SYBA.io</a>
   </div>
@@ -127,104 +69,36 @@
         return;
       }
 
-      // --- Tab switching ---
-      var tabSignIn = document.getElementById('tabSignIn');
-      var tabSignUp = document.getElementById('tabSignUp');
-      var formSignIn = document.getElementById('signInForm');
-      var formSignUp = document.getElementById('signUpForm');
-      var signUpSuccess = document.getElementById('signUpSuccess');
-
-      function showTab(tab) {
-        var isSignIn = tab === 'signin';
-        tabSignIn.classList.toggle('active', isSignIn);
-        tabSignUp.classList.toggle('active', !isSignIn);
-        formSignIn.classList.toggle('active', isSignIn);
-        formSignUp.classList.toggle('active', !isSignIn);
-        signUpSuccess.style.display = 'none';
-        // Clear errors on tab switch
-        hideError('signInError');
-        hideError('signUpError');
-      }
-
-      tabSignIn.addEventListener('click', function () { showTab('signin'); });
-      tabSignUp.addEventListener('click', function () { showTab('signup'); });
-
-      // --- Helper: show/hide error ---
-      function showError(elementId, message) {
-        var el = document.getElementById(elementId);
+      function showError(message) {
+        var el = document.getElementById('signInError');
         el.textContent = message;
         el.style.display = 'block';
         el.classList.add('visible');
       }
 
-      function hideError(elementId) {
-        var el = document.getElementById(elementId);
+      function hideError() {
+        var el = document.getElementById('signInError');
         el.textContent = '';
         el.style.display = 'none';
         el.classList.remove('visible');
       }
 
-      // --- Sign In ---
       document.getElementById('signInForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         var email = document.getElementById('signInEmail').value.trim();
         var password = document.getElementById('signInPassword').value;
         var btn = document.getElementById('signInBtn');
 
-        hideError('signInError');
+        hideError();
         btn.disabled = true;
         btn.textContent = 'Signing in...';
 
         try {
           await Auth.login(email, password);
-          // login() redirects to dashboard.html on success
         } catch (err) {
-          showError('signInError', err.message || 'Invalid credentials. Please try again.');
+          showError(err.message || 'Invalid credentials. Please try again.');
           btn.disabled = false;
           btn.textContent = 'Sign In';
-        }
-      });
-
-      // --- Sign Up ---
-      document.getElementById('signUpForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        var email = document.getElementById('signUpEmail').value.trim();
-        var password = document.getElementById('signUpPassword').value;
-        var confirm = document.getElementById('signUpConfirm').value;
-        var btn = document.getElementById('signUpBtn');
-
-        hideError('signUpError');
-
-        // Validate passwords match
-        if (password !== confirm) {
-          showError('signUpError', 'Passwords do not match.');
-          return;
-        }
-
-        if (password.length < 6) {
-          showError('signUpError', 'Password must be at least 6 characters.');
-          return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = 'Creating account...';
-
-        try {
-          var data = await Auth.signUp(email, password);
-
-          // If session exists, user was auto-confirmed — redirect
-          if (data.session) {
-            window.location.href = 'dashboard.html';
-            return;
-          }
-
-          // Otherwise, show confirmation message
-          formSignUp.classList.remove('active');
-          signUpSuccess.style.display = 'block';
-        } catch (err) {
-          showError('signUpError', err.message || 'Could not create account. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Create Account';
         }
       });
     })();
