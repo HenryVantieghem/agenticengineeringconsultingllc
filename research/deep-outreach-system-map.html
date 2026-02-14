@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Outreach System Map — Agentic Engineering</title>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#E8533F;--bg:#0F1419;--card:#1A1F2E;--border:#2A3142;
+  --text:#E8EAED;--text-sec:#9AA0A6;--success:#34A853;--warning:#FBBC04;
+  --error:#EA4335;--info:#4285F4;--radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --phase-discovery:#4285F4;--phase-processing:#9C27B0;
+  --phase-delivery:#34A853;--phase-analytics:#FBBC04;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== LAYOUT ===== */
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+section{padding:80px 0 40px}
+h2{font-size:1.75rem;margin-bottom:24px;color:var(--text);position:relative;padding-bottom:12px}
+h2::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:3px;background:var(--primary);border-radius:2px}
+h3{font-size:1.25rem;margin-bottom:16px;color:var(--text)}
+p{color:var(--text-sec);margin-bottom:12px}
+
+/* ===== NAV ===== */
+.nav{
+  position:sticky;top:0;z-index:100;background:rgba(15,20,25,.92);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+}
+.nav-inner{display:flex;align-items:center;gap:8px;padding:12px 0;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:700;color:var(--primary);white-space:nowrap;font-size:.9rem;margin-right:8px}
+.nav-link{
+  color:var(--text-sec);font-size:.8rem;padding:6px 12px;border-radius:var(--radius-xs);
+  white-space:nowrap;transition:color .2s,background .2s;cursor:pointer;border:none;background:none;
+}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--card)}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.card-grid{display:grid;gap:20px}
+.card-grid-2{grid-template-columns:repeat(2,1fr)}
+.card-grid-3{grid-template-columns:repeat(3,1fr)}
+.card-grid-4{grid-template-columns:repeat(4,1fr)}
+
+/* ===== BADGES ===== */
+.badge{
+  display:inline-flex;align-items:center;padding:4px 10px;border-radius:var(--radius-xs);
+  font-size:.75rem;font-weight:600;
+}
+.badge-success{background:rgba(52,168,83,.15);color:var(--success)}
+.badge-warning{background:rgba(251,188,4,.15);color:var(--warning)}
+.badge-error{background:rgba(234,67,53,.15);color:var(--error)}
+.badge-info{background:rgba(66,133,244,.15);color:var(--info)}
+.badge-primary{background:rgba(232,83,63,.15);color:var(--primary)}
+
+/* ===== SECTION 1: HERO ===== */
+.hero{text-align:center;padding:100px 0 60px}
+.hero h1{font-size:2.75rem;font-weight:800;margin-bottom:12px;letter-spacing:-.02em}
+.hero h1 span{color:var(--primary)}
+.hero .subtitle{font-size:1.15rem;color:var(--text-sec);margin-bottom:48px;max-width:600px;margin-left:auto;margin-right:auto}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:48px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center}
+.stat-num{font-size:2.5rem;font-weight:800;color:var(--primary);line-height:1}
+.stat-label{font-size:.85rem;color:var(--text-sec);margin-top:8px}
+.comparison-banner{
+  background:linear-gradient(135deg,rgba(232,83,63,.08),rgba(66,133,244,.08));
+  border:1px solid var(--border);border-radius:var(--radius);padding:20px 32px;
+  display:flex;justify-content:center;gap:40px;flex-wrap:wrap;
+}
+.comparison-banner .item{text-align:center}
+.comparison-banner .old{color:var(--text-sec);font-size:1.5rem;font-weight:700}
+.comparison-banner .arrow{color:var(--primary);font-size:1.5rem;align-self:center}
+.comparison-banner .new{color:var(--success);font-size:1.5rem;font-weight:700}
+.comparison-banner .label{font-size:.75rem;color:var(--text-sec);display:block;margin-top:4px}
+
+/* ===== SECTION 2: PIPELINE ===== */
+.pipeline-container{position:relative}
+.pipeline-stages{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pipeline-stage{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;cursor:pointer;transition:border-color .2s,transform .2s;position:relative;
+}
+.pipeline-stage:hover{border-color:var(--primary);transform:translateY(-2px)}
+.pipeline-stage.active{border-color:var(--primary);box-shadow:0 0 20px rgba(232,83,63,.15)}
+.stage-num{
+  display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+  border-radius:50%;background:var(--primary);color:#fff;font-size:.75rem;font-weight:700;
+  margin-bottom:8px;
+}
+.stage-name{font-weight:600;font-size:.9rem;margin-bottom:4px}
+.stage-agent{font-size:.75rem;color:var(--text-sec)}
+.stage-duration{font-size:.7rem;color:var(--text-sec);margin-top:4px}
+.pipeline-detail{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-top:20px;display:none;
+}
+.pipeline-detail.show{display:block;animation:fadeIn .3s ease}
+.pipeline-detail h3{color:var(--primary)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.detail-item{font-size:.85rem}
+.detail-item strong{color:var(--text)}
+.detail-item span{color:var(--text-sec)}
+.pipeline-arrows{display:flex;justify-content:center;gap:4px;margin:12px 0}
+.pipeline-arrows .arrow-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:.4}
+.pipeline-arrows .arrow-dot:nth-child(2){opacity:.6}
+.pipeline-arrows .arrow-dot:nth-child(3){opacity:.8}
+.pipeline-arrows .arrow-dot:nth-child(4){opacity:1}
+.gate-marker{
+  position:absolute;top:-8px;right:-8px;width:24px;height:24px;background:var(--warning);
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);display:flex;align-items:center;
+  justify-content:center;
+}
+
+/* ===== SECTION 3: AGENTS ===== */
+.agent-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;cursor:pointer;transition:all .3s;overflow:hidden;
+}
+.agent-card:hover{border-color:var(--primary);transform:translateY(-3px)}
+.agent-card .agent-icon{
+  width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;
+  justify-content:center;font-size:1.25rem;margin-bottom:12px;
+}
+.agent-card .agent-name{font-weight:700;font-size:.95rem;margin-bottom:4px}
+.agent-card .agent-role{font-size:.8rem;color:var(--text-sec);margin-bottom:8px}
+.agent-card .agent-tools{display:flex;flex-wrap:wrap;gap:4px}
+.agent-card .tool-badge{
+  font-size:.65rem;padding:2px 8px;background:rgba(255,255,255,.05);
+  border-radius:var(--radius-xs);color:var(--text-sec);
+}
+.agent-expanded{
+  max-height:0;overflow:hidden;transition:max-height .4s ease;
+  margin-top:0;border-top:0 solid var(--border);
+}
+.agent-card.expanded .agent-expanded{max-height:400px;margin-top:12px;border-top-width:1px;padding-top:12px}
+.agent-expanded p{font-size:.8rem;margin-bottom:6px}
+.phase-discovery .agent-icon{background:rgba(66,133,244,.15);color:var(--phase-discovery)}
+.phase-processing .agent-icon{background:rgba(156,39,176,.15);color:var(--phase-processing)}
+.phase-delivery .agent-icon{background:rgba(52,168,83,.15);color:var(--phase-delivery)}
+.phase-analytics .agent-icon{background:rgba(251,188,4,.15);color:var(--phase-analytics)}
+.phase-label{
+  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:8px;padding:4px 12px;border-radius:var(--radius-xs);display:inline-block;
+}
+
+/* ===== SECTION 4: A/B TESTING ===== */
+.ab-test-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.ab-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.ab-variants{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.variant-card{background:rgba(255,255,255,.03);border-radius:var(--radius-sm);padding:16px}
+.variant-card h4{font-size:.9rem;margin-bottom:8px}
+.variant-card .variant-label{
+  display:inline-block;padding:2px 8px;border-radius:var(--radius-xs);font-size:.7rem;
+  font-weight:700;margin-bottom:8px;
+}
+.variant-a .variant-label{background:rgba(66,133,244,.15);color:var(--info)}
+.variant-b .variant-label{background:rgba(232,83,63,.15);color:var(--primary)}
+.variant-metric{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem}
+.progress-bar{
+  width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;
+  margin-top:4px;
+}
+.progress-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.significance-bar{margin-top:16px}
+.significance-bar .label{font-size:.8rem;color:var(--text-sec);margin-bottom:4px}
+.significance-bar .progress-bar{height:8px}
+
+/* ===== SECTION 5: LEAD SCORING ===== */
+.score-feature{
+  display:flex;align-items:center;gap:16px;margin-bottom:16px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 16px;
+}
+.score-feature .weight{
+  min-width:48px;font-size:1.1rem;font-weight:700;color:var(--primary);text-align:center;
+}
+.score-feature .feature-name{min-width:160px;font-weight:600;font-size:.85rem}
+.score-feature .bar-wrapper{flex:1}
+.score-feature .bar{
+  height:24px;border-radius:4px;position:relative;transition:width 1s ease;
+}
+.score-feature .bar-value{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.7rem;
+  font-weight:700;color:#fff;
+}
+.calculator{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-top:24px;
+}
+.calc-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.calc-row label{min-width:160px;font-size:.85rem;font-weight:600}
+.calc-row select{
+  background:var(--bg);color:var(--text);border:1px solid var(--border);
+  border-radius:var(--radius-xs);padding:6px 12px;font-size:.85rem;flex:1;min-width:200px;
+}
+.calc-result{
+  text-align:center;margin-top:20px;padding:20px;
+  background:rgba(255,255,255,.03);border-radius:var(--radius-sm);
+}
+.calc-score{font-size:3rem;font-weight:800;line-height:1}
+.calc-tier{font-size:1.1rem;font-weight:700;margin-top:4px}
+
+/* ===== SECTION 6: GATES ===== */
+.gate-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.gate-diamond{
+  width:48px;height:48px;background:var(--warning);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.gate-diamond span{font-weight:800;font-size:.9rem;color:var(--bg)}
+.check-list{list-style:none}
+.check-list li{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:.85rem}
+.check-icon{font-size:.9rem;flex-shrink:0;margin-top:2px}
+.check-pass{color:var(--success)}
+.check-fail{color:var(--error)}
+.gate-progress{margin-top:16px}
+.gate-progress .circle-wrap{
+  width:64px;height:64px;position:relative;margin:0 auto;
+}
+.gate-progress svg{transform:rotate(-90deg)}
+.gate-progress .circle-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6}
+.gate-progress .circle-fill{fill:none;stroke:var(--success);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.gate-progress .circle-text{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:.85rem;font-weight:700;
+}
+
+/* ===== SECTION 7: KPIs ===== */
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.kpi-value{font-size:1.75rem;font-weight:800;line-height:1}
+.kpi-label{font-size:.8rem;color:var(--text-sec);margin-top:4px;margin-bottom:12px}
+.kpi-target{font-size:.75rem;color:var(--text-sec)}
+.kpi-target span{color:var(--success);font-weight:600}
+.trend-up{color:var(--success)}
+.trend-down{color:var(--error)}
+.sparkline{margin:8px 0}
+.sparkline svg{width:100%;height:32px}
+.sparkline polyline{fill:none;stroke:var(--primary);stroke-width:1.5}
+.sparkline .area{fill:rgba(232,83,63,.1);stroke:none}
+
+/* ===== SECTION 8: BEFORE/AFTER ===== */
+.comparison-table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:var(--radius)}
+.comparison-table th,.comparison-table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);font-size:.85rem}
+.comparison-table th{background:rgba(255,255,255,.05);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.comparison-table .col-dim{width:20%;color:var(--text)}
+.comparison-table .col-before{width:30%;color:var(--text-sec);background:rgba(255,255,255,.02)}
+.comparison-table .col-after{width:30%;color:var(--text)}
+.comparison-table .col-delta{width:20%}
+.delta-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:var(--radius-xs);font-size:.75rem;font-weight:600;
+  background:rgba(52,168,83,.12);color:var(--success);
+}
+
+/* ===== SECTION 9: RESEARCH ===== */
+.research-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative}
+.research-num{
+  position:absolute;top:-10px;left:16px;background:var(--primary);color:#fff;
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:800;
+}
+.research-card h4{font-size:.95rem;margin-bottom:8px;margin-top:8px}
+.research-stat{font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:4px}
+.research-source{font-size:.7rem;color:var(--text-sec);font-style:italic}
+
+/* ===== SECTION 10: ROADMAP ===== */
+.roadmap{position:relative}
+.roadmap::before{
+  content:'';position:absolute;left:24px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--phase-discovery),var(--phase-processing),var(--phase-delivery),var(--phase-analytics));
+}
+.phase-block{position:relative;padding-left:60px;margin-bottom:32px}
+.phase-marker{
+  position:absolute;left:12px;top:0;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  color:#fff;z-index:1;
+}
+.phase-block:nth-child(1) .phase-marker{background:var(--phase-discovery)}
+.phase-block:nth-child(2) .phase-marker{background:var(--phase-processing)}
+.phase-block:nth-child(3) .phase-marker{background:var(--phase-delivery)}
+.phase-block:nth-child(4) .phase-marker{background:var(--phase-analytics)}
+.phase-header{
+  display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 20px;transition:border-color .2s;
+}
+.phase-header:hover{border-color:var(--primary)}
+.phase-header h3{margin:0;font-size:1rem}
+.phase-header .week{font-size:.8rem;color:var(--primary);font-weight:700}
+.phase-tasks{
+  max-height:0;overflow:hidden;transition:max-height .4s ease;
+}
+.phase-block.expanded .phase-tasks{max-height:600px}
+.task-list{list-style:none;padding:12px 0 0}
+.task-list li{
+  display:flex;gap:8px;padding:8px 16px;font-size:.85rem;border-left:2px solid var(--border);
+  margin-left:8px;
+}
+.task-list li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--primary);margin-top:7px;flex-shrink:0}
+.milestone{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 12px;
+  background:rgba(232,83,63,.1);border:1px solid rgba(232,83,63,.3);
+  border-radius:var(--radius-xs);font-size:.75rem;font-weight:700;color:var(--primary);
+  margin-top:8px;margin-left:8px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1200px){
+  .stat-cards,.pipeline-stages{grid-template-columns:repeat(2,1fr)}
+  .card-grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hero h1{font-size:1.75rem}
+  .stat-cards,.pipeline-stages,.card-grid-2,.card-grid-3,.card-grid-4{grid-template-columns:1fr}
+  .ab-variants{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .comparison-banner{flex-direction:column;gap:16px}
+  .nav-link{display:none}
+  .nav.open .nav-link{display:block}
+  .hamburger{display:block}
+  section{padding:60px 0 30px}
+  .comparison-table{display:block;overflow-x:auto}
+}
+@media(max-width:375px){
+  .hero h1{font-size:1.5rem}
+  .container{padding:0 12px}
+}
+
+/* ===== PRINT ===== */
+@media print{
+  body{background:#fff;color:#000}
+  .nav{display:none}
+  .card,.stat-card,.agent-card,.ab-test-card,.kpi-card,.gate-card,.research-card,.phase-header{
+    background:#fff;border-color:#ccc;color:#000;break-inside:avoid;
+  }
+  .stat-num,.kpi-value,.research-stat{color:var(--primary)}
+  h2::after{background:#000}
+  .agent-expanded{max-height:none!important}
+  .phase-tasks{max-height:none!important}
+  .pipeline-detail{display:block!important}
+  section{padding:20px 0}
+}
+
+/* ===== REDUCED MOTION ===== */
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+<div class="container nav-inner">
+  <span class="nav-logo">DEEP OUTREACH</span>
+  <button class="hamburger" aria-label="Toggle navigation" onclick="this.parentElement.parentElement.classList.toggle('open')">&#9776;</button>
+  <button class="nav-link" onclick="scrollTo_('hero')">Overview</button>
+  <button class="nav-link" onclick="scrollTo_('pipeline')">Pipeline</button>
+  <button class="nav-link" onclick="scrollTo_('agents')">Agents</button>
+  <button class="nav-link" onclick="scrollTo_('abtesting')">A/B Testing</button>
+  <button class="nav-link" onclick="scrollTo_('scoring')">Lead Scoring</button>
+  <button class="nav-link" onclick="scrollTo_('gates')">Gates</button>
+  <button class="nav-link" onclick="scrollTo_('kpis')">KPIs</button>
+  <button class="nav-link" onclick="scrollTo_('comparison')">Before/After</button>
+  <button class="nav-link" onclick="scrollTo_('research')">Research</button>
+  <button class="nav-link" onclick="scrollTo_('roadmap')">Roadmap</button>
+</div>
+</nav>
+
+<!-- ===== SECTION 1: HERO ===== -->
+<section id="hero" class="hero">
+<div class="container">
+  <h1>Deep <span>Outreach</span> System</h1>
+  <p class="subtitle">AI-Powered Scientific Cold Outreach for Local Businesses</p>
+
+  <div class="stat-cards">
+    <div class="stat-card fade-in">
+      <div class="stat-num" data-target="11">0</div>
+      <div class="stat-label">Specialized Agents</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-num" data-target="12">0</div>
+      <div class="stat-label">Pipeline Stages</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-num" data-target="4">0</div>
+      <div class="stat-label">Verification Gates</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-num" data-target="8">0</div>
+      <div class="stat-label">Scoring Features</div>
+    </div>
+  </div>
+
+  <div class="comparison-banner fade-in">
+    <div class="item">
+      <div class="old">4 Commands</div>
+      <span class="label">Before</span>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="item">
+      <div class="new">1 Unified Pipeline</div>
+      <span class="label">After</span>
+    </div>
+    <div class="item">
+      <div class="old">5 Agents</div>
+      <span class="label">Before</span>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="item">
+      <div class="new">11 Agents</div>
+      <span class="label">After</span>
+    </div>
+    <div class="item">
+      <div class="old">1-10 Score</div>
+      <span class="label">Before</span>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="item">
+      <div class="new">0-100 Score</div>
+      <span class="label">After</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 2: PIPELINE ===== -->
+<section id="pipeline">
+<div class="container">
+  <h2>12-Stage Data Pipeline</h2>
+  <p>Click any stage to see detailed inputs, outputs, agent, and timing.</p>
+
+  <div class="pipeline-stages" role="list">
+    <div class="pipeline-stage fade-in" data-stage="1" role="listitem" tabindex="0" aria-label="Stage 1: Context Load" onclick="showStage(1)">
+      <span class="stage-num">1</span>
+      <div class="stage-name">Context Load</div>
+      <div class="stage-agent">Agent 1: Client Context</div>
+      <div class="stage-duration">~2 seconds</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="2" role="listitem" tabindex="0" aria-label="Stage 2: Lead Discovery" onclick="showStage(2)">
+      <span class="stage-num">2</span>
+      <div class="stage-name">Lead Discovery</div>
+      <div class="stage-agent">Agent 2: Lead Discovery</div>
+      <div class="stage-duration">~30-60 seconds</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="3" role="listitem" tabindex="0" aria-label="Stage 3: Deep Enrichment" onclick="showStage(3)">
+      <span class="stage-num">3</span>
+      <div class="stage-name">Deep Enrichment</div>
+      <div class="stage-agent">Agent 3: Deep Research (x5)</div>
+      <div class="stage-duration">~3-5 minutes</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="4" role="listitem" tabindex="0" aria-label="Stage 4: Scoring" onclick="showStage(4)">
+      <span class="stage-num">4</span>
+      <div class="stage-name">Scoring</div>
+      <div class="stage-agent">Agent 4: Lead Scoring</div>
+      <div class="stage-duration">~5 seconds</div>
+    </div>
+  </div>
+
+  <div class="pipeline-arrows"><span class="arrow-dot"></span><span class="arrow-dot"></span><span class="arrow-dot"></span><span class="arrow-dot"></span></div>
+
+  <div class="pipeline-stages" role="list">
+    <div class="pipeline-stage fade-in" data-stage="5" role="listitem" tabindex="0" onclick="showStage(5)">
+      <span class="stage-num">5</span>
+      <div class="stage-name">Email Crafting</div>
+      <div class="stage-agent">Agent 5: Email Crafting (x5)</div>
+      <div class="stage-duration">~2-3 minutes</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="6" role="listitem" tabindex="0" onclick="showStage(6)">
+      <span class="stage-num">6</span>
+      <div class="stage-name">A/B Variants</div>
+      <div class="stage-agent">Agent 6: A/B Generator</div>
+      <div class="stage-duration">~1-2 minutes</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="7" role="listitem" tabindex="0" onclick="showStage(7)">
+      <div class="gate-marker" aria-label="Verification gate"><span></span></div>
+      <span class="stage-num">7</span>
+      <div class="stage-name">Verification</div>
+      <div class="stage-agent">Agent 7: Verification (4 Gates)</div>
+      <div class="stage-duration">~10-30 seconds</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="8" role="listitem" tabindex="0" onclick="showStage(8)">
+      <span class="stage-num">8</span>
+      <div class="stage-name">Sending</div>
+      <div class="stage-agent">Agent 8: Sending</div>
+      <div class="stage-duration">~2-5 minutes</div>
+    </div>
+  </div>
+
+  <div class="pipeline-arrows"><span class="arrow-dot"></span><span class="arrow-dot"></span><span class="arrow-dot"></span><span class="arrow-dot"></span></div>
+
+  <div class="pipeline-stages" role="list">
+    <div class="pipeline-stage fade-in" data-stage="9" role="listitem" tabindex="0" onclick="showStage(9)">
+      <span class="stage-num">9</span>
+      <div class="stage-name">Reply Detection</div>
+      <div class="stage-agent">Agent 9: Reply Detection</div>
+      <div class="stage-duration">~30-60 seconds</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="10" role="listitem" tabindex="0" onclick="showStage(10)">
+      <span class="stage-num">10</span>
+      <div class="stage-name">Follow-Up</div>
+      <div class="stage-agent">Agent 10: Follow-Up</div>
+      <div class="stage-duration">~2-3 minutes</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="11" role="listitem" tabindex="0" onclick="showStage(11)">
+      <span class="stage-num">11</span>
+      <div class="stage-name">Analytics</div>
+      <div class="stage-agent">Agent 11: Analytics</div>
+      <div class="stage-duration">~10 seconds</div>
+    </div>
+    <div class="pipeline-stage fade-in" data-stage="12" role="listitem" tabindex="0" onclick="showStage(12)">
+      <span class="stage-num">12</span>
+      <div class="stage-name">Feedback Loop</div>
+      <div class="stage-agent">All Agents</div>
+      <div class="stage-duration">~5 seconds</div>
+    </div>
+  </div>
+
+  <div id="stageDetail" class="pipeline-detail" role="region" aria-live="polite"></div>
+</div>
+</section>
+
+<!-- ===== SECTION 3: AGENTS ===== -->
+<section id="agents">
+<div class="container">
+  <h2>11-Agent Orchestration</h2>
+  <p>Click any agent to see inputs, outputs, and tools. Color-coded by phase.</p>
+
+  <!-- Phase 1: Discovery -->
+  <div style="margin-bottom:8px"><span class="phase-label" style="background:rgba(66,133,244,.12);color:var(--phase-discovery)">Phase 1: Context & Discovery</span></div>
+  <div class="card-grid card-grid-2" style="margin-bottom:24px">
+    <div class="agent-card phase-discovery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128269;</div>
+      <div class="agent-name">Agent 1: Client Context</div>
+      <div class="agent-role">Load client config, ICP, rotation state, campaign history</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Supabase MCP</span>
+        <span class="tool-badge">Filesystem</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> Client slug, mode flag (prospect/client), overrides</p>
+        <p><strong>Outputs:</strong> ClientContext object (identity, ICP, rotation, history, A/B tests, rate limits, exclusions)</p>
+        <p><strong>Duration:</strong> ~2 seconds | <strong>Data:</strong> ~2KB JSON</p>
+      </div>
+    </div>
+    <div class="agent-card phase-discovery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#127758;</div>
+      <div class="agent-name">Agent 2: Lead Discovery</div>
+      <div class="agent-role">Waterfall discovery: Apify Google Maps, Firecrawl, Apollo, Bright Data</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Apify MCP</span>
+        <span class="tool-badge">Firecrawl MCP</span>
+        <span class="tool-badge">Apollo MCP</span>
+        <span class="tool-badge">Bright Data MCP</span>
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> ClientContext, target count (50 for /drop, 20 for /serve), industry, city</p>
+        <p><strong>Outputs:</strong> RawLead[] (50-100 candidates with name, address, phone, website, rating, reviews, owner)</p>
+        <p><strong>Duration:</strong> ~30-60s | <strong>Data:</strong> ~50KB JSON</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2: Processing -->
+  <div style="margin-bottom:8px"><span class="phase-label" style="background:rgba(156,39,176,.12);color:var(--phase-processing)">Phase 2: Enrichment & Scoring</span></div>
+  <div class="card-grid card-grid-2" style="margin-bottom:24px">
+    <div class="agent-card phase-processing fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128300;</div>
+      <div class="agent-name">Agent 3: Deep Research</div>
+      <div class="agent-role">Website analysis, reviews, tech stack, triggers, competitors (parallel x5)</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Firecrawl MCP</span>
+        <span class="tool-badge">Apify MCP</span>
+        <span class="tool-badge">Bright Data MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> RawLead (single), ClientContext for ICP matching</p>
+        <p><strong>Outputs:</strong> EnrichedLead (website analysis, review analysis, tech stack, trigger events, competitor context, leads for them, revenue estimate)</p>
+        <p><strong>Duration:</strong> ~3-5 min parallel | <strong>Data:</strong> ~500KB JSON</p>
+      </div>
+    </div>
+    <div class="agent-card phase-processing fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#9889;</div>
+      <div class="agent-name">Agent 4: Lead Scoring</div>
+      <div class="agent-role">8-feature weighted scoring (0-100), HOT/WARM/COOL/SKIP tiers</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Claude Analysis</span>
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> EnrichedLead[], ClientContext, quality threshold (40)</p>
+        <p><strong>Outputs:</strong> ScoredLead[] (sorted desc), RejectedLead[], score distribution stats</p>
+        <p><strong>Duration:</strong> ~5s | <strong>Data:</strong> ~400KB JSON</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3: Content -->
+  <div style="margin-bottom:8px"><span class="phase-label" style="background:rgba(52,168,83,.12);color:var(--phase-delivery)">Phase 3: Content Generation</span></div>
+  <div class="card-grid card-grid-2" style="margin-bottom:24px">
+    <div class="agent-card phase-delivery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#9997;</div>
+      <div class="agent-name">Agent 5: Email Crafting</div>
+      <div class="agent-role">PAS framework + Cialdini principles, hyper-personalized (parallel x5)</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Claude LLM</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> ScoredLead, ClientContext, mode (prospect/client), A/B test assignments</p>
+        <p><strong>Outputs:</strong> EmailDraft (subject, body HTML/text, personalization tokens, psychology principles, word count, variant_id)</p>
+        <p><strong>Constraints:</strong> 50-125 words, 6-8 sentences, question-based subjects 4-7 words</p>
+      </div>
+    </div>
+    <div class="agent-card phase-delivery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128172;</div>
+      <div class="agent-name">Agent 6: A/B Variant Generator</div>
+      <div class="agent-role">Generate test variants, 50/50 allocation, deterministic hashing</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> EmailDraft[], active A/B tests, allocation ratio (50/50)</p>
+        <p><strong>Outputs:</strong> EmailVariant[] (15-25 variants for 1-2 active tests)</p>
+        <p><strong>Test types:</strong> subject_line, email_body, cta, send_time, follow_up_cadence</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4: Delivery -->
+  <div style="margin-bottom:8px"><span class="phase-label" style="background:rgba(52,168,83,.12);color:var(--phase-delivery)">Phase 4: Verification & Delivery</span></div>
+  <div class="card-grid card-grid-2" style="margin-bottom:24px">
+    <div class="agent-card phase-delivery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#9989;</div>
+      <div class="agent-name">Agent 7: Verification</div>
+      <div class="agent-role">4 gates: quality, safety (10 checks), A/B equivalence, rate limits</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Hunter.io MCP</span>
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> EmailDraft[] + EmailVariant[], ScoredLead[], rate limit state</p>
+        <p><strong>Outputs:</strong> VerifiedEmail[] + RejectedEmail[] with gate ID, failure reason, remediation</p>
+        <p><strong>Gates:</strong> G1=Score>=40, G2=10-point safety, G3=Variant equivalence, G4=Rate limits</p>
+      </div>
+    </div>
+    <div class="agent-card phase-delivery fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128232;</div>
+      <div class="agent-name">Agent 8: Sending</div>
+      <div class="agent-role">Gmail API with variable timing (0.3-0.8s), warming-safe patterns</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Google Workspace MCP</span>
+        <span class="tool-badge">Gmail API</span>
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> VerifiedEmail[], send mode (send/draft), OAuth token</p>
+        <p><strong>Outputs:</strong> SentEmail[] with Gmail message IDs, SendFailure[]</p>
+        <p><strong>Safety:</strong> Variable delay 0.3-0.8s, shuffled order, exponential backoff on rate limits</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 5: Post-Send -->
+  <div style="margin-bottom:8px"><span class="phase-label" style="background:rgba(251,188,4,.12);color:var(--phase-analytics)">Phase 5: Post-Send & Analytics</span></div>
+  <div class="card-grid card-grid-3">
+    <div class="agent-card phase-analytics fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128172;</div>
+      <div class="agent-name">Agent 9: Reply Detection</div>
+      <div class="agent-role">Gmail polling, classify: positive/negative/question/bounce</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Google Workspace MCP</span>
+        <span class="tool-badge">Supabase MCP</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> SentEmail[] (last 30 days of active campaigns)</p>
+        <p><strong>Outputs:</strong> Reply[] with classification (positive/negative/question/OOO/bounce/unsubscribe)</p>
+      </div>
+    </div>
+    <div class="agent-card phase-analytics fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128260;</div>
+      <div class="agent-name">Agent 10: Follow-Up</div>
+      <div class="agent-role">3-7-7 cadence (Day 3, Day 10, Day 17), breakup email</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Supabase MCP</span>
+        <span class="tool-badge">Filesystem</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> Active sends with no reply past cadence thresholds, follow-up templates</p>
+        <p><strong>Outputs:</strong> FollowUpEmail[] routed through Stages 7-8</p>
+        <p><strong>Cadence:</strong> Day 0 initial, Day 3 FU1, Day 10 FU2, Day 17 final breakup</p>
+      </div>
+    </div>
+    <div class="agent-card phase-analytics fade-in" onclick="this.classList.toggle('expanded')">
+      <div class="agent-icon">&#128202;</div>
+      <div class="agent-name">Agent 11: Analytics</div>
+      <div class="agent-role">KPI computation, chi-square A/B testing, trend analysis</div>
+      <div class="agent-tools">
+        <span class="tool-badge">Supabase MCP</span>
+        <span class="tool-badge">Claude Analysis</span>
+      </div>
+      <div class="agent-expanded">
+        <p><strong>Inputs:</strong> All campaign data for date range, comparison period</p>
+        <p><strong>Outputs:</strong> CampaignReport (KPIs, A/B results, score accuracy, recommendations)</p>
+        <p><strong>Stats:</strong> Chi-square (p&lt;0.05 = significant), Pearson correlation for score accuracy</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 4: A/B TESTING ===== -->
+<section id="abtesting">
+<div class="container">
+  <h2>A/B Testing Dashboard</h2>
+  <p>7 registered tests with chi-square significance testing. Example data shown for active tests.</p>
+
+  <!-- Test T001 -->
+  <div class="ab-test-card fade-in">
+    <div class="ab-header">
+      <div>
+        <h3>T001: Subject Line &mdash; Question vs Statement</h3>
+        <span class="badge badge-success">Active</span>
+      </div>
+      <span style="font-size:.8rem;color:var(--text-sec)">Target: Open rate | Min: 100/variant</span>
+    </div>
+    <div class="ab-variants">
+      <div class="variant-card variant-a">
+        <span class="variant-label">CONTROL (A)</span>
+        <h4>"5 leads for [Business] &mdash; free"</h4>
+        <div class="variant-metric"><span>Sends</span><strong>127</strong></div>
+        <div class="variant-metric"><span>Replies</span><strong>14</strong></div>
+        <div class="variant-metric"><span>Reply Rate</span><strong>11.0%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:11%;background:var(--info)"></div></div>
+      </div>
+      <div class="variant-card variant-b">
+        <span class="variant-label">VARIANT (B)</span>
+        <h4>"Quick question about [Business]'s growth?"</h4>
+        <div class="variant-metric"><span>Sends</span><strong>124</strong></div>
+        <div class="variant-metric"><span>Replies</span><strong>22</strong></div>
+        <div class="variant-metric"><span>Reply Rate</span><strong>17.7%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:17.7%;background:var(--primary)"></div></div>
+      </div>
+    </div>
+    <div class="significance-bar">
+      <div class="label">Significance Progress (need p &lt; 0.05 | chi2 &gt; 3.841)</div>
+      <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:78%;background:var(--warning)"></div></div>
+      <span style="font-size:.75rem;color:var(--text-sec)">chi2 = 2.98 | p = 0.084 | 78% to significance &mdash; Variant B leading (+61% lift)</span>
+    </div>
+  </div>
+
+  <!-- Test T003 -->
+  <div class="ab-test-card fade-in">
+    <div class="ab-header">
+      <div>
+        <h3>T003: Email Body &mdash; PAS vs Direct Value</h3>
+        <span class="badge badge-info">Collecting</span>
+      </div>
+      <span style="font-size:.8rem;color:var(--text-sec)">Target: Reply rate | Min: 100/variant</span>
+    </div>
+    <div class="ab-variants">
+      <div class="variant-card variant-a">
+        <span class="variant-label">CONTROL (A)</span>
+        <h4>Full PAS framework email</h4>
+        <div class="variant-metric"><span>Sends</span><strong>68</strong></div>
+        <div class="variant-metric"><span>Replies</span><strong>5</strong></div>
+        <div class="variant-metric"><span>Reply Rate</span><strong>7.4%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:7.4%;background:var(--info)"></div></div>
+      </div>
+      <div class="variant-card variant-b">
+        <span class="variant-label">VARIANT (B)</span>
+        <h4>Lead-with-value (leads first, pitch second)</h4>
+        <div class="variant-metric"><span>Sends</span><strong>71</strong></div>
+        <div class="variant-metric"><span>Replies</span><strong>7</strong></div>
+        <div class="variant-metric"><span>Reply Rate</span><strong>9.9%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:9.9%;background:var(--primary)"></div></div>
+      </div>
+    </div>
+    <div class="significance-bar">
+      <div class="label">Sample Progress (68/100 = 68%)</div>
+      <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:68%;background:var(--info)"></div></div>
+      <span style="font-size:.75rem;color:var(--text-sec)">Need 32 more sends per variant for minimum sample size</span>
+    </div>
+  </div>
+
+  <!-- Test T004 -->
+  <div class="ab-test-card fade-in">
+    <div class="ab-header">
+      <div>
+        <h3>T004: CTA &mdash; Calendly Link vs Reply Prompt</h3>
+        <span class="badge badge-info">Collecting</span>
+      </div>
+      <span style="font-size:.8rem;color:var(--text-sec)">Target: Conversion rate | Min: 100/variant</span>
+    </div>
+    <div class="ab-variants">
+      <div class="variant-card variant-a">
+        <span class="variant-label">CONTROL (A)</span>
+        <h4>"Book 15 min: [Calendly link]"</h4>
+        <div class="variant-metric"><span>Sends</span><strong>52</strong></div>
+        <div class="variant-metric"><span>Bookings</span><strong>2</strong></div>
+        <div class="variant-metric"><span>Booking Rate</span><strong>3.8%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:3.8%;background:var(--info)"></div></div>
+      </div>
+      <div class="variant-card variant-b">
+        <span class="variant-label">VARIANT (B)</span>
+        <h4>"Just reply 'interested' and I'll send details"</h4>
+        <div class="variant-metric"><span>Sends</span><strong>49</strong></div>
+        <div class="variant-metric"><span>Bookings</span><strong>3</strong></div>
+        <div class="variant-metric"><span>Booking Rate</span><strong>6.1%</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:6.1%;background:var(--primary)"></div></div>
+      </div>
+    </div>
+    <div class="significance-bar">
+      <div class="label">Sample Progress (49/100 = 49%)</div>
+      <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:49%;background:var(--info)"></div></div>
+      <span style="font-size:.75rem;color:var(--text-sec)">Need 51 more sends per variant for minimum sample size</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 5: LEAD SCORING ===== -->
+<section id="scoring">
+<div class="container">
+  <h2>Lead Scoring Algorithm</h2>
+  <p>8 weighted features producing a 0-100 score. Total weights sum to 1.00.</p>
+
+  <div id="scoreFeatures">
+    <div class="score-feature fade-in">
+      <div class="weight">0.20</div>
+      <div class="feature-name">Trigger Events</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--primary)" data-width="100"><span class="bar-value">Buying window signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.15</div>
+      <div class="feature-name">Tech Stack Gap</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:#9C27B0" data-width="75"><span class="bar-value">Need-for-service signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.15</div>
+      <div class="feature-name">ICP Fit</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--info)" data-width="75"><span class="bar-value">Target-match signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.12</div>
+      <div class="feature-name">Review Score</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--success)" data-width="60"><span class="bar-value">Rating quality signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.12</div>
+      <div class="feature-name">Website Quality</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--success)" data-width="60"><span class="bar-value">Investment-in-growth signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.10</div>
+      <div class="feature-name">Decision Maker Found</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--warning)" data-width="50"><span class="bar-value">Reachability signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.08</div>
+      <div class="feature-name">Review Volume</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--warning)" data-width="40"><span class="bar-value">Establishment signal</span></div></div>
+    </div>
+    <div class="score-feature fade-in">
+      <div class="weight">0.08</div>
+      <div class="feature-name">Social Presence</div>
+      <div class="bar-wrapper"><div class="bar" style="width:0%;background:var(--warning)" data-width="40"><span class="bar-value">Growth-mindedness signal</span></div></div>
+    </div>
+  </div>
+
+  <!-- Interactive Calculator -->
+  <div class="calculator fade-in">
+    <h3>Interactive Score Calculator</h3>
+    <p style="margin-bottom:16px">Select values for each feature to compute a real-time lead score.</p>
+
+    <div class="calc-row">
+      <label>Trigger Events</label>
+      <select id="calc-triggers" onchange="calculateScore()">
+        <option value="0">No triggers detected (0)</option>
+        <option value="30">Seasonal timing (30)</option>
+        <option value="50">Negative review / competitor (50)</option>
+        <option value="75">Website redesign / hiring (75)</option>
+        <option value="100" selected>New location + hiring (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Tech Stack Gap</label>
+      <select id="calc-tech" onchange="calculateScore()">
+        <option value="0">Full marketing stack (-30 mod)</option>
+        <option value="30">Has CRM, missing chat (30)</option>
+        <option value="60">No booking system (60)</option>
+        <option value="85" selected>No CRM + no booking + no chat (85)</option>
+        <option value="100">No CRM, no analytics, no booking (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>ICP Fit</label>
+      <select id="calc-icp" onchange="calculateScore()">
+        <option value="20">Revenue >$10M, 50+ employees (20)</option>
+        <option value="50">Revenue $200K-$500K (50)</option>
+        <option value="80" selected>Revenue $500K-$5M, team 2-20 (80)</option>
+        <option value="100">Perfect ICP match + pain indicators (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Review Score</label>
+      <select id="calc-review" onchange="calculateScore()">
+        <option value="30">Below 3.0 (30)</option>
+        <option value="50">No rating (50)</option>
+        <option value="70">4.5-5.0 (70)</option>
+        <option value="90">3.5-3.9 (90)</option>
+        <option value="100" selected>4.0-4.4 sweet spot (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Website Quality</label>
+      <select id="calc-website" onchange="calculateScore()">
+        <option value="10">Under construction (10)</option>
+        <option value="40">Basic site, no SSL (40)</option>
+        <option value="70" selected>Modern, responsive, SSL (70)</option>
+        <option value="90">Modern + blog + contact form (90)</option>
+        <option value="100">Full professional site (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Decision Maker</label>
+      <select id="calc-dm" onchange="calculateScore()">
+        <option value="20">No name, no email (20)</option>
+        <option value="40">No name, has email (40)</option>
+        <option value="60">Name found, no email (60)</option>
+        <option value="80" selected>Name found, generic email (80)</option>
+        <option value="100">Name + direct email (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Review Volume</label>
+      <select id="calc-volume" onchange="calculateScore()">
+        <option value="30">0 reviews (30)</option>
+        <option value="40">1-4 reviews (40)</option>
+        <option value="70">5-19 reviews (70)</option>
+        <option value="90" selected>20-49 reviews (90)</option>
+        <option value="100">50-199 reviews (100)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Social Presence</label>
+      <select id="calc-social" onchange="calculateScore()">
+        <option value="30">No social presence (30)</option>
+        <option value="50">Has profiles, inactive (50)</option>
+        <option value="80" selected>Active on 1-2 platforms (80)</option>
+        <option value="100">Active on 3+ platforms (100)</option>
+      </select>
+    </div>
+
+    <div class="calc-result">
+      <div class="calc-score" id="calcScoreValue">0</div>
+      <div class="calc-tier" id="calcTierLabel">--</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 6: VERIFICATION GATES ===== -->
+<section id="gates">
+<div class="container">
+  <h2>Verification Gates</h2>
+  <p>4 sequential gates that every email must pass before sending. Any failure blocks the email.</p>
+
+  <div class="card-grid card-grid-2">
+    <!-- Gate 1 -->
+    <div class="gate-card fade-in">
+      <div class="gate-diamond"><span>G1</span></div>
+      <h3>Gate 1: Lead Quality Threshold</h3>
+      <p style="font-size:.85rem;margin-bottom:12px">Ensures only leads meeting minimum quality standards enter the pipeline.</p>
+      <ul class="check-list">
+        <li><span class="check-icon check-pass">&#10003;</span> Total score >= 40 (COOL tier or above)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Has valid email address (not empty/null)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Has business name</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Has website URL (for personalization)</li>
+        <li><span class="check-icon check-fail">&#10007;</span> Not in exclusion list (contacted within 90 days)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Not marked "declined" or "unsubscribed"</li>
+      </ul>
+      <div class="gate-progress">
+        <div class="circle-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle class="circle-bg" cx="32" cy="32" r="28"/><circle class="circle-fill" cx="32" cy="32" r="28" stroke-dasharray="175.93" stroke-dashoffset="26.39"/></svg>
+          <span class="circle-text">85%</span>
+        </div>
+        <div style="text-align:center;font-size:.75rem;color:var(--text-sec);margin-top:4px">Pass Rate</div>
+      </div>
+    </div>
+
+    <!-- Gate 2 -->
+    <div class="gate-card fade-in">
+      <div class="gate-diamond"><span>G2</span></div>
+      <h3>Gate 2: Content Safety (10 Checks)</h3>
+      <p style="font-size:.85rem;margin-bottom:12px">Protects deliverability, brand reputation, and legal compliance.</p>
+      <ul class="check-list">
+        <li><span class="check-icon check-pass">&#10003;</span> No deceptive subjects (RE:/FW: fakes)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> No urgency spam words (URGENT/ASAP)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Word count 50-150</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Sentence count 4-10</li>
+        <li><span class="check-icon check-fail">&#10007;</span> No broken [placeholder] tokens</li>
+        <li><span class="check-icon check-pass">&#10003;</span> CTA present (exactly one)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Unsubscribe mechanism included</li>
+        <li><span class="check-icon check-pass">&#10003;</span> No competitor disparagement</li>
+        <li><span class="check-icon check-pass">&#10003;</span> No false claims</li>
+        <li><span class="check-icon check-pass">&#10003;</span> All URLs valid, no shortened links</li>
+      </ul>
+      <div class="gate-progress">
+        <div class="circle-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle class="circle-bg" cx="32" cy="32" r="28"/><circle class="circle-fill" cx="32" cy="32" r="28" stroke-dasharray="175.93" stroke-dashoffset="17.59"/></svg>
+          <span class="circle-text">90%</span>
+        </div>
+        <div style="text-align:center;font-size:.75rem;color:var(--text-sec);margin-top:4px">Pass Rate</div>
+      </div>
+    </div>
+
+    <!-- Gate 3 -->
+    <div class="gate-card fade-in">
+      <div class="gate-diamond"><span>G3</span></div>
+      <h3>Gate 3: A/B Variant Equivalence</h3>
+      <p style="font-size:.85rem;margin-bottom:12px">Ensures variants differ only in the tested dimension for valid results.</p>
+      <ul class="check-list">
+        <li><span class="check-icon check-pass">&#10003;</span> Single variable difference only</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Comparable length (+/-20% word count)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Same personalization depth</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Same CTA type (unless CTA is tested)</li>
+        <li><span class="check-icon check-fail">&#10007;</span> Same tone (sentiment within 0.1)</li>
+      </ul>
+      <div class="gate-progress">
+        <div class="circle-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle class="circle-bg" cx="32" cy="32" r="28"/><circle class="circle-fill" cx="32" cy="32" r="28" stroke-dasharray="175.93" stroke-dashoffset="14.07"/></svg>
+          <span class="circle-text">92%</span>
+        </div>
+        <div style="text-align:center;font-size:.75rem;color:var(--text-sec);margin-top:4px">Pass Rate</div>
+      </div>
+    </div>
+
+    <!-- Gate 4 -->
+    <div class="gate-card fade-in">
+      <div class="gate-diamond"><span>G4</span></div>
+      <h3>Gate 4: Rate Limit Check</h3>
+      <p style="font-size:.85rem;margin-bottom:12px">Prevents sending volume that damages domain reputation.</p>
+      <ul class="check-list">
+        <li><span class="check-icon check-pass">&#10003;</span> Daily limit not exceeded (warming phase)</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Hourly limit &lt; 15 sends/hour</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Per-domain limit: max 3 to same domain/24h</li>
+        <li><span class="check-icon check-pass">&#10003;</span> 7-day bounce rate &lt; 2%</li>
+        <li><span class="check-icon check-pass">&#10003;</span> Spam complaint rate &lt; 0.1%</li>
+      </ul>
+      <div class="gate-progress">
+        <div class="circle-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle class="circle-bg" cx="32" cy="32" r="28"/><circle class="circle-fill" cx="32" cy="32" r="28" stroke-dasharray="175.93" stroke-dashoffset="5.28"/></svg>
+          <span class="circle-text">97%</span>
+        </div>
+        <div style="text-align:center;font-size:.75rem;color:var(--text-sec);margin-top:4px">Pass Rate</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 7: KPIs ===== -->
+<section id="kpis">
+<div class="container">
+  <h2>KPI Metrics Dashboard</h2>
+  <p>Campaign, A/B test, and lead scoring metrics tracked in Supabase.</p>
+
+  <div class="card-grid card-grid-4" style="margin-bottom:24px">
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">50<span style="font-size:.9rem;color:var(--text-sec)">/day</span></div>
+      <div class="kpi-label">Total Sent</div>
+      <div class="sparkline"><svg viewBox="0 0 120 32"><polyline class="area" points="0,28 10,24 20,26 30,20 40,22 50,18 60,16 70,20 80,14 90,10 100,12 110,8 120,6 120,32 0,32"/><polyline points="0,28 10,24 20,26 30,20 40,22 50,18 60,16 70,20 80,14 90,10 100,12 110,8 120,6"/></svg></div>
+      <div class="kpi-target">Target: <span>50/day</span> <span class="trend-up">&#9650;</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value" style="color:var(--success)">11.2<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Reply Rate</div>
+      <div class="sparkline"><svg viewBox="0 0 120 32"><polyline class="area" points="0,26 10,24 20,22 30,24 40,20 50,18 60,20 70,16 80,14 90,16 100,12 110,10 120,8 120,32 0,32"/><polyline points="0,26 10,24 20,22 30,24 40,20 50,18 60,20 70,16 80,14 90,16 100,12 110,10 120,8"/></svg></div>
+      <div class="kpi-target">Target: <span>8-15%</span> <span class="trend-up">&#9650; +2.1%</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value" style="color:var(--info)">7.8<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Positive Reply Rate</div>
+      <div class="sparkline"><svg viewBox="0 0 120 32"><polyline class="area" points="0,28 10,26 20,28 30,24 40,22 50,24 60,20 70,18 80,20 90,16 100,14 110,12 120,10 120,32 0,32"/><polyline points="0,28 10,26 20,28 30,24 40,22 50,24 60,20 70,18 80,20 90,16 100,14 110,12 120,10"/></svg></div>
+      <div class="kpi-target">Target: <span>5-10%</span> <span class="trend-up">&#9650; +1.3%</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value" style="color:var(--primary)">3.4<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Booking Rate</div>
+      <div class="sparkline"><svg viewBox="0 0 120 32"><polyline class="area" points="0,30 10,28 20,30 30,26 40,28 50,24 60,26 70,22 80,24 90,20 100,22 110,18 120,16 120,32 0,32"/><polyline points="0,30 10,28 20,30 30,26 40,28 50,24 60,26 70,22 80,24 90,20 100,22 110,18 120,16"/></svg></div>
+      <div class="kpi-target">Target: <span>2-5%</span> <span class="trend-up">&#9650; +0.8%</span></div>
+    </div>
+  </div>
+
+  <div class="card-grid card-grid-4" style="margin-bottom:24px">
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">1.2<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Bounce Rate</div>
+      <div class="progress-bar" style="margin:8px 0"><div class="progress-fill" style="width:60%;background:var(--success)"></div></div>
+      <div class="kpi-target">Target: <span>&lt; 2%</span> <span class="trend-down">&#9660; -0.4%</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">0.08<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Unsubscribe Rate</div>
+      <div class="progress-bar" style="margin:8px 0"><div class="progress-fill" style="width:16%;background:var(--success)"></div></div>
+      <div class="kpi-target">Target: <span>&lt; 0.5%</span> <span class="trend-down">&#9660; -0.02%</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">8.1<span style="font-size:.9rem">%</span></div>
+      <div class="kpi-label">Follow-Up Effectiveness</div>
+      <div class="progress-bar" style="margin:8px 0"><div class="progress-fill" style="width:81%;background:var(--info)"></div></div>
+      <div class="kpi-target">Target: <span>5-10%</span> <span class="trend-up">&#9650;</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value" style="color:var(--success)">87</div>
+      <div class="kpi-label">Emails Per Conversion</div>
+      <div class="progress-bar" style="margin:8px 0"><div class="progress-fill" style="width:87%;background:var(--warning)"></div></div>
+      <div class="kpi-target">Target: <span>&lt; 100</span> <span class="trend-down">&#9660; -8</span></div>
+    </div>
+  </div>
+
+  <div class="card-grid card-grid-3">
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">2</div>
+      <div class="kpi-label">Active A/B Tests</div>
+      <div class="kpi-target">Target: <span>2-3 concurrent</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">62.4</div>
+      <div class="kpi-label">Avg Lead Score</div>
+      <div class="kpi-target">Target: <span>55-70</span> <span class="trend-up">&#9650;</span></div>
+    </div>
+    <div class="kpi-card fade-in">
+      <div class="kpi-value">0.34</div>
+      <div class="kpi-label">Score-Reply Correlation</div>
+      <div class="kpi-target">Target: <span>&gt; 0.3 Pearson</span> <span class="trend-up">&#9650;</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 8: BEFORE/AFTER ===== -->
+<section id="comparison">
+<div class="container">
+  <h2>Before / After Comparison</h2>
+  <p>The Deep Outreach v2 system versus the current monolithic approach.</p>
+
+  <div style="overflow-x:auto">
+  <table class="comparison-table fade-in">
+    <thead>
+      <tr>
+        <th class="col-dim">Dimension</th>
+        <th class="col-before">Before (Current)</th>
+        <th class="col-after">After (Deep Outreach v2)</th>
+        <th class="col-delta">Delta</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-dim">Entry Points</td>
+        <td class="col-before">4 separate commands (/drop, /serve, /follow-up, /revenue-engine)</td>
+        <td class="col-after">1 unified command (/deep-outreach) with mode flags</td>
+        <td class="col-delta"><span class="delta-badge">4 &rarr; 1</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Agent Count</td>
+        <td class="col-before">5 inline agents (SCOUT, ENRICH, QUALIFY, COMPOSE, DISPATCH)</td>
+        <td class="col-after">11 specialized agents with defined interfaces</td>
+        <td class="col-delta"><span class="delta-badge">+120%</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Lead Scoring</td>
+        <td class="col-before">1-10 fit_score in /serve, no scoring in /drop</td>
+        <td class="col-after">0-100 weighted algorithm, 8 features, calibrated thresholds</td>
+        <td class="col-delta"><span class="delta-badge">10x granularity</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Email Verification</td>
+        <td class="col-before">None &mdash; emails bounce silently</td>
+        <td class="col-after">Hunter.io MCP verification + catch-all detection</td>
+        <td class="col-delta"><span class="delta-badge">+99% accuracy</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">A/B Testing</td>
+        <td class="col-before">None &mdash; single template per campaign</td>
+        <td class="col-after">5+ simultaneous tests with chi-square significance</td>
+        <td class="col-delta"><span class="delta-badge">0 &rarr; 7 tests</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Follow-Up</td>
+        <td class="col-before">Fixed Day 3/7/14, separate /follow-up skill</td>
+        <td class="col-after">Adaptive 3-7-7 cadence (Day 0/3/10/17), research-driven</td>
+        <td class="col-delta"><span class="delta-badge">+49% replies</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Reply Detection</td>
+        <td class="col-before">Manual &mdash; check Gmail inbox</td>
+        <td class="col-after">Automated Gmail polling + Supabase status updates</td>
+        <td class="col-delta"><span class="delta-badge">Automated</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Analytics</td>
+        <td class="col-before">Summary printout at end of run</td>
+        <td class="col-after">Persistent KPI tracking in Supabase with trend analysis</td>
+        <td class="col-delta"><span class="delta-badge">Persistent</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Content Safety</td>
+        <td class="col-before">None &mdash; trust the LLM output</td>
+        <td class="col-after">10-point verification gate before sending</td>
+        <td class="col-delta"><span class="delta-badge">10 checks</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Personalization</td>
+        <td class="col-before">Website scrape + Google reviews</td>
+        <td class="col-after">Website + reviews + tech stack + social + news + triggers + competitors</td>
+        <td class="col-delta"><span class="delta-badge">+5 sources</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Infrastructure</td>
+        <td class="col-before">Single domain, no warming</td>
+        <td class="col-after">Separate outreach domain, SPF/DKIM/DMARC, variable volume</td>
+        <td class="col-delta"><span class="delta-badge">Protected</span></td>
+      </tr>
+      <tr>
+        <td class="col-dim">Supabase Tables</td>
+        <td class="col-before">5 tables + leaddrop_prospects</td>
+        <td class="col-after">5 existing + 5 new (campaigns, variants, sends, scores, failures)</td>
+        <td class="col-delta"><span class="delta-badge">+5 tables</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 9: RESEARCH ===== -->
+<section id="research">
+<div class="container">
+  <h2>Research Findings</h2>
+  <p>Key findings from 30+ sources powering the system design.</p>
+
+  <div class="card-grid card-grid-3">
+    <div class="research-card fade-in">
+      <span class="research-num">1</span>
+      <h4>Optimal Email Length</h4>
+      <div class="research-stat">50-125 words</div>
+      <p>6-8 sentences = 6.9% reply rate + 42.67% open rate. 13+ sentences drops to 3.8%.</p>
+      <div class="research-source">Belkins 2025 Study</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">2</span>
+      <h4>Personalization Impact</h4>
+      <div class="research-stat">+133% reply rate</div>
+      <p>Campaigns with &lt;200 contacts: 18% reply. 1,000+: 8%. Smaller, targeted = better.</p>
+      <div class="research-source">Martal 2025, Snov.io 2026</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">3</span>
+      <h4>Question Subject Lines</h4>
+      <div class="research-stat">46% open rate</div>
+      <p>Top performer across all studies. 4-7 words optimal, especially on mobile.</p>
+      <div class="research-source">Belkins 2025, EmailAnalytics</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">4</span>
+      <h4>Best Send Time</h4>
+      <div class="research-stat">Tuesday 6-9 AM</div>
+      <p>Highest reply rate in 85K email study. Monday strong for cold email replies.</p>
+      <div class="research-source">Martal, B2BRocket</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">5</span>
+      <h4>Follow-Up Effectiveness</h4>
+      <div class="research-stat">+49% reply increase</div>
+      <p>60% of total replies come from follow-ups. 3-7-7 cadence captures 93% by Day 10.</p>
+      <div class="research-source">SalesBread, Snov.io (85K emails)</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">6</span>
+      <h4>Trigger-Based Selling</h4>
+      <div class="research-stat">20-35% response</div>
+      <p>vs 5-10% for standard cold outreach. Hiring, funding, reviews, competitor moves.</p>
+      <div class="research-source">UserGems, Boomerang</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">7</span>
+      <h4>Reciprocity Principle</h4>
+      <div class="research-stat">#1 persuasion trigger</div>
+      <p>Personalized + unexpected free value is the strongest persuasion trigger. Our 5-lead model is perfect.</p>
+      <div class="research-source">Cialdini, CXL, Gong</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">8</span>
+      <h4>Loss Aversion</h4>
+      <div class="research-stat">2x stronger than gain</div>
+      <p>Frame as what they're losing: "You're losing ~$X/month to competitors who find prospects first."</p>
+      <div class="research-source">Kahneman & Tversky</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">9</span>
+      <h4>Batch Size Impact</h4>
+      <div class="research-stat">&le;50 = 18% reply rate</div>
+      <p>Campaigns with 1-200 prospects get 18% reply rate vs 8% for 1,000+ recipients.</p>
+      <div class="research-source">Martal 2025, Snov.io 2026</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">10</span>
+      <h4>ML Lead Scoring</h4>
+      <div class="research-stat">Significant improvement</div>
+      <p>ML-based scoring models significantly improve lead prioritization using firmographic + behavioral data.</p>
+      <div class="research-source">Frontiers in AI, 2025</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">11</span>
+      <h4>Multi-Agent Architecture</h4>
+      <div class="research-stat">72% of AI projects</div>
+      <p>72% of enterprise AI projects now involve multi-agent architectures (up from 23% in 2024).</p>
+      <div class="research-source">Industry Survey 2025</div>
+    </div>
+    <div class="research-card fade-in">
+      <span class="research-num">12</span>
+      <h4>Email Verification</h4>
+      <div class="research-stat">99% accuracy</div>
+      <p>Hunter.io on non-catch-all domains. Eliminates bounce-related deliverability damage.</p>
+      <div class="research-source">Hunter.io Documentation</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== SECTION 10: ROADMAP ===== -->
+<section id="roadmap">
+<div class="container">
+  <h2>Implementation Roadmap</h2>
+  <p>4-phase, 4-week implementation plan. Click each phase to expand task details.</p>
+
+  <div class="roadmap">
+    <!-- Phase 1 -->
+    <div class="phase-block" onclick="this.classList.toggle('expanded')">
+      <div class="phase-marker">1</div>
+      <div class="phase-header">
+        <div>
+          <h3>Phase 1: Foundation</h3>
+          <p style="font-size:.8rem;color:var(--text-sec);margin:0">Core infrastructure &mdash; new tables, basic pipeline, Agent 1-4</p>
+        </div>
+        <span class="week">Week 1</span>
+      </div>
+      <div class="phase-tasks">
+        <ul class="task-list">
+          <li>Create 002_deep_outreach_schema.sql migration (5 new Supabase tables)</li>
+          <li>Install Hunter.io MCP for email verification</li>
+          <li>Implement Agent 1: Client Context loader</li>
+          <li>Implement Agent 2: Lead Discovery with waterfall + dedup</li>
+          <li>Implement Agent 3: Deep Research (parallel x5 workers)</li>
+          <li>Implement Agent 4: Lead Scoring (8-feature algorithm)</li>
+          <li>Write /deep-outreach command (Stages 1-4)</li>
+          <li>Integration test: 50 scored leads from Atlanta Dental</li>
+          <li>Scoring calibration baseline analysis</li>
+        </ul>
+        <div class="milestone">Milestone: Stages 1-4 produce 50 scored leads end-to-end</div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-block" onclick="this.classList.toggle('expanded')">
+      <div class="phase-marker">2</div>
+      <div class="phase-header">
+        <div>
+          <h3>Phase 2: Content & Delivery</h3>
+          <p style="font-size:.8rem;color:var(--text-sec);margin:0">Email generation, verification, sending &mdash; Agent 5-8</p>
+        </div>
+        <span class="week">Week 2</span>
+      </div>
+      <div class="phase-tasks">
+        <ul class="task-list">
+          <li>Implement Agent 5: Email Crafting (PAS + LeadDrop, parallel x5)</li>
+          <li>Implement Agent 6: A/B Variant Generator (test T001 active)</li>
+          <li>Implement Agent 7: Verification (4 gates, 10-point safety)</li>
+          <li>Implement Agent 8: Sending (Gmail API, variable timing)</li>
+          <li>End-to-end test: Stages 1-8 full pipeline</li>
+          <li>Migrate /drop to use deep-outreach pipeline internally</li>
+          <li>First live /deep-outreach --mode=prospect run (50 emails)</li>
+          <li>Monitor deliverability baseline (bounce + complaint rates)</li>
+        </ul>
+        <div class="milestone">Milestone: First 50 real emails sent with &lt;2% bounce rate</div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-block" onclick="this.classList.toggle('expanded')">
+      <div class="phase-marker">3</div>
+      <div class="phase-header">
+        <div>
+          <h3>Phase 3: Intelligence</h3>
+          <p style="font-size:.8rem;color:var(--text-sec);margin:0">Reply detection, follow-up automation, analytics &mdash; Agent 9-11</p>
+        </div>
+        <span class="week">Week 3</span>
+      </div>
+      <div class="phase-tasks">
+        <ul class="task-list">
+          <li>Implement Agent 9: Reply Detection (Gmail polling + classification)</li>
+          <li>Implement reply-to-status pipeline (auto-update leads/email_sends)</li>
+          <li>Implement Agent 10: Follow-Up (3-7-7 cadence engine)</li>
+          <li>Migrate /follow-up to use Agent 10</li>
+          <li>Implement Agent 11: Analytics (KPIs + chi-square)</li>
+          <li>First A/B test analysis (T001 interim results)</li>
+          <li>Migrate /serve to deep-outreach for client mode</li>
+          <li>First /deep-outreach --mode=client --slug=syba run</li>
+          <li>Dashboard integration: KPI metrics visible in client dashboard</li>
+        </ul>
+        <div class="milestone">Milestone: Reply detection catches >90% of replies within 24h</div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase-block" onclick="this.classList.toggle('expanded')">
+      <div class="phase-marker">4</div>
+      <div class="phase-header">
+        <div>
+          <h3>Phase 4: Optimization</h3>
+          <p style="font-size:.8rem;color:var(--text-sec);margin:0">Calibration, advanced tests, performance tuning, full migration</p>
+        </div>
+        <span class="week">Week 4</span>
+      </div>
+      <div class="phase-tasks">
+        <ul class="task-list">
+          <li>Score calibration round 1 (adjust weights based on Week 1-3 data)</li>
+          <li>Launch A/B tests T002-T004 (3 new tests active)</li>
+          <li>Implement feedback loop (Stage 12: auto-calibration)</li>
+          <li>Performance optimization (pipeline &lt; 15 minutes)</li>
+          <li>Deprecate /revenue-engine (merge PAS-SP into Agent 5)</li>
+          <li>Data migration: leaddrop_prospects to email_sends</li>
+          <li>Full system stress test (100 leads through complete pipeline)</li>
+          <li>Documentation finalization</li>
+          <li>Phase 4 retrospective and v2.1 planning</li>
+        </ul>
+        <div class="milestone">Milestone: All 4 legacy commands migrated, pipeline consistently &lt;15 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Metrics -->
+  <div class="card fade-in" style="margin-top:32px">
+    <h3>End of Week 4 Success Metrics</h3>
+    <div class="card-grid card-grid-3" style="margin-top:16px;gap:12px">
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--primary)">&lt; 15 min</div><div style="font-size:.8rem;color:var(--text-sec)">Pipeline Execution Time</div></div>
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--success)">&gt; 8%</div><div style="font-size:.8rem;color:var(--text-sec)">Reply Rate (up from 3-5%)</div></div>
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--info)">&lt; 2%</div><div style="font-size:.8rem;color:var(--text-sec)">Bounce Rate</div></div>
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--warning)">1+</div><div style="font-size:.8rem;color:var(--text-sec)">Significant A/B Tests</div></div>
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--primary)">&gt; 0.3</div><div style="font-size:.8rem;color:var(--text-sec)">Score-Reply Correlation</div></div>
+      <div style="text-align:center;padding:12px"><div style="font-size:1.25rem;font-weight:700;color:var(--success)">4 &rarr; 1</div><div style="font-size:.8rem;color:var(--text-sec)">Commands Consolidated</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:40px 20px;border-top:1px solid var(--border);color:var(--text-sec);font-size:.8rem">
+  <p>Deep Outreach System Map &mdash; Agentic Engineering Consulting</p>
+  <p style="margin-top:4px">Built on 30+ research sources, 7 Cialdini principles, and 85K+ email data points.</p>
+</footer>
+
+<script>
+/* ===== SCROLL SPY ===== */
+const sections = ['hero','pipeline','agents','abtesting','scoring','gates','kpis','comparison','research','roadmap'];
+const navLinks = document.querySelectorAll('.nav-link');
+let scrollTimeout;
+
+function updateActiveNav() {
+  const scrollY = window.scrollY + 100;
+  let current = sections[0];
+  for (const id of sections) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) current = id;
+  }
+  navLinks.forEach((link, i) => {
+    link.classList.toggle('active', sections[i] === current);
+  });
+}
+
+window.addEventListener('scroll', function() {
+  if (scrollTimeout) return;
+  scrollTimeout = setTimeout(function() {
+    scrollTimeout = null;
+    updateActiveNav();
+  }, 50);
+});
+
+function scrollTo_(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  document.querySelector('.nav').classList.remove('open');
+}
+
+/* ===== COUNT-UP ANIMATION ===== */
+function animateCountUp(el) {
+  const target = parseInt(el.getAttribute('data-target'));
+  const duration = 1200;
+  const start = performance.now();
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(eased * target);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+/* ===== INTERSECTION OBSERVER ===== */
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // Count-up for stat numbers
+      const nums = entry.target.querySelectorAll('[data-target]');
+      nums.forEach(function(n) {
+        if (!n.dataset.animated) {
+          n.dataset.animated = '1';
+          animateCountUp(n);
+        }
+      });
+      // Score bars
+      const bars = entry.target.querySelectorAll('.bar[data-width]');
+      bars.forEach(function(b) {
+        if (!b.dataset.animated) {
+          b.dataset.animated = '1';
+          setTimeout(function() { b.style.width = b.getAttribute('data-width') + '%'; }, 200);
+        }
+      });
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
+// Also observe stat cards individually
+document.querySelectorAll('.stat-card').forEach(function(el) { observer.observe(el); });
+
+/* ===== PIPELINE STAGE DETAIL ===== */
+const stageData = {
+  1: { name:'Context Load', input:'Client slug + mode flag + overrides', process:'Query Supabase for client record, load rotation state, fetch exclusion list, load active A/B tests, check daily rate limit', output:'ClientContext object', data:'~2KB JSON', duration:'~2 seconds', agent:'Agent 1: Client Context', parallelism:'Sequential' },
+  2: { name:'Lead Discovery', input:'ClientContext (city, industry, target count)', process:'Waterfall: Apify Google Maps (primary) -> Firecrawl search (secondary) -> Apollo org search (tertiary) -> Bright Data (fallback). Deduplicate. Filter for website_url required.', output:'RawLead[] (50-100 candidates)', data:'~50KB JSON', duration:'~30-60 seconds', agent:'Agent 2: Lead Discovery', parallelism:'Sequential' },
+  3: { name:'Deep Enrichment', input:'RawLead[] (top 50 candidates)', process:'5 parallel agents, each researching 10 leads. Per lead: website scrape, review analysis, tech stack detection, news/trigger search, competitor context, find-leads-for-them.', output:'EnrichedLead[] (50 enriched)', data:'~500KB JSON', duration:'~3-5 minutes', agent:'Agent 3: Deep Research (x5)', parallelism:'5x Parallel' },
+  4: { name:'Scoring', input:'EnrichedLead[]', process:'Apply 8-feature weighted algorithm. Score 0-100. Filter below threshold (40). Classify tiers (HOT/WARM/COOL). Store in lead_scores.', output:'ScoredLead[] (35-45 pass)', data:'~400KB JSON', duration:'~5 seconds', agent:'Agent 4: Lead Scoring', parallelism:'Sequential' },
+  5: { name:'Email Crafting', input:'ScoredLead[] + ClientContext', process:'5 parallel agents, each crafting 10 emails. PAS framework, Cialdini principles, pattern interrupt subjects. 50-125 words, 6-8 sentences.', output:'EmailDraft[]', data:'~200KB', duration:'~2-3 minutes', agent:'Agent 5: Email Crafting (x5)', parallelism:'5x Parallel' },
+  6: { name:'A/B Variant Generation', input:'EmailDraft[] + active A/B tests', process:'For each active test, identify eligible leads, allocate 50/50 control/variant, generate variant B emails, record allocations.', output:'EmailVariant[] (15-25)', data:'~100KB', duration:'~1-2 minutes', agent:'Agent 6: A/B Variant Generator', parallelism:'Sequential' },
+  7: { name:'Verification (4 Gates)', input:'EmailDraft[] + EmailVariant[]', process:'Gate 1: Lead quality >= 40. Gate 2: 10-point content safety. Gate 3: A/B variant equivalence. Gate 4: Rate limit compliance.', output:'VerifiedEmail[] + RejectedEmail[]', data:'~300KB', duration:'~10-30 seconds', agent:'Agent 7: Verification', parallelism:'Sequential' },
+  8: { name:'Sending', input:'VerifiedEmail[] + send mode', process:'Extract OAuth token. Shuffle send order. Create draft, send if mode=send, record in email_sends, variable delay 0.3-0.8s.', output:'SentEmail[] + SendFailure[]', data:'~50KB', duration:'~2-5 minutes', agent:'Agent 8: Sending', parallelism:'Sequential' },
+  9: { name:'Reply Detection', input:'Active sends (last 30 days)', process:'Poll Gmail inbox for replies matching sent subjects. Classify: positive/negative/question/OOO/bounce/unsubscribe. Update statuses.', output:'Reply[] with classifications', data:'~10KB per run', duration:'~30-60 seconds', agent:'Agent 9: Reply Detection', parallelism:'Polling' },
+  10:{ name:'Follow-Up Engine', input:'Unreplied sends past cadence thresholds', process:'Query Day 3/10/17 due sends. Load templates. Personalize. Route through Stages 7-8.', output:'FollowUpEmail[]', data:'~50KB', duration:'~2-3 minutes', agent:'Agent 10: Follow-Up', parallelism:'Scheduled' },
+  11:{ name:'Analytics Computation', input:'All campaign data for date range', process:'Compute KPIs. Chi-square on A/B tests. Score accuracy analysis. Trend comparisons. Generate recommendations.', output:'CampaignReport', data:'~20KB', duration:'~10 seconds', agent:'Agent 11: Analytics', parallelism:'On-demand' },
+  12:{ name:'Feedback Loop', input:'CampaignReport + historical data', process:'Recalibrate scoring weights. Update template effectiveness. Refine ICP criteria. Adjust send time optimization.', output:'Updated weights, templates, ICP', data:'Config updates', duration:'~5 seconds', agent:'All Agents', parallelism:'Continuous' }
+};
+
+function showStage(n) {
+  const d = stageData[n];
+  if (!d) return;
+  const el = document.getElementById('stageDetail');
+  // Toggle off if same stage clicked
+  document.querySelectorAll('.pipeline-stage').forEach(function(s) { s.classList.remove('active'); });
+  if (el.dataset.stage === String(n) && el.classList.contains('show')) {
+    el.classList.remove('show');
+    el.dataset.stage = '';
+    return;
+  }
+  el.dataset.stage = String(n);
+  document.querySelector('[data-stage="'+n+'"]').classList.add('active');
+  el.innerHTML = '<h3>Stage '+n+': '+d.name+'</h3><div class="detail-grid">'
+    +'<div class="detail-item"><strong>Agent:</strong> <span>'+d.agent+'</span></div>'
+    +'<div class="detail-item"><strong>Parallelism:</strong> <span>'+d.parallelism+'</span></div>'
+    +'<div class="detail-item"><strong>Input:</strong> <span>'+d.input+'</span></div>'
+    +'<div class="detail-item"><strong>Output:</strong> <span>'+d.output+'</span></div>'
+    +'<div class="detail-item"><strong>Process:</strong> <span>'+d.process+'</span></div>'
+    +'<div class="detail-item"><strong>Data Size:</strong> <span>'+d.data+'</span></div>'
+    +'<div class="detail-item"><strong>Duration:</strong> <span>'+d.duration+'</span></div>'
+    +'</div>';
+  el.classList.add('show');
+}
+
+/* ===== LEAD SCORE CALCULATOR ===== */
+function calculateScore() {
+  var triggers = parseInt(document.getElementById('calc-triggers').value);
+  var tech = parseInt(document.getElementById('calc-tech').value);
+  var icp = parseInt(document.getElementById('calc-icp').value);
+  var review = parseInt(document.getElementById('calc-review').value);
+  var website = parseInt(document.getElementById('calc-website').value);
+  var dm = parseInt(document.getElementById('calc-dm').value);
+  var volume = parseInt(document.getElementById('calc-volume').value);
+  var social = parseInt(document.getElementById('calc-social').value);
+
+  var score = Math.round(
+    review * 0.12 +
+    volume * 0.08 +
+    website * 0.12 +
+    tech * 0.15 +
+    social * 0.08 +
+    triggers * 0.20 +
+    dm * 0.10 +
+    icp * 0.15
+  );
+
+  score = Math.max(0, Math.min(100, score));
+
+  var tier, color;
+  if (score >= 80) { tier = 'HOT (Send Immediately)'; color = 'var(--success)'; }
+  else if (score >= 60) { tier = 'WARM (Include in Batch)'; color = 'var(--warning)'; }
+  else if (score >= 40) { tier = 'COOL (Volume Fill)'; color = 'var(--info)'; }
+  else { tier = 'SKIP (Do Not Email)'; color = 'var(--error)'; }
+
+  document.getElementById('calcScoreValue').textContent = score;
+  document.getElementById('calcScoreValue').style.color = color;
+  document.getElementById('calcTierLabel').textContent = tier;
+  document.getElementById('calcTierLabel').style.color = color;
+}
+
+// Initial calculation
+calculateScore();
+
+/* ===== INIT ===== */
+updateActiveNav();
+</script>
+</body>
+</html>
