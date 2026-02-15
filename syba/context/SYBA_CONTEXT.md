@@ -96,8 +96,8 @@ SYBA is an all-in-one personal cybersecurity platform that PREVENTS cyber events
 
 ### Follow-Up Sequence
 - **Day 3:** New angle/stat, reference original email
-- **Day 7:** Share relevant case study or news article
-- **Day 14:** Break-up email, offer resource with no strings
+- **Day 10:** Share relevant case study or news article
+- **Day 17:** Break-up email, offer resource with no strings
 
 ## Calendly Links
 - **Demo booking:** https://calendly.com/with-francis-at-syba-io/15min
@@ -108,3 +108,84 @@ SYBA is an all-in-one personal cybersecurity platform that PREVENTS cyber events
 - **Aura:** Identity theft protection — no network scanning, no WiFi monitoring, limited insurance
 - **IdentityForce:** Identity monitoring — no prevention tools, no training, corporate-focused
 - **SYBA's moat:** Only platform combining prevention app + 24/7 human support + $5M insurance + training + backed by top-tier underwriters
+
+---
+
+## Exclusion Rules
+
+### Partner Companies (NEVER include as leads)
+These are SYBA's existing partners. Targeting them wastes resources and damages relationships.
+- **Chubb** — insurance underwriter partner
+- **Tokio Marine Highland** — insurance underwriter partner
+- **Jencap Group** — exclusive HNWI distribution partner
+- **PwC Belgium** — Scale-up Track recognition partner
+- **Concordia** — strategic partner
+
+### Partner Competitors (include with [FLAGGED] tag)
+These compete with SYBA's partners. Include them for Francis/Brigitte to review but always tag:
+- AON, Marsh McLennan, Willis Towers Watson, Epic Insurance, CRC Group
+
+### Filtering Rule
+Before including ANY lead, check company name against both lists. If match:
+- Partner → exclude entirely, log in "Excluded" section of brief
+- Partner competitor → include with [FLAGGED] prefix, move to separate review section
+
+---
+
+## Regional Allocation
+
+| Region | Lead Count | Owner | Messaging Angle |
+|--------|-----------|-------|-----------------|
+| Belgium | 20 | Francis (francis@syba.io) | PwC Scale-up Track recognition, Belgian market expertise |
+| USA | 20 | Brigitte (brigittev@syba.io) | Chubb $5M coverage, Jencap HNWI distribution |
+| Europe ex-Belgium | 10 | Francis (francis@syba.io) | NIS2 compliance, GDPR cyber requirements |
+
+---
+
+## Quality Gates (4 mandatory checks)
+
+### Gate 1: Email Verification
+Every lead email MUST be verified via SmtpVerifier ($0) before inclusion in "Verified" section.
+- SmtpVerifier valid (score 90) → Verified section
+- SmtpVerifier catch-all (score 50) → Verified section with [CATCH-ALL] note
+- SmtpVerifier unknown/invalid → Unverified section (include LinkedIn URL)
+
+### Gate 2: Exclusion Check
+Run every lead company against the exclusion list above.
+
+### Gate 3: Content Safety (11 checks from deep-outreach)
+1. No competitor badmouthing
+2. No false urgency or pressure
+3. No misleading claims about coverage
+4. No unauthorized use of partner names in endorsements
+5. No personal health/financial assumptions
+6. Subject line matches body content
+7. CTA is a question, not a command
+8. Unsubscribe/opt-out respect
+9. No all-caps words (except acronyms)
+10. Professional greeting (no "Hey" for C-suite)
+11. Accurate statistics with attributable sources
+
+### Gate 4: Pre-Send Verification
+Before sending brief or drafting emails:
+- All Calendly links resolve (https://calendly.com/with-francis-at-syba-io/15min)
+- No {{placeholder}} text remains
+- Correct Francis/Brigitte sign-off per region
+- Email subject under 50 characters
+
+---
+
+## Follow-Up Cadence
+
+| Day | Type | Content Strategy |
+|-----|------|-----------------|
+| 0 | Cold email | Personalized with LinkedIn post hook + 1 stat + SYBA solution |
+| 3 | Follow-up 1 | New angle/stat, reference original email, same thread |
+| 10 | Follow-up 2 | Share relevant case study, news article, or industry report |
+| 17 | Follow-up 3 | Break-up email, offer free resource with no strings |
+
+### Follow-Up Rules
+- Track via `contacted_at` + `follow_up_stage` columns in Supabase
+- `/syba-intelligence` checks for due follow-ups on every run
+- If lead replies at any stage → move to `replied` status, stop sequence
+- If lead books meeting → move to `meeting_booked` status, stop sequence

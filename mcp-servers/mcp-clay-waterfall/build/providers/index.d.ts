@@ -8,7 +8,7 @@
  * 3. Insert it into the relevant priority arrays
  */
 import type { EnrichmentProvider } from "../types.js";
-/** Email waterfall — order: Hunter > Snov > Apollo > Prospeo > RocketReach > PDL */
+/** Email waterfall — order: SmtpVerifier ($0) > Hunter > Snov > Apollo > Prospeo > RocketReach > PDL */
 export declare const emailProviders: EnrichmentProvider[];
 /** Phone waterfall — order: Lusha > Apollo > RocketReach > Snov > PDL */
 export declare const phoneProviders: EnrichmentProvider[];
@@ -18,7 +18,7 @@ export declare const personProviders: EnrichmentProvider[];
 export declare const companyProviders: EnrichmentProvider[];
 /** Decision-maker search — order: Apollo > Hunter > RocketReach > PDL > Snov */
 export declare const decisionMakerProviders: EnrichmentProvider[];
-/** Email verification — Hunter only (others don't have dedicated verification) */
+/** Email verification — SmtpVerifier ($0) first, Hunter as paid fallback */
 export declare const verificationProviders: EnrichmentProvider[];
 export declare const allProviders: EnrichmentProvider[];
 //# sourceMappingURL=index.d.ts.map

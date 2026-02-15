@@ -8,6 +8,7 @@
  * 3. Insert it into the relevant priority arrays
  */
 
+import { SmtpVerifierProvider } from "./smtp-verifier.js";
 import { HunterProvider } from "./hunter.js";
 import { SnovProvider } from "./snov.js";
 import { ApolloProvider } from "./apollo.js";
@@ -21,6 +22,7 @@ import type { EnrichmentProvider } from "../types.js";
 // Singleton instances
 // ---------------------------------------------------------------------------
 
+const smtpVerifier = new SmtpVerifierProvider();
 const hunter = new HunterProvider();
 const snov = new SnovProvider();
 const apollo = new ApolloProvider();
@@ -33,8 +35,9 @@ const pdl = new PDLProvider();
 // Priority-ordered arrays for each enrichment type
 // ---------------------------------------------------------------------------
 
-/** Email waterfall — order: Hunter > Snov > Apollo > Prospeo > RocketReach > PDL */
+/** Email waterfall — order: SmtpVerifier ($0) > Hunter > Snov > Apollo > Prospeo > RocketReach > PDL */
 export const emailProviders: EnrichmentProvider[] = [
+  smtpVerifier,
   hunter,
   snov,
   apollo,
@@ -78,8 +81,9 @@ export const decisionMakerProviders: EnrichmentProvider[] = [
   snov,
 ];
 
-/** Email verification — Hunter only (others don't have dedicated verification) */
+/** Email verification — SmtpVerifier ($0) first, Hunter as paid fallback */
 export const verificationProviders: EnrichmentProvider[] = [
+  smtpVerifier,
   hunter,
 ];
 
@@ -88,6 +92,7 @@ export const verificationProviders: EnrichmentProvider[] = [
 // ---------------------------------------------------------------------------
 
 export const allProviders: EnrichmentProvider[] = [
+  smtpVerifier,
   hunter,
   snov,
   apollo,

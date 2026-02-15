@@ -78,6 +78,10 @@
     return div.innerHTML;
   }
 
+  function escapeAttr(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
   function fullName(obj) {
     return [(obj.first_name || ''), (obj.last_name || '')].filter(Boolean).join(' ') || 'Unknown';
   }
@@ -188,7 +192,7 @@
 
     let query = sb
       .from('leads')
-      .select('id, first_name, last_name, company, title, fit_score, region, icp_segment, email, created_date', { count: 'exact' })
+      .select('id, first_name, last_name, company, title, fit_score, region, icp_segment, email, created_date, email_verified, email_verification_source, contact_status, contacted_at, follow_up_stage, notes, linkedin_post_hook', { count: 'exact' })
       .eq('client_id', clientId)
       .order('fit_score', { ascending: false })
       .range(from, to);
@@ -198,6 +202,7 @@
     if (filters.dateFrom) query = query.gte('created_date', filters.dateFrom);
     if (filters.dateTo) query = query.lte('created_date', filters.dateTo);
     if (filters.minFitScore) query = query.gte('fit_score', filters.minFitScore);
+    if (filters.contact_status) query = query.eq('contact_status', filters.contact_status);
 
     const { data, error, count } = await query;
     if (error) throw error;
@@ -209,6 +214,70 @@
       perPage,
       totalPages: Math.ceil((count || 0) / perPage)
     };
+  }
+
+  /**
+   * Update a lead's contact status in Supabase.
+   */
+  async function updateLeadStatus(leadId, newStatus) {
+    const { sb } = await getClientSupabase();
+    const updateData = { contact_status: newStatus };
+
+    // Set contacted_at on first status change from pending
+    if (newStatus === 'contacted') {
+      updateData.contacted_at = new Date().toISOString();
+    }
+
+    const { error } = await sb
+      .from('leads')
+      .update(updateData)
+      .eq('id', leadId);
+
+    if (error) throw error;
+    showToast('Status updated to ' + newStatus);
+  }
+
+  /**
+   * Update a lead's follow-up stage.
+   */
+  async function updateFollowUpStage(leadId, stage) {
+    const { sb } = await getClientSupabase();
+    const { error } = await sb
+      .from('leads')
+      .update({ follow_up_stage: stage })
+      .eq('id', leadId);
+
+    if (error) throw error;
+  }
+
+  /**
+   * Update a lead's notes.
+   */
+  async function updateLeadNotes(leadId, notes) {
+    const { sb } = await getClientSupabase();
+    const { error } = await sb
+      .from('leads')
+      .update({ notes: notes })
+      .eq('id', leadId);
+
+    if (error) throw error;
+    showToast('Notes saved');
+  }
+
+  /**
+   * Calculate follow-up due badge text.
+   */
+  function getFollowUpBadge(lead) {
+    if (!lead.contacted_at || lead.contact_status !== 'contacted') return '';
+    const contactedDate = new Date(lead.contacted_at);
+    const now = new Date();
+    const daysSince = Math.floor((now - contactedDate) / (1000 * 60 * 60 * 24));
+    const stage = lead.follow_up_stage || 'initial';
+
+    if (stage === 'initial' && daysSince >= 3) return 'FU1 due';
+    if (stage === 'fu1_sent' && daysSince >= 10) return 'FU2 due';
+    if (stage === 'fu2_sent' && daysSince >= 17) return 'FU3 due';
+    return '';
   }
 
   /**
@@ -263,7 +332,7 @@
 
     let query = sb
       .from('leads')
-      .select('first_name, last_name, company, title, email, fit_score, region, icp_segment, created_date')
+      .select('first_name, last_name, company, title, email, fit_score, email_verified, contact_status, region, icp_segment, created_date, notes')
       .eq('client_id', clientId)
       .order('fit_score', { ascending: false });
 
@@ -281,16 +350,19 @@
       return;
     }
 
-    const headers = ['Name', 'Company', 'Title', 'Email', 'Fit Score', 'Region', 'ICP Segment', 'Date'];
+    const headers = ['Name', 'Company', 'Title', 'Email', 'Fit Score', 'Verified', 'Status', 'Region', 'ICP Segment', 'Date', 'Notes'];
     const rows = data.map(l => [
       fullName(l),
       l.company,
       l.title,
       l.email,
       l.fit_score,
+      l.email_verified ? 'Yes' : 'No',
+      l.contact_status || 'pending',
       l.region,
       l.icp_segment,
-      l.created_date
+      l.created_date,
+      l.notes || ''
     ].map(v => '"' + String(v || '').replace(/"/g, '""') + '"').join(','));
 
     const csv = [headers.join(','), ...rows].join('\n');
@@ -365,6 +437,10 @@
     if (resetBtn) {
       resetBtn.addEventListener('click', async () => {
         document.getElementById('leads-filters').reset();
+        // Also reset status filter
+        document.querySelectorAll('.btn-status-filter').forEach(b => b.classList.remove('active'));
+        const allBtn = document.querySelector('.btn-status-filter[data-status=""]');
+        if (allBtn) allBtn.classList.add('active');
         _currentFilters = { page: 1 };
         await loadLeads();
       });
@@ -376,6 +452,82 @@
         readFiltersFromForm();
         exportLeadsCSV(_currentFilters);
       });
+    }
+
+    // Status filter buttons
+    document.querySelectorAll('.btn-status-filter').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.btn-status-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const status = btn.dataset.status;
+        if (status) {
+          _currentFilters.contact_status = status;
+        } else {
+          delete _currentFilters.contact_status;
+        }
+        _currentFilters.page = 1;
+        await loadLeads();
+      });
+    });
+
+    // Notes modal close/cancel
+    const notesModal = document.getElementById('notesModal');
+    const notesClose = document.getElementById('notesModalClose');
+    const notesCancel = document.getElementById('notesCancel');
+    if (notesClose) notesClose.addEventListener('click', () => { notesModal.hidden = true; });
+    if (notesCancel) notesCancel.addEventListener('click', () => { notesModal.hidden = true; });
+    if (notesModal) {
+      notesModal.addEventListener('click', (e) => {
+        if (e.target === notesModal) notesModal.hidden = true;
+      });
+    }
+
+    // Notes save
+    const notesSave = document.getElementById('notesSave');
+    if (notesSave) {
+      notesSave.addEventListener('click', async () => {
+        const leadId = notesModal.dataset.leadId;
+        const notes = document.getElementById('notesTextarea').value;
+        try {
+          await updateLeadNotes(leadId, notes);
+          notesModal.hidden = true;
+          await loadLeads();
+        } catch (err) {
+          console.error('Notes save error:', err);
+          showToast('Error saving notes');
+        }
+      });
+    }
+  }
+
+  /**
+   * Open notes modal for a lead.
+   */
+  function openNotesModal(leadId, leadName, currentNotes) {
+    const modal = document.getElementById('notesModal');
+    const title = document.getElementById('notesModalTitle');
+    const textarea = document.getElementById('notesTextarea');
+    if (!modal) return;
+    modal.dataset.leadId = leadId;
+    title.textContent = 'Notes — ' + leadName;
+    textarea.value = currentNotes || '';
+    modal.hidden = false;
+    textarea.focus();
+  }
+
+  /**
+   * Handle status dropdown change in the leads table.
+   */
+  async function handleStatusChange(selectEl) {
+    const leadId = selectEl.dataset.leadId;
+    const newStatus = selectEl.value;
+    try {
+      await updateLeadStatus(leadId, newStatus);
+      // Update the select styling
+      selectEl.className = 'status-select status--' + newStatus;
+    } catch (err) {
+      console.error('Status update error:', err);
+      showToast('Error updating status');
     }
   }
 
@@ -407,19 +559,50 @@
       if (badge) badge.textContent = result.total + ' leads';
 
       if (result.leads.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="empty-state">No leads match your filters.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">No leads match your filters.</td></tr>';
       } else {
-        tableBody.innerHTML = result.leads.map(lead => `
-          <tr onclick="window.location.href='lead.html?id=${lead.id}'">
-            <td>${escapeHtml(fullName(lead))}</td>
+        tableBody.innerHTML = result.leads.map(lead => {
+          const verified = lead.email_verified;
+          const verifiedClass = verified === true ? 'valid' : verified === false ? 'invalid' : 'unknown';
+          const verifiedIcon = verified === true ? '&#10003;' : verified === false ? '&#10007;' : '?';
+          const verifiedTitle = verified === true ? 'Verified' : verified === false ? 'Not verified' : 'Unknown';
+          const status = lead.contact_status || 'pending';
+          const fuBadge = getFollowUpBadge(lead);
+          const hasNotes = lead.notes && lead.notes.trim().length > 0;
+
+          return `
+          <tr>
+            <td>
+              <a class="lead-name-link" href="lead.html?id=${lead.id}">${escapeHtml(fullName(lead))}</a>
+              ${fuBadge ? '<span class="fu-badge">' + fuBadge + '</span>' : ''}
+              <button class="btn-notes ${hasNotes ? 'has-notes' : ''}" data-lead-id="${escapeAttr(lead.id)}" data-lead-name="${escapeAttr(fullName(lead))}" data-notes="${escapeAttr(lead.notes || '')}" title="${hasNotes ? 'Edit notes' : 'Add notes'}">&#9998;</button>
+            </td>
             <td>${escapeHtml(lead.company || '')}</td>
             <td>${escapeHtml(lead.title || '')}</td>
             <td><span class="score-badge ${scoreClass(lead.fit_score)}">${lead.fit_score}</span></td>
+            <td><span class="verified-badge ${verifiedClass}" title="${verifiedTitle}">${verifiedIcon}</span></td>
+            <td>
+              <select class="status-select status--${status}" data-lead-id="${lead.id}" onchange="App.handleStatusChange(this)">
+                <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="contacted" ${status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                <option value="replied" ${status === 'replied' ? 'selected' : ''}>Replied</option>
+                <option value="meeting_booked" ${status === 'meeting_booked' ? 'selected' : ''}>Booked</option>
+                <option value="bounced" ${status === 'bounced' ? 'selected' : ''}>Bounced</option>
+              </select>
+            </td>
             <td><span class="region-tag">${escapeHtml(lead.region || '')}</span></td>
             <td>${escapeHtml(lead.icp_segment || '')}</td>
             <td>${formatDate(lead.created_date)}</td>
-          </tr>
-        `).join('');
+          </tr>`;
+        }).join('');
+
+        // Bind notes buttons
+        tableBody.querySelectorAll('.btn-notes').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openNotesModal(btn.dataset.leadId, btn.dataset.leadName, btn.dataset.notes);
+          });
+        });
       }
 
       // Render pagination
@@ -446,10 +629,12 @@
         if (cells[0]) cells[0].setAttribute('data-label', 'Name');
         if (cells[1]) cells[1].setAttribute('data-label', 'Company');
         if (cells[2]) cells[2].setAttribute('data-label', 'Title');
-        if (cells[3]) cells[3].setAttribute('data-label', 'Fit Score');
-        if (cells[4]) cells[4].setAttribute('data-label', 'Region');
-        if (cells[5]) cells[5].setAttribute('data-label', 'ICP Segment');
-        if (cells[6]) cells[6].setAttribute('data-label', 'Date');
+        if (cells[3]) cells[3].setAttribute('data-label', 'Fit');
+        if (cells[4]) cells[4].setAttribute('data-label', 'Verified');
+        if (cells[5]) cells[5].setAttribute('data-label', 'Status');
+        if (cells[6]) cells[6].setAttribute('data-label', 'Region');
+        if (cells[7]) cells[7].setAttribute('data-label', 'ICP Segment');
+        if (cells[8]) cells[8].setAttribute('data-label', 'Date');
       });
 
       // Client-side search filter
@@ -941,6 +1126,13 @@
     fetchLeadDetail,
     fetchBriefings,
     exportLeadsCSV,
+
+    // Interactive tracking (V3)
+    handleStatusChange,
+    updateLeadStatus,
+    updateLeadNotes,
+    updateFollowUpStage,
+    openNotesModal,
 
     // Helpers
     copyToClipboard,

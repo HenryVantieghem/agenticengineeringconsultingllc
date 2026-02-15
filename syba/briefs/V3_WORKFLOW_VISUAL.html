@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYBA V3 Sales Intelligence Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Satoshi:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0D0D0E;
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Satoshi', 'Inter', sans-serif;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .header-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: rgba(233, 69, 96, 0.12);
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    color: #e94560;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #e94560 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-date {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+    color: #ffffff;
+  }
+
+  .section-title .accent {
+    color: #e94560;
+  }
+
+  /* ── Glass card ── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 32px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ── Pipeline Diagram ── */
+  .pipeline-section {
+    margin-bottom: 64px;
+  }
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .pipeline-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .agent-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 24px 28px;
+    text-align: center;
+    min-width: 180px;
+    position: relative;
+    transition: border-color 0.3s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .agent-box:hover {
+    border-color: rgba(233, 69, 96, 0.4);
+  }
+
+  .agent-box .agent-number {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(233, 69, 96, 0.15);
+    color: #e94560;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .agent-box .agent-name {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin-bottom: 6px;
+  }
+
+  .agent-box .agent-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+  }
+
+  .agent-box.highlight {
+    border-color: rgba(233, 69, 96, 0.35);
+    background: rgba(233, 69, 96, 0.06);
+  }
+
+  /* Arrows */
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .arrow-down .arrow-line {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .arrow-down .arrow-head {
+    font-size: 10px;
+    line-height: 1;
+    margin-top: -2px;
+  }
+
+  /* Split/merge arrows */
+  .split-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .split-arrows {
+    display: flex;
+    justify-content: center;
+    width: 420px;
+    position: relative;
+    height: 40px;
+  }
+
+  .split-arrows::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-50%);
+  }
+
+  .split-arrows::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: calc(50% - 160px);
+    width: 320px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .split-arrows .split-left,
+  .split-arrows .split-right {
+    position: absolute;
+    top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .split-arrows .split-left {
+    left: calc(50% - 160px);
+    transform: translateX(-50%);
+  }
+
+  .split-arrows .split-right {
+    right: calc(50% - 160px);
+    transform: translateX(50%);
+  }
+
+  .split-arrows .split-left .arrow-line,
+  .split-arrows .split-right .arrow-line {
+    width: 1px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .split-arrows .split-left .arrow-head,
+  .split-arrows .split-right .arrow-head {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.2);
+    line-height: 1;
+    margin-top: -2px;
+  }
+
+  .parallel-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .parallel-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+
+  .parallel-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    color: #4ade80;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .merge-arrows {
+    display: flex;
+    justify-content: center;
+    width: 420px;
+    position: relative;
+    height: 40px;
+  }
+
+  .merge-arrows::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(50% - 160px);
+    width: 320px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .merge-arrows .merge-left,
+  .merge-arrows .merge-right {
+    position: absolute;
+    top: -12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .merge-arrows .merge-left {
+    left: calc(50% - 160px);
+    transform: translateX(-50%);
+  }
+
+  .merge-arrows .merge-right {
+    right: calc(50% - 160px);
+    transform: translateX(50%);
+  }
+
+  .merge-arrows .merge-left .arrow-line,
+  .merge-arrows .merge-right .arrow-line {
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .merge-arrows::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-50%);
+  }
+
+  .merge-point {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+
+  .merge-point .arrow-head {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.2);
+    line-height: 1;
+  }
+
+  /* ── Cost Comparison Table ── */
+  .cost-section {
+    margin-bottom: 64px;
+  }
+
+  .cost-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cost-table thead th {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 14px 20px;
+    text-align: left;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cost-table tbody td {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .cost-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .cost-table tbody tr:last-child {
+    background: rgba(233, 69, 96, 0.05);
+  }
+
+  .cost-table tbody tr:last-child td {
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .status-broken {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-working {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    color: #facc15;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-current {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    color: #4ade80;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .version-label {
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .version-sub {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+  }
+
+  .cost-value {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #ffffff;
+  }
+
+  .cost-table tbody tr:first-child .cost-value {
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: line-through;
+  }
+
+  /* ── Issues Resolved ── */
+  .issues-section {
+    margin-bottom: 64px;
+  }
+
+  .issues-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .issue-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.3s ease;
+  }
+
+  .issue-card:hover {
+    border-color: rgba(74, 222, 128, 0.25);
+  }
+
+  .issue-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .issue-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .issue-problem {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .issue-solution {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    padding-left: 32px;
+    line-height: 1.5;
+  }
+
+  .issue-solution .highlight-fix {
+    color: #4ade80;
+    font-weight: 500;
+  }
+
+  /* ── Key Stats Grid ── */
+  .stats-section {
+    margin-bottom: 64px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 28px 20px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(233, 69, 96, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .stat-value {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #ffffff 30%, #e94560 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* ── Deterministic Section ── */
+  .deterministic-section {
+    margin-bottom: 48px;
+  }
+
+  .deterministic-card {
+    background: rgba(233, 69, 96, 0.04);
+    border: 1px solid rgba(233, 69, 96, 0.15);
+    border-radius: 16px;
+    padding: 40px 32px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .deterministic-quote {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #ffffff;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .deterministic-subquote {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 36px;
+  }
+
+  .deterministic-icons {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .det-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 180px;
+  }
+
+  .det-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: rgba(233, 69, 96, 0.1);
+    border: 1px solid rgba(233, 69, 96, 0.2);
+  }
+
+  .det-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  /* ── Divider ── */
+  .section-divider {
+    width: 48px;
+    height: 2px;
+    background: rgba(233, 69, 96, 0.3);
+    margin: 0 auto 64px;
+    border-radius: 1px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .footer-text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.5px;
+  }
+
+  .footer-text a {
+    color: #e94560;
+    text-decoration: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .container { padding: 32px 20px; }
+    .header h1 { font-size: 28px; }
+    .issues-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .parallel-row { flex-direction: column; gap: 12px; align-items: center; }
+    .split-arrows, .merge-arrows { width: 100%; }
+    .deterministic-icons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- HEADER                                       -->
+  <!-- ════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-badge">Architecture Overview</div>
+    <h1>SYBA V3 Sales<br>Intelligence Engine</h1>
+    <div class="header-date">February 15, 2026</div>
+  </header>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- PIPELINE DIAGRAM                             -->
+  <!-- ════════════════════════════════════════════ -->
+  <section class="pipeline-section">
+    <h2 class="section-title">5-Agent <span class="accent">Pipeline</span></h2>
+
+    <div class="glass-card">
+      <div class="pipeline">
+
+        <!-- Agent 1: SCOUT -->
+        <div class="pipeline-row">
+          <div class="agent-box">
+            <div class="agent-number">1</div>
+            <div class="agent-name">Scout</div>
+            <div class="agent-desc">Lead Discovery</div>
+          </div>
+        </div>
+
+        <!-- Split arrow -->
+        <div class="split-container">
+          <div class="split-arrows">
+            <div class="split-left">
+              <div class="arrow-line"></div>
+              <div class="arrow-head">&#9662;</div>
+            </div>
+            <div class="split-right">
+              <div class="arrow-line"></div>
+              <div class="arrow-head">&#9662;</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parallel label -->
+        <div class="parallel-label">
+          <span class="parallel-badge">Parallel Execution</span>
+        </div>
+
+        <!-- Agents 2 & 3: VERIFIER + PROFILER (parallel) -->
+        <div class="parallel-row">
+          <div class="agent-box highlight">
+            <div class="agent-number">2</div>
+            <div class="agent-name">Verifier</div>
+            <div class="agent-desc">$0 Email Verification</div>
+          </div>
+          <div class="agent-box highlight">
+            <div class="agent-number">3</div>
+            <div class="agent-name">Profiler</div>
+            <div class="agent-desc">Deep Personalization</div>
+          </div>
+        </div>
+
+        <!-- Merge arrows -->
+        <div class="split-container">
+          <div class="merge-arrows">
+            <div class="merge-left">
+              <div class="arrow-line"></div>
+            </div>
+            <div class="merge-right">
+              <div class="arrow-line"></div>
+            </div>
+          </div>
+          <div class="merge-point">
+            <div class="arrow-head">&#9662;</div>
+          </div>
+        </div>
+
+        <!-- Agent 4: COMPOSER -->
+        <div class="pipeline-row">
+          <div class="agent-box">
+            <div class="agent-number">4</div>
+            <div class="agent-name">Composer</div>
+            <div class="agent-desc">Email Generation</div>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="arrow-down">
+          <div class="arrow-line"></div>
+          <div class="arrow-head">&#9662;</div>
+        </div>
+
+        <!-- Agent 5: DISPATCHER -->
+        <div class="pipeline-row">
+          <div class="agent-box">
+            <div class="agent-number">5</div>
+            <div class="agent-name">Dispatcher</div>
+            <div class="agent-desc">Storage + Delivery</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- COST COMPARISON TABLE                        -->
+  <!-- ════════════════════════════════════════════ -->
+  <section class="cost-section">
+    <h2 class="section-title">Cost <span class="accent">Breakdown</span></h2>
+
+    <table class="cost-table">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Cost / Month</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="version-label">V1</span>
+            <span class="version-sub">&nbsp;Manual</span>
+          </td>
+          <td><span class="cost-value">$0</span></td>
+          <td><span class="status-broken">Broken</span>&nbsp; Apollo + HubSpot failed</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="version-label">V2</span>
+            <span class="version-sub">&nbsp;MCP</span>
+          </td>
+          <td><span class="cost-value">~$61/mo</span></td>
+          <td><span class="status-working">Working</span>&nbsp; Overpaying for verification</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="version-label">V3</span>
+            <span class="version-sub">&nbsp;5-Agent</span>
+          </td>
+          <td><span class="cost-value">~$15/mo</span></td>
+          <td><span class="status-current">Current</span>&nbsp; $0 verification + optimized</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- FRANCIS'S 6 ISSUES — ALL RESOLVED           -->
+  <!-- ════════════════════════════════════════════ -->
+  <section class="issues-section">
+    <h2 class="section-title">Francis's 6 Issues <span class="accent">&mdash; All Resolved</span></h2>
+
+    <div class="issues-grid">
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">Emails to wrong people</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">Exclusion list + 4-gate verification</span> ensures every lead is validated before send</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">No follow-up tracking</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">Automated Day 3/10/17 cadence</span> with status tracking in dashboard</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">Unverified emails bouncing</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">$0 SmtpVerifier</span> (DNS MX + SMTP RCPT TO) replaces paid services</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">No way to track lead status</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">Interactive dashboard</span> with status dropdowns per lead</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">Missing personalization</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">LinkedIn post hooks</span> + company deep research per prospect</div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-header">
+          <div class="issue-check">&#10003;</div>
+          <div class="issue-problem">Too expensive</div>
+        </div>
+        <div class="issue-solution"><span class="highlight-fix">$61/mo &rarr; $15/mo</span> &mdash; 75% cost reduction</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- KEY STATS GRID                               -->
+  <!-- ════════════════════════════════════════════ -->
+  <section class="stats-section">
+    <h2 class="section-title">Key <span class="accent">Numbers</span></h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">50</div>
+        <div class="stat-label">Leads / Day</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$0</div>
+        <div class="stat-label">Verification</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Quality Gates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Stage Follow-up</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- DETERMINISTIC SECTION                        -->
+  <!-- ════════════════════════════════════════════ -->
+  <section class="deterministic-section">
+    <h2 class="section-title">What <span class="accent">Deterministic</span> Means</h2>
+
+    <div class="deterministic-card">
+      <div class="deterministic-quote">
+        Run 100 times with the same inputs &rarr;<br>Same quality output 100 times.
+      </div>
+      <div class="deterministic-subquote">Every run is as reliable as the first.</div>
+
+      <div class="deterministic-icons">
+        <div class="det-item">
+          <div class="det-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="det-text">No off days.</div>
+        </div>
+        <div class="det-item">
+          <div class="det-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="det-text">No forgetting follow-ups.</div>
+        </div>
+        <div class="det-item">
+          <div class="det-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="det-text">No sending to wrong people.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- FOOTER                                       -->
+  <!-- ════════════════════════════════════════════ -->
+  <footer class="footer">
+    <p class="footer-text">Built by <a href="https://agenticengineering.netlify.app">Agentic Engineering</a> &mdash; AI Sales Intelligence for SYBA</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

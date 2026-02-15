@@ -8,6 +8,133 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    /* Status filter buttons */
+    .btn-status-filter {
+      padding: 6px 14px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-status-filter:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
+    .btn-status-filter.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+
+    /* Verified badge */
+    .verified-badge { font-size: 14px; display: inline-block; }
+    .verified-badge.valid { color: var(--success); }
+    .verified-badge.invalid { color: #EF4444; }
+    .verified-badge.unknown { color: var(--muted); }
+    .verified-badge.catch-all { color: var(--warning); }
+
+    /* Status select in table */
+    .status-select {
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--white);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      min-width: 110px;
+    }
+    .status-select option { background: var(--black); color: var(--white); }
+    .status-select.status--pending { border-color: var(--muted); }
+    .status-select.status--contacted { border-color: #3B82F6; color: #3B82F6; }
+    .status-select.status--replied { border-color: var(--success); color: var(--success); }
+    .status-select.status--meeting_booked { border-color: #F59E0B; color: #F59E0B; }
+    .status-select.status--bounced { border-color: #EF4444; color: #EF4444; }
+
+    /* Follow-up badge */
+    .fu-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(var(--accent-rgb), 0.15);
+      color: var(--accent);
+      margin-left: 4px;
+    }
+
+    /* Notes button in table */
+    .btn-notes {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-notes:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
+    .btn-notes.has-notes { color: var(--accent); border-color: var(--accent); }
+
+    /* Notes modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay[hidden] { display: none; }
+    .modal-content {
+      background: #1A1A1B;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 90%;
+      max-width: 500px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 { font-size: 16px; color: var(--white); }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    .notes-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px;
+      resize: vertical;
+    }
+    .notes-textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+
+    /* Clickable row without navigating */
+    .data-table tbody tr { cursor: default; }
+    .lead-name-link { color: var(--accent); cursor: pointer; text-decoration: none; }
+    .lead-name-link:hover { text-decoration: underline; }
+  </style>
   <script src="js/config.js"></script>
   <script>document.documentElement.style.setProperty('--client-accent', CONFIG.accentColor);</script>
 </head>
@@ -74,6 +201,17 @@
       </div>
     </div>
 
+    <!-- Status filter bar -->
+    <div class="filters-bar" style="margin-bottom: 0; padding: 12px 24px; gap: 8px; display: flex; flex-wrap: wrap; align-items: center;">
+      <span class="filter-label" style="margin-right: 8px;">Status:</span>
+      <button type="button" class="btn-status-filter active" data-status="">All</button>
+      <button type="button" class="btn-status-filter" data-status="pending">Pending</button>
+      <button type="button" class="btn-status-filter" data-status="contacted">Contacted</button>
+      <button type="button" class="btn-status-filter" data-status="replied">Replied</button>
+      <button type="button" class="btn-status-filter" data-status="meeting_booked">Booked</button>
+      <button type="button" class="btn-status-filter" data-status="bounced">Bounced</button>
+    </div>
+
     <!-- Filters bar -->
     <form class="filters-bar" id="leads-filters" aria-label="Lead filters">
       <div class="filters-row">
@@ -138,7 +276,9 @@
             <th>Name</th>
             <th>Company</th>
             <th>Title</th>
-            <th>Fit Score</th>
+            <th>Fit</th>
+            <th>Verified</th>
+            <th>Status</th>
             <th>Region</th>
             <th>ICP Segment</th>
             <th>Date</th>
@@ -160,6 +300,21 @@
     <nav class="pagination" id="leads-pagination" aria-label="Table pagination">
     </nav>
   </main>
+
+  <!-- Notes Modal -->
+  <div class="modal-overlay" id="notesModal" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="notesModalTitle">Lead Notes</h3>
+        <button class="modal-close" id="notesModalClose" type="button">&times;</button>
+      </div>
+      <textarea id="notesTextarea" class="notes-textarea" rows="6" placeholder="Add notes about this lead..."></textarea>
+      <div class="modal-actions">
+        <button class="btn-accent btn-sm" id="notesSave" type="button">Save Notes</button>
+        <button class="btn-ghost btn-sm" id="notesCancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast container -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
