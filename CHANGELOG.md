@@ -2,6 +2,7 @@
 
 
 ## [Unreleased]
+- `3819eb2` docs: Add V3 revenue-generating prompt sequence for daily operations (2026-02-15)
 - `f13c7fd` feat: SYBA V3 Sales Intelligence System — 5-agent pipeline + audit fixes + dashboard deploy (2026-02-15)
 - `67ddaf9` chore: Ignore Swift .build artifacts, remove 64MB file from tracking (2026-02-15)
 - `6296b49` feat: Add CHANGELOG and commit all project changes (2026-02-15)
