@@ -32,3 +32,6 @@ hardened-google-workspace-mcp/
 
 # Embedded repos (use submodules if needed)
 mcp/pumpfun-mcp/
+
+# Swift build artifacts
+.build/

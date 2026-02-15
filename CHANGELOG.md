@@ -2,6 +2,7 @@
 
 
 ## [Unreleased]
+- `67ddaf9` chore: Ignore Swift .build artifacts, remove 64MB file from tracking (2026-02-15)
 - `6296b49` feat: Add CHANGELOG and commit all project changes (2026-02-15)
 
 All notable changes to this project will be documented in this file.
