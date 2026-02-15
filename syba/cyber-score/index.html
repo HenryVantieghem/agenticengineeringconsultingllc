@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYBA Cyber Score | How Cyber-Safe Is Your Family?</title>
+  <meta name="description" content="Take the free 2-minute assessment. Get your personalized Cyber Score and discover your family's biggest cybersecurity gaps.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SYBA Cyber Score | Free Family Cybersecurity Assessment">
+  <meta property="og:description" content="Take the free 2-minute assessment. Get your personalized Cyber Score.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon (SYBA red shield) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%23e94560'/><text x='50' y='68' font-size='60' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>S</text></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       Navigation
+       ==================================================================== -->
+
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="https://www.syba.io" class="nav__logo" aria-label="SYBA Home">
+        <!-- SYBA Shield Icon -->
+        <svg class="nav__logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 7v9c0 8.5 5.1 16.4 12 18 6.9-1.6 12-9.5 12-18V7L16 2z" fill="#e94560" opacity="0.15" stroke="#e94560" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M16 2L4 7v9c0 8.5 5.1 16.4 12 18 6.9-1.6 12-9.5 12-18V7L16 2z" fill="none" stroke="#e94560" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="16" y="21" text-anchor="middle" font-size="14" font-weight="bold" fill="#e94560" font-family="sans-serif">S</text>
+        </svg>
+        <span class="nav__logo-text"><span>SYBA</span> Cyber Score</span>
+      </a>
+      <a href="https://www.syba.io" class="nav__cta" target="_blank" rel="noopener">
+        Learn About SYBA
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ====================================================================
+       Hero Section
+       ==================================================================== -->
+
+  <section class="hero" id="heroSection">
+    <div class="container">
+      <div class="hero__badge">
+        <span class="hero__badge-dot" aria-hidden="true"></span>
+        Free 2-Minute Assessment
+      </div>
+      <h1 class="hero__title">How Cyber-Safe<br>Is Your <em>Family?</em></h1>
+      <p class="hero__subtitle">Take the free 2-minute assessment. Get your personalized Cyber Score and discover where your family is most vulnerable.</p>
+      <a href="#assessmentSection" class="hero__cta" id="heroCta">
+        Start Free Assessment
+        <svg class="hero__cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <div class="hero__stat-value">2,847</div>
+          <div class="hero__stat-label">Families Assessed</div>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <div class="hero__stat-value">62</div>
+          <div class="hero__stat-label">Average Score</div>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <div class="hero__stat-value">74%</div>
+          <div class="hero__stat-label">Have Critical Gaps</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       Assessment Section
+       ==================================================================== -->
+
+  <section class="assessment" id="assessmentSection">
+    <div class="container">
+      <div class="assessment__card" id="assessmentCard">
+
+        <!-- Progress Bar -->
+        <div class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="15">
+          <div class="progress__bar">
+            <div class="progress__segment" data-category="0">
+              <div class="progress__segment-fill"></div>
+            </div>
+            <div class="progress__segment" data-category="1">
+              <div class="progress__segment-fill"></div>
+            </div>
+            <div class="progress__segment" data-category="2">
+              <div class="progress__segment-fill"></div>
+            </div>
+            <div class="progress__segment" data-category="3">
+              <div class="progress__segment-fill"></div>
+            </div>
+            <div class="progress__segment" data-category="4">
+              <div class="progress__segment-fill"></div>
+            </div>
+          </div>
+          <div class="progress__meta">
+            <span class="progress__label" id="progressLabel">Network Security</span>
+            <span class="progress__count" id="progressCount">1 / 15</span>
+          </div>
+        </div>
+
+        <!-- Quiz Area -->
+        <div class="quiz" id="quizArea">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Quiz Navigation -->
+        <div class="quiz__nav">
+          <button class="quiz__nav-btn quiz__nav-btn--back quiz__nav-btn--hidden" id="btnBack" disabled aria-label="Previous question">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+          </button>
+          <button class="quiz__nav-btn quiz__nav-btn--next" id="btnNext" disabled aria-label="Next question">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Email Gate (shown after quiz) -->
+        <div class="email-gate" id="emailGate" aria-label="Enter email to see results">
+          <div class="email-gate__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <h2 class="email-gate__title">Your Score Is Ready</h2>
+          <p class="email-gate__subtitle">Enter your email to see your personalized Cyber Score, risk assessment, and top vulnerabilities.</p>
+          <div class="email-gate__form">
+            <input
+              type="email"
+              class="email-gate__input"
+              id="emailInput"
+              placeholder="you@email.com"
+              autocomplete="email"
+              aria-label="Email address"
+              required
+            >
+            <button class="email-gate__submit" id="emailSubmit" type="button">
+              See My Score
+            </button>
+          </div>
+          <p class="email-gate__error" id="emailError" role="alert" aria-live="polite"></p>
+          <p class="email-gate__privacy">We never spam. Your data stays private.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       Results Section
+       ==================================================================== -->
+
+  <section class="results" id="resultsSection">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="results__header">
+        <h2 class="results__title">Your Cyber Score</h2>
+        <p class="results__subtitle">Here's how your family's cybersecurity stacks up.</p>
+      </div>
+
+      <!-- Score Ring -->
+      <div class="score-ring" role="img" aria-label="Cyber Score visualization">
+        <svg class="score-ring__svg" viewBox="0 0 220 220">
+          <circle class="score-ring__glow" id="scoreRingGlow" cx="110" cy="110" r="100"/>
+          <circle class="score-ring__bg" cx="110" cy="110" r="100"/>
+          <circle class="score-ring__fill" id="scoreRingFill" cx="110" cy="110" r="100"/>
+        </svg>
+        <div class="score-ring__center">
+          <div class="score-ring__number" id="scoreNumber" aria-live="polite">0</div>
+          <div class="score-ring__out-of">out of 100</div>
+        </div>
+      </div>
+
+      <!-- Grade & Risk Level -->
+      <div class="results__grade" aria-label="Grade and risk level">
+        <div class="results__grade-letter" id="gradeLetter">F</div>
+        <div class="results__risk-level" id="riskLevel">Critical Risk</div>
+      </div>
+
+      <!-- Category Breakdown -->
+      <div class="breakdown">
+        <div class="breakdown__title">Category Breakdown</div>
+        <div id="breakdownContainer">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Top 3 Risks -->
+      <div class="risks">
+        <div class="risks__title">Your Top Vulnerabilities</div>
+        <div class="risks__list" id="risksContainer">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Premium Section (Blurred/Locked) -->
+      <div class="premium">
+        <div class="premium__content" aria-hidden="true">
+          <div class="premium__fake-item">
+            <div class="premium__fake-dot"></div>
+            <div class="premium__fake-text">
+              <div class="premium__fake-line" style="width:90%"></div>
+              <div class="premium__fake-line" style="width:75%"></div>
+              <div class="premium__fake-line" style="width:60%"></div>
+            </div>
+          </div>
+          <div class="premium__fake-item">
+            <div class="premium__fake-dot"></div>
+            <div class="premium__fake-text">
+              <div class="premium__fake-line" style="width:85%"></div>
+              <div class="premium__fake-line" style="width:70%"></div>
+              <div class="premium__fake-line" style="width:55%"></div>
+            </div>
+          </div>
+          <div class="premium__fake-item">
+            <div class="premium__fake-dot"></div>
+            <div class="premium__fake-text">
+              <div class="premium__fake-line" style="width:80%"></div>
+              <div class="premium__fake-line" style="width:65%"></div>
+            </div>
+          </div>
+          <div class="premium__fake-item">
+            <div class="premium__fake-dot"></div>
+            <div class="premium__fake-text">
+              <div class="premium__fake-line" style="width:95%"></div>
+              <div class="premium__fake-line" style="width:80%"></div>
+              <div class="premium__fake-line" style="width:50%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="premium__overlay">
+          <div class="premium__lock-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+          </div>
+          <h3 class="premium__overlay-title">Unlock Your Full Report</h3>
+          <p class="premium__overlay-desc">Get detailed remediation steps, a personalized action plan, quarterly re-assessments, and priority support.</p>
+          <div class="premium__features">
+            <div class="premium__feature">
+              <span class="premium__feature-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Step-by-step remediation guide
+            </div>
+            <div class="premium__feature">
+              <span class="premium__feature-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Personalized family action plan
+            </div>
+            <div class="premium__feature">
+              <span class="premium__feature-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Quarterly re-assessment
+            </div>
+            <div class="premium__feature">
+              <span class="premium__feature-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Priority expert support
+            </div>
+          </div>
+          <div class="premium__price">$29<span class="premium__price-period">/month</span></div>
+          <button class="premium__buy-btn" id="premiumBtn">
+            Unlock Full Report
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions (Share + Learn More) -->
+      <div class="actions">
+        <button class="actions__btn actions__btn--share" id="shareBtn" aria-label="Share your score">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share Your Score
+        </button>
+        <a href="https://www.syba.io" class="actions__btn actions__btn--cta" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 7v9c0 8.5 5.1 16.4 12 18 6.9-1.6 12-9.5 12-18V7L16 2z" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="1.5"/></svg>
+          Want 24/7 Protection? Learn About SYBA
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       Footer
+       ==================================================================== -->
+
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__powered">Powered by <strong>SYBA</strong> &mdash; Personal Cybersecurity for Families</p>
+      <div class="footer__links">
+        <a href="https://www.syba.io" class="footer__link" target="_blank" rel="noopener">syba.io</a>
+        <span class="footer__sep" aria-hidden="true"></span>
+        <a href="https://www.syba.io/privacy" class="footer__link" target="_blank" rel="noopener">Privacy Policy</a>
+        <span class="footer__sep" aria-hidden="true"></span>
+        <a href="https://www.syba.io/terms" class="footer__link" target="_blank" rel="noopener">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

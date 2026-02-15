@@ -29,3 +29,6 @@ __pycache__/
 
 # Google Workspace MCP (standalone repo, cloned separately)
 hardened-google-workspace-mcp/
+
+# Embedded repos (use submodules if needed)
+mcp/pumpfun-mcp/

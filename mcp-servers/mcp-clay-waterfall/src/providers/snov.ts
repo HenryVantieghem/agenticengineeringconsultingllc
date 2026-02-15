@@ -1,0 +1,224 @@
+/**
+ * Snov.io provider
+ *
+ * Auth: OAuth client_credentials flow — uses SNOV_USER_ID + SNOV_API_KEY
+ * to obtain a short-lived access token, which is then used for all calls.
+ *
+ * Endpoints used:
+ * - Token:              POST /v1/oauth/access_token
+ * - Email Finder:       POST /v1/get-emails-from-names
+ * - Domain Search:      POST /v2/get-emails-from-domain
+ * - Email Verifier:     POST /v1/get-emails-verification-status
+ *
+ * Docs: https://snov.io/knowledgebase/category/api/
+ */
+
+import type {
+  EnrichmentProvider,
+  EmailResult,
+  PhoneResult,
+  PersonResult,
+  DecisionMakerResult,
+} from "../types.js";
+import { fetchWithRetry, log } from "../waterfall.js";
+
+const BASE = "https://api.snov.io";
+
+export class SnovProvider implements EnrichmentProvider {
+  name = "snov.io";
+  private userId: string | undefined;
+  private apiKey: string | undefined;
+  private accessToken: string | null = null;
+  private tokenExpiry = 0;
+
+  constructor() {
+    this.userId = process.env.SNOV_USER_ID;
+    this.apiKey = process.env.SNOV_API_KEY;
+  }
+
+  isConfigured(): boolean {
+    return !!this.userId && !!this.apiKey;
+  }
+
+  // -----------------------------------------------------------------------
+  // Auth
+  // -----------------------------------------------------------------------
+
+  private async getToken(): Promise<string> {
+    if (this.accessToken && Date.now() < this.tokenExpiry) {
+      return this.accessToken;
+    }
+
+    const res = await fetchWithRetry(`${BASE}/v1/oauth/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "client_credentials",
+        client_id: this.userId,
+        client_secret: this.apiKey,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Snov token request failed: HTTP ${res.status}`);
+    }
+
+    const json = (await res.json()) as {
+      access_token?: string;
+      expires_in?: number;
+    };
+
+    if (!json.access_token) throw new Error("Snov token response missing access_token");
+
+    this.accessToken = json.access_token;
+    // Expire 60s early to be safe
+    this.tokenExpiry = Date.now() + ((json.expires_in ?? 3600) - 60) * 1000;
+    return this.accessToken;
+  }
+
+  private async post(path: string, body: Record<string, unknown>): Promise<unknown> {
+    const token = await this.getToken();
+
+    const res = await fetchWithRetry(`${BASE}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      log("warn", `Snov ${path} HTTP ${res.status}`);
+      return null;
+    }
+
+    return res.json();
+  }
+
+  // -----------------------------------------------------------------------
+  // findEmail
+  // -----------------------------------------------------------------------
+
+  async findEmail(name: string, domain: string): Promise<EmailResult | null> {
+    const [firstName, ...rest] = name.trim().split(/\s+/);
+    const lastName = rest.join(" ");
+
+    const json = (await this.post("/v1/get-emails-from-names", {
+      firstName,
+      lastName,
+      domain,
+    })) as {
+      success?: boolean;
+      data?: { emails?: Array<{ email?: string; emailStatus?: string }> };
+    } | null;
+
+    if (!json?.data?.emails?.length) return null;
+
+    const best = json.data.emails[0];
+    if (!best.email) return null;
+
+    return {
+      email: best.email,
+      verified: best.emailStatus === "valid",
+      confidence: best.emailStatus === "valid" ? 90 : 60,
+    };
+  }
+
+  // -----------------------------------------------------------------------
+  // findPhone (Snov doesn't have a dedicated phone endpoint — returns null)
+  // -----------------------------------------------------------------------
+
+  async findPhone(_name: string, _company: string): Promise<PhoneResult | null> {
+    return null;
+  }
+
+  // -----------------------------------------------------------------------
+  // enrichPerson
+  // -----------------------------------------------------------------------
+
+  async enrichPerson(identifier: {
+    email?: string;
+    name?: string;
+    company?: string;
+  }): Promise<PersonResult | null> {
+    if (!identifier.email) return null;
+
+    const json = (await this.post("/v1/get-profile-by-email", {
+      email: identifier.email,
+    })) as {
+      success?: boolean;
+      data?: {
+        name?: string;
+        firstName?: string;
+        lastName?: string;
+        currentJob?: Array<{
+          companyName?: string;
+          position?: string;
+        }>;
+        social?: Array<{ link?: string; type?: string }>;
+        locality?: string;
+        country?: string;
+      };
+    } | null;
+
+    if (!json?.data) return null;
+
+    const d = json.data;
+    const currentJob = d.currentJob?.[0];
+    const linkedin = d.social?.find((s) => s.type === "linkedin");
+
+    return {
+      name: d.name ?? ([d.firstName, d.lastName].filter(Boolean).join(" ") || null),
+      email: identifier.email,
+      phone: null,
+      title: currentJob?.position ?? null,
+      linkedin_url: linkedin?.link ?? null,
+      company: currentJob?.companyName ?? identifier.company ?? null,
+      location: [d.locality, d.country].filter(Boolean).join(", ") || null,
+    };
+  }
+
+  // -----------------------------------------------------------------------
+  // findDecisionMakers (via domain email search)
+  // -----------------------------------------------------------------------
+
+  async findDecisionMakers(
+    _company: string,
+    domain: string,
+    titles: string[],
+  ): Promise<DecisionMakerResult[]> {
+    const json = (await this.post("/v2/get-emails-from-domain", {
+      domain,
+      type: "all",
+      limit: 20,
+    })) as {
+      success?: boolean;
+      data?: Array<{
+        email?: string;
+        firstName?: string;
+        lastName?: string;
+        position?: string;
+        sourcePage?: string;
+      }>;
+    } | null;
+
+    if (!json?.data?.length) return [];
+
+    const titleLower = titles.map((t) => t.toLowerCase());
+
+    return json.data
+      .filter((e) => {
+        if (!e.position) return false;
+        const pos = e.position.toLowerCase();
+        return titleLower.some((t) => pos.includes(t));
+      })
+      .map((e) => ({
+        name: [e.firstName, e.lastName].filter(Boolean).join(" "),
+        title: e.position ?? "",
+        email: e.email ?? null,
+        linkedin_url: null,
+        confidence: 70,
+      }));
+  }
+}

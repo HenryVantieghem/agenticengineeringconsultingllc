@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Tutoring Business, Automated</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a1a;
+    --bg-card: #12122a;
+    --accent: #6C63FF;
+    --accent-glow: rgba(108, 99, 255, 0.3);
+    --text: #ffffff;
+    --text-muted: #8888aa;
+    --text-dim: #555577;
+    --success: #00d97e;
+    --danger: #ff4d6a;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* --- SLIDES --- */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    position: relative;
+    scroll-snap-align: start;
+  }
+
+  .slide-inner {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  /* --- NAVIGATION DOTS --- */
+  .nav-dots {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 100;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-dot.active,
+  .nav-dot:hover {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: scale(1.3);
+  }
+
+  /* --- TYPOGRAPHY --- */
+  h1 {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 1.35rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+
+  .accent { color: var(--accent); }
+  .success { color: var(--success); }
+  .danger { color: var(--danger); }
+
+  .label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    background: rgba(108, 99, 255, 0.12);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* --- BIG NUMBER --- */
+  .big-number {
+    font-size: 5rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .big-number.counter {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- CARDS --- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px 28px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .card .icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* --- VS LAYOUT (Slide 2) --- */
+  .vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 50px;
+  }
+
+  .vs-block {
+    text-align: center;
+  }
+
+  .vs-divider {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* --- CASE STUDY GRID --- */
+  .case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .case-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px 24px;
+  }
+
+  .case-card .name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .case-card .niche {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .case-card .revenue {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--success);
+    margin-bottom: 8px;
+  }
+
+  .case-card .detail {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* --- STAT ROW --- */
+  .stat-row {
+    display: flex;
+    gap: 60px;
+    margin-top: 50px;
+    flex-wrap: wrap;
+  }
+
+  .stat-block {
+    text-align: center;
+  }
+
+  .stat-block .stat-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .stat-block .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 180px;
+  }
+
+  /* --- CHECKLIST --- */
+  .checklist {
+    list-style: none;
+    margin-top: 30px;
+  }
+
+  .checklist li {
+    font-size: 1.2rem;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .checklist li .check {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(108, 99, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* --- CTA BUTTON --- */
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 18px 48px;
+    border-radius: 12px;
+    text-decoration: none;
+    margin-top: 40px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px var(--accent-glow);
+  }
+
+  /* --- PILLAR NUMBERS --- */
+  .pillar-num {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent);
+    opacity: 0.3;
+    position: absolute;
+    top: 16px;
+    right: 24px;
+  }
+
+  .card { position: relative; }
+
+  /* --- FOOTER --- */
+  .footer-text {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 20px;
+  }
+
+  /* --- ANIMATIONS --- */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .fade-up.delay-1 { transition-delay: 0.1s; }
+  .fade-up.delay-2 { transition-delay: 0.2s; }
+  .fade-up.delay-3 { transition-delay: 0.3s; }
+  .fade-up.delay-4 { transition-delay: 0.4s; }
+
+  /* --- KEYBOARD HINT --- */
+  .key-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 768px) {
+    .slide { padding: 40px 24px; }
+    h1 { font-size: 2.4rem; }
+    h2 { font-size: 1.8rem; }
+    .big-number { font-size: 3rem; }
+    .vs-container { flex-direction: column; gap: 30px; }
+    .case-grid { grid-template-columns: 1fr; }
+    .stat-row { gap: 30px; }
+    .nav-dots { right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION DOTS -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<div class="key-hint">Arrow keys or scroll to navigate</div>
+
+<!-- ========== SLIDE 1: TITLE ========== -->
+<section class="slide" id="slide-0">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">Agentic Engineering Consulting</span>
+    </div>
+    <h1 class="fade-up delay-1">Your Tutoring Business,<br><span class="accent">Automated.</span></h1>
+    <p class="subtitle fade-up delay-2" style="margin: 0 auto;">
+      Stop trading hours for dollars. Build a content engine, a lead funnel,<br>and an outreach system that works while you teach.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 2: THE GAP ========== -->
+<section class="slide" id="slide-1">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">The Reality</span>
+    </div>
+    <h2 class="fade-up delay-1">Same Skill. Different System.</h2>
+    <div class="vs-container fade-up delay-2">
+      <div class="vs-block">
+        <div class="big-number danger counter" data-target="40" data-prefix="$" data-suffix="/hr">$0/hr</div>
+        <p class="subtitle" style="margin-top: 8px;">Average tutor</p>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div class="vs-block">
+        <div class="big-number success counter" data-target="1000" data-prefix="$" data-suffix="/hr">$0/hr</div>
+        <p class="subtitle" style="margin-top: 8px;">Top tutors</p>
+      </div>
+    </div>
+    <p class="subtitle fade-up delay-3" style="margin: 40px auto 0; text-align: center; max-width: 600px;">
+      The difference is not talent. It is not credentials.<br>It is a <strong style="color: #fff;">system</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 3: THE PROBLEM ========== -->
+<section class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">The Problem</span>
+    </div>
+    <h2 class="fade-up delay-1">You Are Incredible at Teaching.<br><span class="danger">But That Is the Problem.</span></h2>
+    <div class="card-grid">
+      <div class="card fade-up delay-1">
+        <span class="icon">&#9200;</span>
+        <h3>Time-Capped</h3>
+        <p>40 hours a week is your ceiling. You cannot scale yourself. Every dollar requires your presence.</p>
+      </div>
+      <div class="card fade-up delay-2">
+        <span class="icon">&#128172;</span>
+        <h3>Referral-Dependent</h3>
+        <p>No content, no funnel, no pipeline. When referrals slow down, revenue drops — and you have no control.</p>
+      </div>
+      <div class="card fade-up delay-3">
+        <span class="icon">&#128200;</span>
+        <h3>No Content System</h3>
+        <p>You know you should post. You never have time. The tutors earning millions post daily — with a system, not willpower.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 4: THE SYSTEM ========== -->
+<section class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">The Solution</span>
+    </div>
+    <h2 class="fade-up delay-1">Three Pillars. <span class="accent">One System.</span></h2>
+    <div class="card-grid">
+      <div class="card fade-up delay-1">
+        <span class="pillar-num">01</span>
+        <span class="icon">&#127909;</span>
+        <h3>Content Engine</h3>
+        <p>Daily scripts, presentations, captions, and thumbnails — researched and written by AI. Optimized for YouTube, TikTok, and Instagram. You just hit record.</p>
+      </div>
+      <div class="card fade-up delay-2">
+        <span class="pillar-num">02</span>
+        <span class="icon">&#129520;</span>
+        <h3>Lead Funnel</h3>
+        <p>Free lead magnets, email sequences, and landing pages that capture interest 24/7. Turn viewers into subscribers into paying students — automatically.</p>
+      </div>
+      <div class="card fade-up delay-3">
+        <span class="pillar-num">03</span>
+        <span class="icon">&#128640;</span>
+        <h3>Automated Outreach</h3>
+        <p>Prospect research, personalized emails, and follow-up sequences that fill your calendar. New students every week without cold calling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 5: CASE STUDIES ========== -->
+<section class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">Proof It Works</span>
+    </div>
+    <h2 class="fade-up delay-1">Tutors Who Built the System</h2>
+    <div class="case-grid">
+      <div class="case-card fade-up delay-1">
+        <div class="name">Ali Abdaal</div>
+        <div class="niche">Productivity &amp; YouTube Growth</div>
+        <div class="revenue">$5-6M/yr</div>
+        <div class="detail">18 staff. $1 micro-course converts to $995 program. Batch-films monthly. Built a brand, not a practice.</div>
+      </div>
+      <div class="case-card fade-up delay-2">
+        <div class="name">The Organic Chemistry Tutor</div>
+        <div class="niche">STEM Education</div>
+        <div class="revenue">$1.5-2.5M/yr</div>
+        <div class="detail">7.78M subscribers. 25M+ views/month. Videos from 2018 still ranking. Zero fancy funnels — just SEO-optimized content.</div>
+      </div>
+      <div class="case-card fade-up delay-3">
+        <div class="name">Steven Menking</div>
+        <div class="niche">SAT/ACT Test Prep</div>
+        <div class="revenue">$500K+/yr</div>
+        <div class="detail">$1,000/hour. Works 20-25 hrs/week. Wall Street background. Premium positioning + elite niche.</div>
+      </div>
+      <div class="case-card fade-up delay-4">
+        <div class="name">Gabby Wallace</div>
+        <div class="niche">English as Second Language</div>
+        <div class="revenue">$400-600K/yr</div>
+        <div class="detail">2.29M subscribers. 100M+ views. Waitlist model creates scarcity. One narrow, painful problem.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 6: THE MARKET ========== -->
+<section class="slide" id="slide-5">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">The Opportunity</span>
+    </div>
+    <h2 class="fade-up delay-1">This Is Not a Niche.<br><span class="accent">This Is a Massive Market.</span></h2>
+    <div class="stat-row fade-up delay-2" style="justify-content: center;">
+      <div class="stat-block">
+        <div class="stat-value accent counter" data-target="12.8" data-prefix="$" data-suffix="B" data-decimals="1">$0B</div>
+        <div class="stat-label">Global online tutoring market (2025)</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value success counter" data-target="14.5" data-suffix="%" data-decimals="1">0%</div>
+        <div class="stat-label">Annual growth rate (CAGR)</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value counter" data-target="25" data-prefix="$" data-suffix="B+">$0B+</div>
+        <div class="stat-label">Projected by 2030</div>
+      </div>
+    </div>
+    <p class="subtitle fade-up delay-3" style="margin: 50px auto 0; text-align: center; max-width: 650px;">
+      AI is disrupting basic tutoring. But tutors who build a brand,<br>create content, and own their funnel <strong style="color: #fff;">win bigger than ever</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 7: WHAT YOU GET ========== -->
+<section class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">What You Get</span>
+    </div>
+    <h2 class="fade-up delay-1">Everything. Done for You.<br><span class="accent">You Just Hit Record.</span></h2>
+    <ul class="checklist">
+      <li class="fade-up delay-1"><span class="check">&#10003;</span> Daily video scripts tailored to your niche and audience</li>
+      <li class="fade-up delay-1"><span class="check">&#10003;</span> Presentation decks for screen-share recording (like this one)</li>
+      <li class="fade-up delay-2"><span class="check">&#10003;</span> Social media captions, hashtags, and posting schedule</li>
+      <li class="fade-up delay-2"><span class="check">&#10003;</span> Lead magnet creation (free mini-courses, PDFs, diagnostics)</li>
+      <li class="fade-up delay-3"><span class="check">&#10003;</span> Email sequences that nurture leads into paying students</li>
+      <li class="fade-up delay-3"><span class="check">&#10003;</span> Prospect research and automated outreach campaigns</li>
+      <li class="fade-up delay-4"><span class="check">&#10003;</span> Landing pages, funnels, and booking automation</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== SLIDE 8: CTA ========== -->
+<section class="slide" id="slide-7">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">Next Step</span>
+    </div>
+    <h1 class="fade-up delay-1">Book 15 Minutes.<br><span class="accent">See Your System.</span></h1>
+    <p class="subtitle fade-up delay-2" style="margin: 0 auto;">
+      No pitch. No pressure. I will show you exactly what your<br>content engine, lead funnel, and outreach system looks like — built for your niche.
+    </p>
+    <a href="https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min" target="_blank" class="cta-btn fade-up delay-3">
+      Book Your Free Strategy Call
+    </a>
+    <p class="footer-text fade-up delay-4">Henry Vantieghem &middot; Agentic Engineering Consulting</p>
+  </div>
+</section>
+
+<script>
+  // --- NAVIGATION DOTS ---
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot';
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => {
+      slides[i].scrollIntoView({ behavior: 'smooth' });
+    });
+    navDots.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll('.nav-dot');
+
+  // --- INTERSECTION OBSERVER (visibility + dots) ---
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Activate fade-ups
+        entry.target.querySelectorAll('.fade-up').forEach(el => el.classList.add('visible'));
+
+        // Update dots
+        const idx = Array.from(slides).indexOf(entry.target);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+        // Trigger counters
+        entry.target.querySelectorAll('.counter').forEach(startCounter);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // --- ANIMATED COUNTERS ---
+  const countedSet = new Set();
+
+  function startCounter(el) {
+    if (countedSet.has(el)) return;
+    countedSet.add(el);
+
+    const target = parseFloat(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = (target * eased).toFixed(decimals);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  // --- KEYBOARD NAVIGATION ---
+  let currentSlide = 0;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      currentSlide = Math.min(currentSlide + 1, slides.length - 1);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      currentSlide = Math.max(currentSlide - 1, 0);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Keep currentSlide in sync with scroll
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        currentSlide = Array.from(slides).indexOf(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => scrollObserver.observe(s));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Production-ready mobile app starter kits. ExpoLaunch (React Native) and SwiftLaunch (SwiftUI) — auth, payments, real-time data, 15+ screens. Ship in days, not months. $149 one-time.">
+  <meta name="keywords" content="mobile app template, React Native starter kit, SwiftUI starter kit, Expo template, Supabase, RevenueCat, StoreKit 2, app boilerplate">
+  <meta property="og:title" content="Starter Kits | Agentic Engineering">
+  <meta property="og:description" content="Ship your app in days, not months. Production-ready mobile app templates with auth, payments, real-time data, and beautiful UI.">
+  <meta property="og:type" content="website">
+  <title>Starter Kits | Agentic Engineering — Ship Your App in Days</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0A0A0B;
+      --white: #FAFAF9;
+      --cream: #F5F0EB;
+      --accent: #E8533F;
+      --accent-glow: #FF6B57;
+      --muted: #8A8A8A;
+      --border: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,11,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      transition: all 0.3s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-glow) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(232,83,63,0.3);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(232,83,63,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s ease-out;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(48px, 8vw, 112px);
+      line-height: 0.95;
+      font-weight: 400;
+      max-width: 900px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease-out 0.1s both;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 56px;
+      animation: fadeUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      animation: fadeUp 0.8s ease-out 0.3s both;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(232,83,63,0.35);
+    }
+
+    .btn-ghost {
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--glass);
+    }
+
+    .hero-note {
+      margin-top: 48px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      animation: fadeUp 0.8s ease-out 0.4s both;
+    }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 100px 48px;
+      gap: 48px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 40px 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      transition: all 0.4s;
+    }
+
+    .stat:hover {
+      border-color: rgba(232,83,63,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .stat-number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* SECTIONS */
+    .section {
+      padding: 120px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      margin-bottom: 64px;
+      max-width: 700px;
+    }
+
+    .section-centered .section-label,
+    .section-centered .section-title {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* PRODUCTS GRID */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .product-card {
+      padding: 56px 44px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .product-card:hover::before { opacity: 1; }
+
+    .product-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+
+    .product-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 28px;
+    }
+
+    .product-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 40px;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    .product-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      margin-bottom: 32px;
+    }
+
+    .product-price {
+      margin-bottom: 36px;
+    }
+
+    .product-price .amount {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .product-price .price-type {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .product-features {
+      list-style: none;
+      margin-bottom: 40px;
+    }
+
+    .product-features li {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: rgba(250,250,249,0.8);
+      font-weight: 300;
+    }
+
+    .product-features li::before {
+      content: '\2713';
+      color: var(--accent);
+      margin-right: 12px;
+      font-weight: 700;
+    }
+
+    .product-btn {
+      display: block;
+      text-align: center;
+      padding: 18px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    .product-btn:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(232,83,63,0.35);
+    }
+
+    /* TECH STACK */
+    .tech-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(232,83,63,0.03) 0%, transparent 100%);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .tech-item {
+      text-align: center;
+      padding: 36px 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      transition: all 0.4s;
+    }
+
+    .tech-item:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+    }
+
+    .tech-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .tech-item span:last-child {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    /* FEATURES GRID */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      padding: 48px 36px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 36px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* FAQ */
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-toggle {
+      display: none;
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--white);
+      transition: color 0.3s;
+      user-select: none;
+      list-style: none;
+    }
+
+    .faq-question:hover {
+      color: var(--accent);
+    }
+
+    .faq-question::after {
+      content: '+';
+      font-family: 'Instrument Serif', serif;
+      font-size: 28px;
+      color: var(--accent);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .faq-toggle:checked + .faq-question::after {
+      content: '\2212';
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+    }
+
+    .faq-toggle:checked ~ .faq-answer {
+      max-height: 200px;
+      padding-bottom: 24px;
+    }
+
+    .faq-answer p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      text-align: center;
+      padding: 160px 48px;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,83,63,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+      font-weight: 300;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+    }
+
+    .footer-logo {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.3s;
+      font-weight: 400;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .footer-email a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.3s;
+    }
+
+    .footer-email a:hover { color: var(--white); }
+
+    /* SCROLL ANIMATE */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .products-grid { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .tech-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 60px; }
+      .stats { grid-template-columns: 1fr; padding: 60px 24px; }
+      .section { padding: 80px 24px; }
+      .products-grid { grid-template-columns: 1fr; }
+      .product-card { padding: 40px 28px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .tech-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-actions { flex-direction: column; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+      .cta-section { padding: 100px 24px; }
+      footer { padding: 48px 24px; }
+      .footer-top { flex-direction: column; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .footer-links { flex-wrap: wrap; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">Agentic <span>Engineering</span></a>
+    <div class="nav-links">
+      <a href="#products">Products</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#products" class="nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Starter Kits
+    </div>
+    <h1>Ship your app in <em>days,</em> not months</h1>
+    <p class="hero-sub">Production-ready mobile app templates with auth, payments, real-time data, and beautiful UI. Just add your idea.</p>
+    <div class="hero-actions">
+      <a href="#products" class="btn-primary">Browse Kits</a>
+      <a href="#products" class="btn-ghost">View Source</a>
+    </div>
+    <p class="hero-note">Used by indie developers, startups, and agencies worldwide</p>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat reveal">
+      <div class="stat-number">15+</div>
+      <div class="stat-label">screens included</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-number">&lt;15 min</div>
+      <div class="stat-label">setup time</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-number">$149</div>
+      <div class="stat-label">one-time price</div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section class="section section-centered" id="products">
+    <div class="section-label">Products</div>
+    <h2 class="section-title" id="pricing">Pick your stack. Start shipping.</h2>
+    <div class="products-grid">
+
+      <!-- ExpoLaunch -->
+      <div class="product-card reveal">
+        <div class="product-badge">React Native</div>
+        <h3>ExpoLaunch</h3>
+        <p class="product-subtitle">Expo + Supabase + RevenueCat</p>
+        <div class="product-price">
+          <div class="amount">$149</div>
+          <div class="price-type">One-time</div>
+        </div>
+        <ul class="product-features">
+          <li>15+ polished screens</li>
+          <li>Email + Apple + Google Auth</li>
+          <li>In-app purchases (RevenueCat)</li>
+          <li>Real-time data sync</li>
+          <li>Push notifications</li>
+          <li>Dark mode + TypeScript</li>
+          <li>Supabase migrations included</li>
+          <li>CI/CD with EAS Build</li>
+        </ul>
+        <a href="#" class="product-btn">Buy ExpoLaunch &mdash; $149</a>
+      </div>
+
+      <!-- SwiftLaunch -->
+      <div class="product-card reveal">
+        <div class="product-badge">SwiftUI</div>
+        <h3>SwiftLaunch</h3>
+        <p class="product-subtitle">SwiftUI + Supabase + StoreKit 2</p>
+        <div class="product-price">
+          <div class="amount">$149</div>
+          <div class="price-type">One-time</div>
+        </div>
+        <ul class="product-features">
+          <li>15+ polished screens</li>
+          <li>Sign in with Apple + Email</li>
+          <li>StoreKit 2 subscriptions</li>
+          <li>Real-time data sync</li>
+          <li>Push notifications (APNs)</li>
+          <li>WidgetKit integration</li>
+          <li>@Observable + async/await</li>
+          <li>Xcode Cloud CI/CD ready</li>
+        </ul>
+        <a href="#" class="product-btn">Buy SwiftLaunch &mdash; $149</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section class="tech-section">
+    <div class="section section-centered">
+      <div class="section-label">Tech Stack</div>
+      <h2 class="section-title">Built with the best tools</h2>
+      <div class="tech-grid">
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#9883;</span>
+          <span>Expo</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#9889;</span>
+          <span>Supabase</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#128176;</span>
+          <span>RevenueCat</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#63743;</span>
+          <span>SwiftUI</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#127991;</span>
+          <span>StoreKit 2</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#123; &#125;</span>
+          <span>TypeScript</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#127912;</span>
+          <span>NativeWind</span>
+        </div>
+        <div class="tech-item reveal">
+          <span class="tech-icon">&#128230;</span>
+          <span>Zustand</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT'S INSIDE -->
+  <section class="section section-centered" id="features">
+    <div class="section-label">What&rsquo;s Inside</div>
+    <h2 class="section-title">Everything you need to ship</h2>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#128274;</span>
+        <h3>Authentication</h3>
+        <p>Email, Apple, Google sign-in with full session management. Secure tokens, auto-refresh, and protected routes out of the box.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#128179;</span>
+        <h3>Payments</h3>
+        <p>RevenueCat or StoreKit 2 subscriptions and one-time purchases. Paywalls, entitlements, and receipt validation pre-wired.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#9889;</span>
+        <h3>Real-time</h3>
+        <p>Live data sync with Supabase Realtime. Presence, broadcast, and PostgreSQL changes streamed instantly to the client.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#128276;</span>
+        <h3>Push Notifications</h3>
+        <p>Expo or APNs with rich notifications. Segment users, schedule sends, and handle deep links from notification taps.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#127912;</span>
+        <h3>Beautiful UI</h3>
+        <p>15+ screens with dark mode, haptic feedback, and smooth animations. Centralized theme system for easy customization.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">&#128451;</span>
+        <h3>Database</h3>
+        <p>Supabase PostgreSQL with row-level security policies and migrations. Type-safe queries and real-time subscriptions included.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-centered" id="faq">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Questions? We&rsquo;ve got answers.</h2>
+    <div class="faq-list">
+
+      <div class="faq-item reveal">
+        <input type="checkbox" id="faq-1" class="faq-toggle">
+        <label for="faq-1" class="faq-question">What do I get when I purchase?</label>
+        <div class="faq-answer">
+          <p>Private GitHub repo access with the full source code, documentation, and setup guide. You own the code forever.</p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <input type="checkbox" id="faq-2" class="faq-toggle">
+        <label for="faq-2" class="faq-question">Can I use it for multiple projects?</label>
+        <div class="faq-answer">
+          <p>Yes! One purchase = unlimited projects. No per-project licensing. Build as many apps as you want.</p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <input type="checkbox" id="faq-3" class="faq-toggle">
+        <label for="faq-3" class="faq-question">What if I need help setting up?</label>
+        <div class="faq-answer">
+          <p>Every kit includes a detailed setup guide. Plus, you can book a free 30-min call with us for personalized onboarding.</p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <input type="checkbox" id="faq-4" class="faq-toggle">
+        <label for="faq-4" class="faq-question">Do you offer refunds?</label>
+        <div class="faq-answer">
+          <p>Yes, 30-day money-back guarantee. No questions asked. If it&rsquo;s not for you, we&rsquo;ll refund you in full.</p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <input type="checkbox" id="faq-5" class="faq-toggle">
+        <label for="faq-5" class="faq-question">Can I customize the design?</label>
+        <div class="faq-answer">
+          <p>Absolutely. The templates use a centralized theme system. Change colors, fonts, and layouts easily from a single config file.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to <em>ship?</em></h2>
+    <p>Stop building from scratch. Start with a production-ready template and focus on what makes your app unique.</p>
+    <a href="#products" class="btn-primary">Get Started &mdash; $149</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-logo">Agentic <span>Engineering</span></div>
+      <div class="footer-links">
+        <a href="#products">Products</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="mailto:henry@agenticengineering.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">&copy; 2026 Agentic Engineering Consulting</div>
+      <div class="footer-email"><a href="mailto:henry@agenticengineering.com">henry@agenticengineering.com</a></div>
+    </div>
+  </footer>
+
+  <!-- SCROLL ANIMATIONS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var reveals = document.querySelectorAll('.reveal');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+      reveals.forEach(function(el) {
+        observer.observe(el);
+      });
+    });
+  </script>
+
+</body>
+</html>

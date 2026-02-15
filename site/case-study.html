@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="How Agentic Engineering built an AI sales engine that delivers 10+ researched leads every morning for SYBA, a cybersecurity consultancy spanning Belgium, Europe, and the USA.">
+  <title>Case Study: SYBA AI Sales Engine | Agentic Engineering</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Case Study: AI Sales Engine Delivering 10+ Leads Daily">
+  <meta property="og:description" content="How we built an AI-powered lead intelligence dashboard for a cybersecurity consultancy spanning 3 regions and 6 industry segments.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agenticengineering.netlify.app/case-study.html">
+  <meta property="og:site_name" content="Agentic Engineering Consulting">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Case Study: AI Sales Engine Delivering 10+ Leads Daily">
+  <meta name="twitter:description" content="How we built an AI-powered lead intelligence dashboard for a cybersecurity consultancy spanning 3 regions and 6 industry segments.">
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <style>
+    :root {
+      --black: #0A0A0B;
+      --white: #FAFAF9;
+      --cream: #F5F0EB;
+      --accent: #E8533F;
+      --accent-glow: #FF6B57;
+      --muted: #8A8A8A;
+      --border: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,11,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      transition: all 0.3s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-glow) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(232,83,63,0.3);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(232,83,63,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s ease-out;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 1.05;
+      font-weight: 400;
+      max-width: 900px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease-out 0.1s both;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 620px;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 56px;
+      animation: fadeUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      animation: fadeUp 0.8s ease-out 0.3s both;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(232,83,63,0.35);
+    }
+
+    .btn-ghost {
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--glass);
+    }
+
+    /* SECTIONS */
+    .section {
+      padding: 120px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      margin-bottom: 64px;
+      max-width: 700px;
+    }
+
+    /* LOOM VIDEO PLACEHOLDER */
+    .loom-section {
+      padding: 0 48px 80px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .loom-placeholder {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: all 0.4s;
+      overflow: hidden;
+    }
+
+    .loom-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(232,83,63,0.06) 0%, transparent 50%, rgba(232,83,63,0.03) 100%);
+      pointer-events: none;
+    }
+
+    .loom-placeholder:hover {
+      border-color: rgba(232,83,63,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .loom-play-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .loom-play-btn::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 14px 0 14px 24px;
+      border-color: transparent transparent transparent var(--white);
+      margin-left: 4px;
+    }
+
+    .loom-placeholder:hover .loom-play-btn {
+      background: var(--accent-glow);
+      transform: scale(1.1);
+      box-shadow: 0 8px 40px rgba(232,83,63,0.4);
+    }
+
+    .loom-label {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* PROBLEM SECTION */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .problem-card {
+      padding: 48px 36px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .problem-card:hover::before { opacity: 1; }
+
+    .problem-card:hover {
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-4px);
+    }
+
+    .problem-icon {
+      font-size: 36px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .problem-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .problem-card p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* DASHBOARD FEATURE CARDS */
+    .dashboard-section {
+      background: linear-gradient(180deg, rgba(232,83,63,0.03) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      overflow: hidden;
+      transition: all 0.4s;
+      position: relative;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-card:hover {
+      border-color: rgba(232,83,63,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .feature-mockup {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(232,83,63,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    /* Mockup: Leads Table */
+    .mockup-table {
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .mockup-table-header {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .mockup-th {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .mockup-row {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      align-items: center;
+    }
+
+    .mockup-name {
+      font-size: 11px;
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .mockup-company {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .mockup-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .score-high {
+      background: rgba(232,83,63,0.15);
+      color: var(--accent);
+    }
+
+    .score-med {
+      background: rgba(255,180,0,0.12);
+      color: #FFB400;
+    }
+
+    /* Mockup: Prospect Brief */
+    .mockup-brief {
+      width: 100%;
+      max-width: 260px;
+      text-align: left;
+    }
+
+    .mockup-brief-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mockup-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .mockup-brief-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .mockup-brief-title {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .mockup-brief-block {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .mockup-brief-label {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .mockup-brief-text {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .mockup-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    /* Mockup: Briefing */
+    .mockup-briefing {
+      width: 100%;
+      max-width: 260px;
+      text-align: left;
+    }
+
+    .mockup-briefing-date {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 300;
+    }
+
+    .mockup-briefing-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 16px;
+      margin-bottom: 14px;
+      color: var(--white);
+    }
+
+    .mockup-hot-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(232,83,63,0.2);
+      border-radius: 8px;
+      background: rgba(232,83,63,0.05);
+      margin-bottom: 8px;
+    }
+
+    .mockup-hot-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+
+    .mockup-hot-text {
+      font-size: 10px;
+      color: rgba(250,250,249,0.8);
+      font-weight: 400;
+    }
+
+    .mockup-action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .mockup-check {
+      color: var(--accent);
+      font-size: 12px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .mockup-action-text {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .feature-content {
+      padding: 32px 28px;
+    }
+
+    .feature-tag {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-content h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      margin-bottom: 12px;
+      font-weight: 400;
+    }
+
+    .feature-content p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* RESULTS / METRICS */
+    .results-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .metric-card {
+      text-align: center;
+      padding: 48px 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      transition: all 0.4s;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(232,83,63,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .metric-number {
+      font-family: 'Instrument Serif', serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* HOW IT WORKS - 3 STEPS */
+    .steps-section {
+      background: linear-gradient(180deg, rgba(232,83,63,0.03) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .step {
+      padding: 48px 32px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+
+    .step:hover { background: var(--glass); }
+
+    .step-num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* PRICING SECTION */
+    .pricing-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .pricing-card {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 48px;
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      background: rgba(232,83,63,0.03);
+      text-align: center;
+      position: relative;
+    }
+
+    .pricing-card::after {
+      content: 'SIMPLE PRICING';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: var(--white);
+      font-size: 11px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      padding: 6px 20px;
+      border-radius: 100px;
+    }
+
+    .pricing-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .pricing-card .pricing-sub {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 36px;
+      font-weight: 300;
+      line-height: 1.6;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pricing-amounts {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .pricing-amount {
+      text-align: center;
+    }
+
+    .pricing-amount .amount {
+      font-family: 'Instrument Serif', serif;
+      font-size: 48px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .pricing-amount .amount span {
+      font-size: 18px;
+      color: var(--muted);
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .pricing-amount .price-type {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .pricing-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: rgba(250,250,249,0.8);
+      font-weight: 300;
+    }
+
+    .pricing-features li::before {
+      content: '\2713';
+      color: var(--accent);
+      margin-right: 12px;
+      font-weight: 700;
+    }
+
+    .pricing-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .pricing-actions .alt-link {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 300;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .pricing-actions .alt-link:hover {
+      color: var(--white);
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      text-align: center;
+      padding: 160px 48px;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(232,83,63,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    .cta-email {
+      display: block;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+    }
+
+    .cta-email a {
+      color: var(--white);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .cta-email a:hover { color: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-left {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-right a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.3s;
+    }
+
+    .footer-right a:hover { color: var(--white); }
+
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 60px; }
+      .section { padding: 80px 24px; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+      footer { flex-direction: column; gap: 24px; text-align: center; }
+      .pricing-card { padding: 48px 24px; }
+      .pricing-amounts { gap: 24px; }
+      .pricing-amount .amount { font-size: 40px; }
+      .pricing-features { max-width: 100%; }
+      .loom-section { padding: 0 24px 60px; }
+      .cta-section { padding: 100px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Agentic<span>.</span></a>
+    <div class="nav-links">
+      <a href="#problem">The Problem</a>
+      <a href="#dashboard">The Dashboard</a>
+      <a href="#results">Results</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="nav-cta">Get This For Your Business</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Client Case Study
+    </div>
+    <h1>How We Built an AI Sales Engine That Delivers <em>10+ Researched Leads</em> Every Morning</h1>
+    <p class="hero-sub">A real case study from our work with SYBA &mdash; a cybersecurity consultancy spanning Belgium, Europe, and the USA.</p>
+    <div class="hero-actions">
+      <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Get This For Your Business</a>
+      <a href="#dashboard" class="btn-ghost">See the Dashboard</a>
+    </div>
+  </section>
+
+  <!-- LOOM VIDEO PLACEHOLDER -->
+  <section class="loom-section" id="loom-video">
+    <div class="loom-placeholder">
+      <div class="loom-play-btn"></div>
+      <span class="loom-label">Watch the 90-second walkthrough</span>
+    </div>
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section class="section" id="problem">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">SYBA needed leads across 3 regions and 6 industries. Manual prospecting wasn&rsquo;t cutting it.</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <span class="problem-icon">&#127758;</span>
+        <h3>3 Regions, 6 Segments, Zero System</h3>
+        <p>SYBA covers Belgium, broader Europe, and the USA. Their ideal customers span Insurance Brokers, Family Offices, Corporate HR, Law Firms, Wealth Managers, and MSPs. Finding qualified leads across all of these manually? Impossible to scale.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">&#9200;</span>
+        <h3>Hours Lost to Prospecting</h3>
+        <p>The team was spending hours every day researching companies, finding decision-makers, writing emails from scratch, and tracking who they&rsquo;d contacted. Time that should have been spent closing deals.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">&#128196;</span>
+        <h3>Generic Lead Data, No Context</h3>
+        <p>Off-the-shelf databases gave names and emails &mdash; but no industry context, no trigger events, no reason to reach out. Cold emails felt cold because they were.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">&#128202;</span>
+        <h3>No Way to Prioritize</h3>
+        <p>Without fit scoring or intelligence, every lead looked the same. The team couldn&rsquo;t tell a 9/10 prospect from a 4/10 &mdash; so they treated them all equally and wasted time on poor fits.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE BUILT -->
+  <section class="dashboard-section" id="dashboard">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">What We Built</div>
+      <h2 class="section-title">An AI-powered dashboard that does the work of a full-time research team.</h2>
+      <div class="feature-grid">
+
+        <!-- Feature 1: Live Leads Table -->
+        <div class="feature-card">
+          <div class="feature-mockup">
+            <div class="mockup-table">
+              <div class="mockup-table-header">
+                <span class="mockup-th">Name</span>
+                <span class="mockup-th">Company</span>
+                <span class="mockup-th">Fit</span>
+              </div>
+              <div class="mockup-row">
+                <span class="mockup-name">Sarah Chen</span>
+                <span class="mockup-company">Apex Insurance</span>
+                <span class="mockup-score score-high">9</span>
+              </div>
+              <div class="mockup-row">
+                <span class="mockup-name">Marc Dupont</span>
+                <span class="mockup-company">Fortis Legal</span>
+                <span class="mockup-score score-high">9</span>
+              </div>
+              <div class="mockup-row">
+                <span class="mockup-name">Lisa Van Berg</span>
+                <span class="mockup-company">Nordic Wealth</span>
+                <span class="mockup-score score-high">8</span>
+              </div>
+              <div class="mockup-row">
+                <span class="mockup-name">James Ortiz</span>
+                <span class="mockup-company">Shield MSP</span>
+                <span class="mockup-score score-med">7</span>
+              </div>
+              <div class="mockup-row">
+                <span class="mockup-name">Anna Peeters</span>
+                <span class="mockup-company">BrightHR Group</span>
+                <span class="mockup-score score-high">8</span>
+              </div>
+            </div>
+          </div>
+          <div class="feature-content">
+            <div class="feature-tag">Live Leads Table</div>
+            <h3>Every Lead Scored and Sorted</h3>
+            <p>Every lead scored 1&ndash;10, filtered by region and ICP segment. Name, company, title, fit score &mdash; all in one view. Click any row to see the full intelligence package.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2: Prospect Intelligence -->
+        <div class="feature-card">
+          <div class="feature-mockup">
+            <div class="mockup-brief">
+              <div class="mockup-brief-header">
+                <div class="mockup-avatar">SC</div>
+                <div>
+                  <div class="mockup-brief-name">Sarah Chen</div>
+                  <div class="mockup-brief-title">VP Risk &middot; Apex Insurance &middot; Brussels</div>
+                </div>
+              </div>
+              <div class="mockup-brief-block">
+                <div class="mockup-brief-label">Cold Email</div>
+                <div class="mockup-brief-text">Sarah &mdash; saw Apex just expanded into the Belgian SME market. With NIS2 enforcement in Q3, your new clients will need...</div>
+              </div>
+              <div class="mockup-brief-block">
+                <div class="mockup-brief-label">Day 3 Follow-Up</div>
+                <div class="mockup-brief-text">Quick follow-up on my note about NIS2 readiness for your SME portfolio...</div>
+              </div>
+              <div class="mockup-copy-btn">&#128203; Copy to clipboard</div>
+            </div>
+          </div>
+          <div class="feature-content">
+            <div class="feature-tag">Prospect Intelligence Packages</div>
+            <h3>Full Outreach, Ready to Send</h3>
+            <p>Click any lead for a full prospect brief, custom cold email, Day 3/7/14 follow-ups, and LinkedIn message. Copy with one click. Every message is personalized to the prospect&rsquo;s company and situation.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3: Daily Briefings -->
+        <div class="feature-card">
+          <div class="feature-mockup">
+            <div class="mockup-briefing">
+              <div class="mockup-briefing-date">Feb 12, 2026 &middot; Daily Intelligence</div>
+              <div class="mockup-briefing-title">Today&rsquo;s Hot Leads</div>
+              <div class="mockup-hot-lead">
+                <span class="mockup-hot-dot"></span>
+                <span class="mockup-hot-text">Sarah Chen (9/10) &mdash; NIS2 trigger event detected</span>
+              </div>
+              <div class="mockup-hot-lead">
+                <span class="mockup-hot-dot"></span>
+                <span class="mockup-hot-text">Marc Dupont (9/10) &mdash; GDPR audit announced</span>
+              </div>
+              <div style="margin-top: 14px;">
+                <div class="mockup-action-item">
+                  <span class="mockup-check">&#10003;</span>
+                  <span class="mockup-action-text">Send 4 high-priority emails (Belgium)</span>
+                </div>
+                <div class="mockup-action-item">
+                  <span class="mockup-check">&#10003;</span>
+                  <span class="mockup-action-text">Follow up with 3 USA prospects (Day 3)</span>
+                </div>
+                <div class="mockup-action-item">
+                  <span class="mockup-check">&#10003;</span>
+                  <span class="mockup-action-text">Connect with 2 new Law Firm leads</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-content">
+            <div class="feature-tag">Daily Intelligence Briefings</div>
+            <h3>Your Morning Action Plan</h3>
+            <p>Each morning: hot leads ranked, regional breakdown, trigger events in their industry, outreach status, and AI-recommended next actions. Know exactly what to do when you sit down.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results-section" id="results">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">The Results</div>
+      <h2 class="section-title">From zero pipeline to a fully loaded sales engine.</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-number">10+</div>
+          <div class="metric-label">leads delivered every day</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">3</div>
+          <div class="metric-label">regions covered simultaneously</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">6</div>
+          <div class="metric-label">ICP segments targeted</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">50</div>
+          <div class="metric-label">prospect packages in first batch</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">100%</div>
+          <div class="metric-label">personalized outreach per lead</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">8.3</div>
+          <div class="metric-label">average fit score out of 10</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="steps-section" id="how">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Three steps. Live in 48 hours.</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Tell Us Your Ideal Customer</h3>
+          <p>We learn your ICP, target regions, and what a perfect lead looks like. For SYBA, that meant 6 industries across 3 countries &mdash; each with unique messaging.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>We Build Your AI Engine</h3>
+          <p>Dashboard, lead scoring model, outreach templates, follow-up sequences &mdash; everything configured and tested. Your system goes live within 48 hours of kickoff.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Wake Up to Leads Every Morning</h3>
+          <p>Fresh, researched leads in your inbox and dashboard every day. Each one comes with a fit score, prospect brief, and ready-to-send outreach. You just send.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing-section" id="pricing">
+    <div class="section" style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-label">Investment</div>
+      <h2 class="section-title">Less than one closed deal pays for a full year.</h2>
+      <div class="pricing-card">
+        <h3>AI Lead Intelligence Platform</h3>
+        <p class="pricing-sub">The same system we built for SYBA &mdash; customized to your business, your regions, and your ideal customers.</p>
+        <div class="pricing-amounts">
+          <div class="pricing-amount">
+            <div class="amount">$300</div>
+            <div class="price-type">One-Time Setup</div>
+          </div>
+          <div class="pricing-amount">
+            <div class="amount">$200<span>/mo</span></div>
+            <div class="price-type">Monthly</div>
+          </div>
+        </div>
+        <ul class="pricing-features">
+          <li>20 AI-researched leads delivered daily</li>
+          <li>Live lead dashboard (your own URL)</li>
+          <li>Daily intelligence briefings</li>
+          <li>Personalized outreach packages per lead</li>
+          <li>3-email follow-up sequences</li>
+          <li>Fit scoring and trigger event alerts</li>
+          <li>Month-to-month, cancel anytime</li>
+        </ul>
+        <div class="pricing-actions">
+          <a href="https://buy.stripe.com/bJe7sK0O92mn1HZ9xEfjG02" class="btn-primary">Get Started &mdash; $300 Setup</a>
+          <a href="https://buy.stripe.com/7sYaEWfJ3aSTfyPeRYfjG03" class="alt-link">or subscribe monthly &mdash; $200/mo &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to wake up to <em>20 leads</em> every morning?</h2>
+    <p>Book a 15-minute call. We&rsquo;ll show you exactly what your dashboard would look like.</p>
+    <a href="#" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min'});return false;" class="btn-primary">Book Your Call</a>
+    <span class="cta-email">Or email us directly: <a href="mailto:henry@agenticengineering.com">henry@agenticengineering.com</a></span>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      &copy; 2026 Agentic Engineering Consulting &middot; Auburn, Alabama
+    </div>
+    <div class="footer-right">
+      <a href="index.html">Main Site</a>
+      <a href="mailto:henry@agenticengineering.com">henry@agenticengineering.com</a>
+    </div>
+  </footer>
+
+</body>
+</html>

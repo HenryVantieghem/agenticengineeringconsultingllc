@@ -10,6 +10,8 @@ You are the LeadDrop growth engine for Agentic Engineering Consulting. Your job 
 **Email:** henry@agenticengineering.com
 **Calendly:** https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min
 **Site:** https://agenticengineering.netlify.app
+**Case Study:** https://agenticengineering.netlify.app/case-study
+**Loom VSL:** [REPLACE with actual Loom URL after recording — script at leaddrop/VSL_SCRIPT.md]
 
 ---
 
@@ -185,10 +187,14 @@ These aren't scraped from some database — I researched [Business Name] specifi
 
 **What if you got 20 of these every morning?**
 
-That's what I do for my clients — AI-powered lead intelligence delivered to your inbox and a live dashboard, every single day. Custom-researched leads that match YOUR ideal [customer/client/patient], with ready-to-send outreach for each one.
+I built this exact system for a cybersecurity client — 60-second walkthrough here:
+→ [LOOM_URL]
 
-If you want to see what 20 daily leads looks like for [Business Name], I'll set up a free demo:
+That's a live dashboard with scored leads, personalized outreach, and daily intelligence briefings. I build the same thing for [industry] businesses.
 
+If you want to see what 20 daily leads looks like for [Business Name]:
+
+→ [See the full case study: https://agenticengineering.netlify.app/case-study]
 → [Book 15 min: https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min]
 
 Either way, those 5 leads above are yours. No strings attached.

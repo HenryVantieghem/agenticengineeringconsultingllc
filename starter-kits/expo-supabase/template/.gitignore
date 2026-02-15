@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native builds
+ios/
+android/
+
+# Environment variables
+.env
+.env.local
+
+# macOS
+.DS_Store
+*.pem
+
+# IDE
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo

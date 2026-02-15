@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadDrop System Blueprint | Agentic Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================
+   CSS VARIABLES
+   ============================ */
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f0f1a;
+  --bg-card: #12121f;
+  --bg-card-hover: #1a1a2e;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-glow: rgba(255,255,255,0.12);
+  --text-primary: #e8e8f0;
+  --text-secondary: #8888a0;
+  --text-muted: #555570;
+
+  /* System layer colors */
+  --discovery: #3b82f6;
+  --discovery-glow: rgba(59,130,246,0.15);
+  --enrichment: #10b981;
+  --enrichment-glow: rgba(16,185,129,0.15);
+  --qualification: #f59e0b;
+  --qualification-glow: rgba(245,158,11,0.15);
+  --composition: #8b5cf6;
+  --composition-glow: rgba(139,92,246,0.15);
+  --dispatch: #ef4444;
+  --dispatch-glow: rgba(239,68,68,0.15);
+
+  /* Status colors */
+  --active: #10b981;
+  --recommended: #f59e0b;
+  --evaluate: #6366f1;
+
+  /* Scoring tiers */
+  --hot: #ef4444;
+  --warm: #f59e0b;
+  --cool: #3b82f6;
+  --skip: #555570;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+}
+
+/* ============================
+   RESET & BASE
+   ============================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* ============================
+   NAVIGATION
+   ============================ */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 2rem;
+  transition: background 0.3s;
+}
+
+nav.scrolled { background: rgba(10,10,15,0.95); }
+
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.nav-logo {
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--discovery), var(--composition));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  overflow-x: auto;
+  max-width: 80%;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: color 0.2s, background 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+}
+
+.nav-links a.active {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.08);
+}
+
+/* ============================
+   SECTIONS
+   ============================ */
+section {
+  min-height: 100vh;
+  padding: 6rem 2rem 4rem;
+  scroll-snap-align: start;
+  position: relative;
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  line-height: 1.7;
+  margin-bottom: 3rem;
+}
+
+/* ============================
+   HERO
+   ============================ */
+#hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.05) 40%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 2; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border-glow);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  background: rgba(255,255,255,0.02);
+}
+
+.hero-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--active);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 650px;
+  margin: 0 auto 3rem;
+  line-height: 1.7;
+}
+
+/* Pipeline Animation */
+.hero-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 3rem auto 0;
+  max-width: 900px;
+  flex-wrap: wrap;
+}
+
+.pipeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  min-width: 120px;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  animation: node-appear 0.6s ease-out both;
+}
+
+.pipeline-node:nth-child(1) { animation-delay: 0.1s; }
+.pipeline-node:nth-child(3) { animation-delay: 0.3s; }
+.pipeline-node:nth-child(5) { animation-delay: 0.5s; }
+.pipeline-node:nth-child(7) { animation-delay: 0.7s; }
+.pipeline-node:nth-child(9) { animation-delay: 0.9s; }
+
+@keyframes node-appear {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pipeline-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+.pipeline-node.discovery { border-color: rgba(59,130,246,0.3); }
+.pipeline-node.discovery:hover { border-color: var(--discovery); box-shadow: 0 8px 30px var(--discovery-glow); }
+.pipeline-node.enrichment { border-color: rgba(16,185,129,0.3); }
+.pipeline-node.enrichment:hover { border-color: var(--enrichment); box-shadow: 0 8px 30px var(--enrichment-glow); }
+.pipeline-node.qualification { border-color: rgba(245,158,11,0.3); }
+.pipeline-node.qualification:hover { border-color: var(--qualification); box-shadow: 0 8px 30px var(--qualification-glow); }
+.pipeline-node.composition { border-color: rgba(139,92,246,0.3); }
+.pipeline-node.composition:hover { border-color: var(--composition); box-shadow: 0 8px 30px var(--composition-glow); }
+.pipeline-node.dispatch { border-color: rgba(239,68,68,0.3); }
+.pipeline-node.dispatch:hover { border-color: var(--dispatch); box-shadow: 0 8px 30px var(--dispatch-glow); }
+
+.pipeline-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pipeline-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pipeline-arrow {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  padding: 0 0.5rem;
+  animation: arrow-pulse 2s ease-in-out infinite;
+}
+
+.pipeline-arrow:nth-child(2) { animation-delay: 0.2s; }
+.pipeline-arrow:nth-child(4) { animation-delay: 0.4s; }
+.pipeline-arrow:nth-child(6) { animation-delay: 0.6s; }
+.pipeline-arrow:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes arrow-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ============================
+   ARCHITECTURE SECTION
+   ============================ */
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.arch-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  cursor: default;
+}
+
+.arch-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+
+.arch-card:hover { transform: translateY(-6px); }
+
+.arch-card.discovery::before { background: var(--discovery); }
+.arch-card.discovery:hover { border-color: var(--discovery); box-shadow: 0 12px 40px var(--discovery-glow); }
+.arch-card.enrichment::before { background: var(--enrichment); }
+.arch-card.enrichment:hover { border-color: var(--enrichment); box-shadow: 0 12px 40px var(--enrichment-glow); }
+.arch-card.qualification::before { background: var(--qualification); }
+.arch-card.qualification:hover { border-color: var(--qualification); box-shadow: 0 12px 40px var(--qualification-glow); }
+.arch-card.composition::before { background: var(--composition); }
+.arch-card.composition:hover { border-color: var(--composition); box-shadow: 0 12px 40px var(--composition-glow); }
+.arch-card.dispatch::before { background: var(--dispatch); }
+.arch-card.dispatch:hover { border-color: var(--dispatch); box-shadow: 0 12px 40px var(--dispatch-glow); }
+
+.arch-card-number {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.arch-card.discovery .arch-card-number { color: var(--discovery); }
+.arch-card.enrichment .arch-card-number { color: var(--enrichment); }
+.arch-card.qualification .arch-card-number { color: var(--qualification); }
+.arch-card.composition .arch-card-number { color: var(--composition); }
+.arch-card.dispatch .arch-card-number { color: var(--dispatch); }
+
+.arch-card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.arch-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.arch-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.arch-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.arch-tool {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.arch-card:hover .arch-tool {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+
+/* Connection line between cards */
+.arch-connections {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.arch-connection-line {
+  flex: 1;
+  height: 2px;
+  max-width: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-connection-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--discovery), var(--enrichment), var(--qualification), var(--composition), var(--dispatch), transparent);
+  animation: flow-line 3s linear infinite;
+}
+
+@keyframes flow-line {
+  from { left: -100%; }
+  to { left: 100%; }
+}
+
+.arch-flow-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--discovery), var(--enrichment), var(--qualification), var(--composition), var(--dispatch));
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-flow-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from { left: -30%; }
+  to { left: 100%; }
+}
+
+/* ============================
+   MCP GRID
+   ============================ */
+.mcp-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.mcp-category-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mcp-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.mcp-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.mcp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.mcp-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.mcp-status {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.mcp-status.active { color: var(--active); background: rgba(16,185,129,0.12); }
+.mcp-status.recommended { color: var(--recommended); background: rgba(245,158,11,0.12); }
+.mcp-status.evaluate { color: var(--evaluate); background: rgba(99,102,241,0.12); }
+
+.mcp-purpose {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================
+   LEAD SCORING
+   ============================ */
+.scoring-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.scoring-factors { display: flex; flex-direction: column; gap: 1rem; }
+
+.scoring-factor {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.3s;
+}
+
+.scoring-factor:hover { border-color: var(--border-glow); }
+
+.factor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.factor-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.factor-weight {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--qualification);
+}
+
+.factor-bar-bg {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.factor-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s ease-out;
+  width: 0;
+}
+
+.factor-bar.visible { width: var(--w); }
+
+.factor-bar.f1 { background: linear-gradient(90deg, var(--discovery), #60a5fa); }
+.factor-bar.f2 { background: linear-gradient(90deg, var(--enrichment), #34d399); }
+.factor-bar.f3 { background: linear-gradient(90deg, var(--composition), #a78bfa); }
+.factor-bar.f4 { background: linear-gradient(90deg, var(--qualification), #fbbf24); }
+.factor-bar.f5 { background: linear-gradient(90deg, #ec4899, #f472b6); }
+.factor-bar.f6 { background: linear-gradient(90deg, var(--dispatch), #f87171); }
+.factor-bar.f7 { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+
+.factor-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.scoring-tiers { display: flex; flex-direction: column; gap: 1rem; }
+
+.tier-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.tier-card:hover { transform: translateX(6px); border-color: var(--border-glow); }
+
+.tier-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: center;
+}
+
+.tier-badge.hot { color: var(--hot); background: rgba(239,68,68,0.12); }
+.tier-badge.warm { color: var(--warm); background: rgba(245,158,11,0.12); }
+.tier-badge.cool { color: var(--cool); background: rgba(59,130,246,0.12); }
+.tier-badge.skip { color: var(--skip); background: rgba(85,85,112,0.12); }
+
+.tier-range {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 55px;
+}
+
+.tier-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+/* ============================
+   PSYCHOLOGY CARDS
+   ============================ */
+.psych-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.psych-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.psych-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-glow);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.psych-number {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.03);
+}
+
+.psych-source {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--composition);
+  margin-bottom: 0.75rem;
+}
+
+.psych-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.psych-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+}
+
+.psych-impl {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  background: rgba(139,92,246,0.06);
+  border-radius: 8px;
+  border-left: 3px solid var(--composition);
+  line-height: 1.6;
+}
+
+/* ============================
+   STATS DASHBOARD
+   ============================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.stat-card:hover { transform: translateY(-4px); border-color: var(--border-glow); }
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-value.highlight {
+  background: linear-gradient(135deg, var(--discovery), var(--composition));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.stat-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ============================
+   COMPETITOR TABLE
+   ============================ */
+.comp-table-wrapper {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  margin-bottom: 2.5rem;
+}
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.comp-table th {
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.comp-table td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.comp-table tr:last-child td { border-bottom: none; }
+
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.comp-table .us-row td {
+  background: rgba(59,130,246,0.04);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.comp-table .us-row:hover td {
+  background: rgba(59,130,246,0.08);
+}
+
+.comp-check { color: var(--active); }
+.comp-x { color: var(--dispatch); }
+.comp-partial { color: var(--qualification); }
+
+.advantages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.advantage-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.3s, border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.advantage-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--discovery);
+}
+
+.advantage-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--discovery), var(--composition));
+}
+
+.advantage-num {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: rgba(59,130,246,0.15);
+  margin-bottom: 0.5rem;
+}
+
+.advantage-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.advantage-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================
+   DAILY OPERATIONS TIMELINE
+   ============================ */
+.timeline {
+  position: relative;
+  padding-left: 3rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--discovery), var(--enrichment), var(--qualification), var(--composition), var(--dispatch));
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 2.5rem;
+  animation: timeline-appear 0.5s ease-out both;
+}
+
+.timeline-item:last-child { padding-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  left: -2.6rem;
+  top: 0.2rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--bg-primary);
+}
+
+.timeline-item:nth-child(1) .timeline-dot { background: var(--discovery); box-shadow: 0 0 12px var(--discovery-glow); }
+.timeline-item:nth-child(2) .timeline-dot { background: var(--enrichment); box-shadow: 0 0 12px var(--enrichment-glow); }
+.timeline-item:nth-child(3) .timeline-dot { background: var(--qualification); box-shadow: 0 0 12px var(--qualification-glow); }
+.timeline-item:nth-child(4) .timeline-dot { background: var(--composition); box-shadow: 0 0 12px var(--composition-glow); }
+.timeline-item:nth-child(5) .timeline-dot { background: var(--dispatch); box-shadow: 0 0 12px var(--dispatch-glow); }
+
+.timeline-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-cmd {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.timeline-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ops-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.funnel-stage {
+  text-align: center;
+  padding: 1rem;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.funnel-stage:hover { transform: scale(1.03); }
+
+.funnel-bar {
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  transition: box-shadow 0.3s;
+}
+
+.funnel-stage:hover .funnel-bar {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.funnel-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ============================
+   NEW MCPs PRIORITY MATRIX
+   ============================ */
+.priority-groups {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.priority-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.priority-group-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.priority-group.p1 .priority-group-title { color: var(--dispatch); }
+.priority-group.p2 .priority-group-title { color: var(--qualification); }
+.priority-group.p3 .priority-group-title { color: var(--text-muted); }
+
+.priority-item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.priority-item:last-child { border-bottom: none; }
+
+.priority-item-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 0.2rem;
+}
+
+.priority-item-why {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.35rem;
+}
+
+.priority-item-cost {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--enrichment);
+}
+
+/* ============================
+   REFERENCES
+   ============================ */
+.ref-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.ref-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.ref-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-glow);
+}
+
+.ref-type {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.ref-title {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+.ref-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================
+   FORMULA SECTION
+   ============================ */
+#formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#formula::before {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(139,92,246,0.06) 0%, rgba(59,130,246,0.04) 50%, transparent 70%);
+  pointer-events: none;
+}
+
+.formula-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.formula-eq {
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 700;
+  line-height: 2.2;
+  margin-bottom: 2.5rem;
+  max-width: 800px;
+}
+
+.formula-eq .var {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 0.2rem 0;
+  border: 1px solid;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.formula-eq .var:hover {
+  transform: translateY(-2px);
+}
+
+.formula-eq .var.v1 { color: var(--composition); border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.06); }
+.formula-eq .var.v1:hover { box-shadow: 0 4px 16px var(--composition-glow); }
+.formula-eq .var.v2 { color: var(--enrichment); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+.formula-eq .var.v2:hover { box-shadow: 0 4px 16px var(--enrichment-glow); }
+.formula-eq .var.v3 { color: var(--discovery); border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.06); }
+.formula-eq .var.v3:hover { box-shadow: 0 4px 16px var(--discovery-glow); }
+.formula-eq .var.v4 { color: var(--qualification); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+.formula-eq .var.v4:hover { box-shadow: 0 4px 16px var(--qualification-glow); }
+.formula-eq .var.v5 { color: #ec4899; border-color: rgba(236,72,153,0.3); background: rgba(236,72,153,0.06); }
+.formula-eq .var.v5:hover { box-shadow: 0 4px 16px rgba(236,72,153,0.15); }
+.formula-eq .var.v6 { color: var(--dispatch); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); }
+.formula-eq .var.v6:hover { box-shadow: 0 4px 16px var(--dispatch-glow); }
+
+.formula-eq .op {
+  color: var(--text-muted);
+  font-weight: 400;
+  padding: 0 0.35rem;
+}
+
+.formula-result {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.formula-cta {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.formula-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 100px;
+  border: 1px solid rgba(16,185,129,0.3);
+  background: rgba(16,185,129,0.06);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--enrichment);
+}
+
+/* ============================
+   SCROLL ANIMATIONS
+   ============================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+@media (max-width: 1100px) {
+  .arch-grid { grid-template-columns: repeat(3, 1fr); }
+  .scoring-grid { grid-template-columns: 1fr; }
+  .ops-grid { grid-template-columns: 1fr; }
+  .priority-groups { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  section { padding: 5rem 1.25rem 3rem; }
+  .arch-grid { grid-template-columns: 1fr; }
+  .psych-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .hero-pipeline { flex-direction: column; }
+  .pipeline-arrow { transform: rotate(90deg); }
+  .advantages-grid { grid-template-columns: 1fr; }
+  .mcp-categories { grid-template-columns: 1fr; }
+  .ref-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================
+     NAVIGATION
+     ============================ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">LEADDROP BLUEPRINT</div>
+    <ul class="nav-links">
+      <li><a href="#hero">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#mcp-ecosystem">MCP Servers</a></li>
+      <li><a href="#lead-scoring">Scoring</a></li>
+      <li><a href="#psychology">Psychology</a></li>
+      <li><a href="#stats">Statistics</a></li>
+      <li><a href="#competitors">Competitors</a></li>
+      <li><a href="#operations">Operations</a></li>
+      <li><a href="#new-mcps">New MCPs</a></li>
+      <li><a href="#references">References</a></li>
+      <li><a href="#formula">Formula</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============================
+     HERO
+     ============================ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span>System Architecture v2.0 &mdash; February 2026</span>
+    </div>
+    <h1 class="hero-title">
+      LeadDrop: The World's Best<br>
+      <span class="gradient-text">AI Lead Generation System</span>
+    </h1>
+    <p class="hero-subtitle">
+      Built on Claude Code + 34 MCP Servers + Behavioral Science.
+      A five-agent pipeline that gives before it asks, powered by
+      peer-reviewed persuasion frameworks and real-time data enrichment.
+    </p>
+
+    <div class="hero-pipeline">
+      <div class="pipeline-node discovery">
+        <div class="pipeline-icon">&#x1F50D;</div>
+        <div class="pipeline-label" style="color:var(--discovery)">Scout</div>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-node enrichment">
+        <div class="pipeline-icon">&#x1F9EC;</div>
+        <div class="pipeline-label" style="color:var(--enrichment)">Enrich</div>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-node qualification">
+        <div class="pipeline-icon">&#x1F3AF;</div>
+        <div class="pipeline-label" style="color:var(--qualification)">Qualify</div>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-node composition">
+        <div class="pipeline-icon">&#x270D;&#xFE0F;</div>
+        <div class="pipeline-label" style="color:var(--composition)">Compose</div>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-node dispatch">
+        <div class="pipeline-icon">&#x1F680;</div>
+        <div class="pipeline-label" style="color:var(--dispatch)">Dispatch</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     SYSTEM ARCHITECTURE
+     ============================ -->
+<section id="architecture">
+  <div class="section-inner">
+    <div class="section-label reveal">02 / System Architecture</div>
+    <h2 class="section-title reveal">Five-Agent Pipeline</h2>
+    <p class="section-subtitle reveal">Each agent in the pipeline handles a discrete stage. Data flows left to right, with each stage enriching the output of the previous one.</p>
+
+    <div class="arch-flow-bar reveal"></div>
+
+    <div class="arch-grid">
+      <div class="arch-card discovery reveal reveal-delay-1">
+        <span class="arch-card-number">Agent 01 &mdash; Discovery</span>
+        <div class="arch-card-icon">&#x1F50D;</div>
+        <div class="arch-card-title">SCOUT</div>
+        <p class="arch-card-desc">Discovers raw business listings by city and industry vertical. Scrapes Google Maps, SERP results, and business directories to build the initial prospect list.</p>
+        <div class="arch-tools">
+          <span class="arch-tool">Apify</span>
+          <span class="arch-tool">Firecrawl</span>
+          <span class="arch-tool">SerpAPI</span>
+          <span class="arch-tool">Google Maps</span>
+        </div>
+      </div>
+
+      <div class="arch-card enrichment reveal reveal-delay-2">
+        <span class="arch-card-number">Agent 02 &mdash; Enrichment</span>
+        <div class="arch-card-icon">&#x1F9EC;</div>
+        <div class="arch-card-title">ENRICH</div>
+        <p class="arch-card-desc">Enriches raw listings with verified emails, website intelligence, tech stack detection, review sentiment, and recent trigger events.</p>
+        <div class="arch-tools">
+          <span class="arch-tool">Hunter.io</span>
+          <span class="arch-tool">Apollo.io</span>
+          <span class="arch-tool">Bright Data</span>
+          <span class="arch-tool">Firecrawl</span>
+        </div>
+      </div>
+
+      <div class="arch-card qualification reveal reveal-delay-3">
+        <span class="arch-card-number">Agent 03 &mdash; Qualification</span>
+        <div class="arch-card-icon">&#x1F3AF;</div>
+        <div class="arch-card-title">QUALIFY</div>
+        <p class="arch-card-desc">Scores every lead 0-100 using a weighted algorithm across 7 dimensions. Only HOT and WARM leads proceed to composition.</p>
+        <div class="arch-tools">
+          <span class="arch-tool">Claude Analysis</span>
+          <span class="arch-tool">ICP Framework</span>
+          <span class="arch-tool">Lead Scoring</span>
+        </div>
+      </div>
+
+      <div class="arch-card composition reveal reveal-delay-4">
+        <span class="arch-card-number">Agent 04 &mdash; Composition</span>
+        <div class="arch-card-icon">&#x270D;&#xFE0F;</div>
+        <div class="arch-card-title">COMPOSE</div>
+        <p class="arch-card-desc">Generates hyper-personalized outreach using PAS framework, Cialdini's reciprocity principle, and full prospect context. Every email is unique.</p>
+        <div class="arch-tools">
+          <span class="arch-tool">Claude PAS</span>
+          <span class="arch-tool">Cialdini</span>
+          <span class="arch-tool">Personalization</span>
+        </div>
+      </div>
+
+      <div class="arch-card dispatch reveal">
+        <span class="arch-card-number">Agent 05 &mdash; Dispatch</span>
+        <div class="arch-card-icon">&#x1F680;</div>
+        <div class="arch-card-title">DISPATCH</div>
+        <p class="arch-card-desc">Delivers emails via Gmail MCP, logs everything to Supabase for pipeline tracking, and queues automated follow-up sequences on Day 3, 10, 17.</p>
+        <div class="arch-tools">
+          <span class="arch-tool">Gmail MCP</span>
+          <span class="arch-tool">Supabase</span>
+          <span class="arch-tool">Follow-ups</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     MCP ECOSYSTEM
+     ============================ -->
+<section id="mcp-ecosystem">
+  <div class="section-inner">
+    <div class="section-label reveal">03 / MCP Server Ecosystem</div>
+    <h2 class="section-title reveal">34+ Integrated MCP Servers</h2>
+    <p class="section-subtitle reveal">Our data pipeline rivals Clay.com's 100+ enrichment providers, orchestrated natively by Claude Code rather than rigid workflow rules.</p>
+
+    <div class="mcp-categories reveal">
+      <!-- Discovery -->
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Firecrawl</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Web scraping, crawling, search, deep extraction. Primary website intelligence source.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Apify</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">1,500+ scraper actors. Google Maps, LinkedIn, Yelp. #1 local business discovery.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">SerpAPI</span>
+          <span class="mcp-status recommended">Recommended</span>
+        </div>
+        <p class="mcp-purpose">Google/Bing SERP results, local business listings, Google Local Services ads.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Bright Data</span>
+          <span class="mcp-status recommended">Recommended</span>
+        </div>
+        <p class="mcp-purpose">Enterprise scraping with proxy rotation. 76.8% success rate. 5K free monthly requests.</p>
+      </div>
+
+      <!-- Enrichment -->
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Hunter.io</span>
+          <span class="mcp-status recommended">Recommended</span>
+        </div>
+        <p class="mcp-purpose">Email finder + verifier + domain search. 99% accuracy. Official MCP server.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Apollo.io</span>
+          <span class="mcp-status recommended">Recommended</span>
+        </div>
+        <p class="mcp-purpose">275M+ contacts, 34+ tools. Prospecting, enrichment, sequence management.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Explorium B2B</span>
+          <span class="mcp-status evaluate">Evaluate</span>
+        </div>
+        <p class="mcp-purpose">Company search, contact discovery, tech stack, funding data enrichment.</p>
+      </div>
+
+      <!-- Intelligence -->
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Google Workspace</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Gmail, Drive, Calendar, Docs, Sheets. Hardened MCP server for email dispatch.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Memory MCP</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Knowledge graph persistence. Store prospect insights across sessions.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Context7</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Up-to-date documentation and library context for code-level integration.</p>
+      </div>
+
+      <!-- CRM -->
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Supabase</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Primary data store. Leads, briefings, outreach packages, pipeline tracking with RLS.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">HubSpot</span>
+          <span class="mcp-status evaluate">Evaluate</span>
+        </div>
+        <p class="mcp-purpose">CRM integration for clients already using HubSpot. Read-only + full CRUD options.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Pipedrive</span>
+          <span class="mcp-status evaluate">Evaluate</span>
+        </div>
+        <p class="mcp-purpose">Alternative CRM pipeline for clients on Pipedrive.</p>
+      </div>
+
+      <!-- Automation -->
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">n8n</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Visual workflow builder. 529+ lead gen templates. 3 server instances running.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Rube / Composio</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">500+ app integrations. Gmail, Slack, Notion, and more via Composio framework.</p>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-card-header">
+          <span class="mcp-name">Netlify</span>
+          <span class="mcp-status active">Active</span>
+        </div>
+        <p class="mcp-purpose">Dashboard and landing page deployment. Direct upload via MCP, no git deploy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     LEAD SCORING
+     ============================ -->
+<section id="lead-scoring">
+  <div class="section-inner">
+    <div class="section-label reveal">04 / Lead Scoring Algorithm</div>
+    <h2 class="section-title reveal">Weighted Scoring: 0&ndash;100</h2>
+    <p class="section-subtitle reveal">Every lead is scored across 7 dimensions. Only HOT (80+) and WARM (60+) leads enter the composition pipeline. Based on ML lead scoring research from Frontiers in AI.</p>
+
+    <div class="scoring-grid">
+      <div class="scoring-factors">
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Trigger Events</span>
+            <span class="factor-weight">x0.20</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f6" style="--w:100%"></div></div>
+          <div class="factor-desc">Hiring signals, new locations, bad reviews, competitor activity, seasonal patterns. Recent changes = buying window.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Review Score</span>
+            <span class="factor-weight">x0.15</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f1" style="--w:75%"></div></div>
+          <div class="factor-desc">4.0+ stars = established quality. Below 3.0 = too many problems to take on new tools.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Website Quality</span>
+            <span class="factor-weight">x0.15</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f3" style="--w:75%"></div></div>
+          <div class="factor-desc">Modern site = invests in growth. Stale WordPress = needs help but may be receptive.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Tech Stack Gap</span>
+            <span class="factor-weight">x0.15</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f4" style="--w:75%"></div></div>
+          <div class="factor-desc">No CRM / no marketing automation = prime candidate. Already using Salesforce = harder sell.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Decision Maker Found</span>
+            <span class="factor-weight">x0.15</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f7" style="--w:75%"></div></div>
+          <div class="factor-desc">Can we reach the owner/partner directly? info@ = low confidence. firstname@ = high confidence.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Review Volume</span>
+            <span class="factor-weight">x0.10</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f2" style="--w:50%"></div></div>
+          <div class="factor-desc">20+ reviews = established business with revenue. Under 5 = too early stage.</div>
+        </div>
+        <div class="scoring-factor reveal">
+          <div class="factor-header">
+            <span class="factor-name">Social Presence</span>
+            <span class="factor-weight">x0.10</span>
+          </div>
+          <div class="factor-bar-bg"><div class="factor-bar f5" style="--w:50%"></div></div>
+          <div class="factor-desc">Active Facebook/Instagram = growth-minded. Zero social = may not value digital.</div>
+        </div>
+      </div>
+
+      <div class="scoring-tiers">
+        <h3 class="reveal" style="font-size:1rem;margin-bottom:1.25rem;color:var(--text-secondary)">Qualification Tiers</h3>
+        <div class="tier-card reveal">
+          <span class="tier-badge hot">HOT</span>
+          <span class="tier-range">80&ndash;100</span>
+          <span class="tier-desc">Reach out immediately. High conversion probability. Strong trigger + verified decision maker.</span>
+        </div>
+        <div class="tier-card reveal">
+          <span class="tier-badge warm">WARM</span>
+          <span class="tier-range">60&ndash;79</span>
+          <span class="tier-desc">Solid prospect. Include in daily batch. Good data quality, moderate trigger signals.</span>
+        </div>
+        <div class="tier-card reveal">
+          <span class="tier-badge cool">COOL</span>
+          <span class="tier-range">40&ndash;59</span>
+          <span class="tier-desc">Include if batch needs volume. Missing some data points. Lower confidence.</span>
+        </div>
+        <div class="tier-card reveal">
+          <span class="tier-badge skip">SKIP</span>
+          <span class="tier-range">0&ndash;39</span>
+          <span class="tier-desc">Not worth the email. Too small, too early, no contact info, or no buying signals.</span>
+        </div>
+
+        <div style="margin-top:1.5rem" class="reveal">
+          <h3 style="font-size:1rem;margin-bottom:1rem;color:var(--text-secondary)">ICP Profile</h3>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:1.25rem;font-size:0.82rem;color:var(--text-secondary);line-height:1.8">
+            <div><strong style="color:var(--text-primary)">Revenue:</strong> $500K&ndash;$5M/yr</div>
+            <div><strong style="color:var(--text-primary)">Team:</strong> 2&ndash;20 employees</div>
+            <div><strong style="color:var(--text-primary)">Location:</strong> Mid-size US cities</div>
+            <div><strong style="color:var(--text-primary)">Digital:</strong> Has website, NO CRM</div>
+            <div><strong style="color:var(--text-primary)">Reviews:</strong> 3.5&ndash;4.5 stars, 20+</div>
+            <div><strong style="color:var(--text-primary)">Signals:</strong> Hiring, active social</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     MARKETING PSYCHOLOGY
+     ============================ -->
+<section id="psychology">
+  <div class="section-inner">
+    <div class="section-label reveal">05 / Marketing Psychology</div>
+    <h2 class="section-title reveal">The LeadDrop Persuasion Framework</h2>
+    <p class="section-subtitle reveal">Every element of our outreach is engineered from peer-reviewed behavioral science: Cialdini, Kahneman, and data from 85,000+ emails.</p>
+
+    <div class="psych-grid">
+      <div class="psych-card reveal">
+        <span class="psych-number">01</span>
+        <div class="psych-source">Cialdini &mdash; Principle #1</div>
+        <div class="psych-title">Reciprocity</div>
+        <p class="psych-desc">Give 5 free, personalized, genuinely valuable leads BEFORE asking for anything. Personalized + unexpected = strongest reciprocity trigger. 73% of trial users convert when given genuine free value.</p>
+        <div class="psych-impl">Implementation: The free leads ARE the demo, the pitch, and the trust-builder &mdash; all in one email.</div>
+      </div>
+
+      <div class="psych-card reveal">
+        <span class="psych-number">02</span>
+        <div class="psych-source">Attention Science</div>
+        <div class="psych-title">Pattern Interrupt</div>
+        <p class="psych-desc">Most cold emails look identical. No "I hope this finds you well." Lead with value immediately. Subject lines: question-based, 4&ndash;7 words, specific to their business.</p>
+        <div class="psych-impl">Subject: "5 people looking for a dentist in Auburn right now" &mdash; 46% open rate format.</div>
+      </div>
+
+      <div class="psych-card reveal">
+        <span class="psych-number">03</span>
+        <div class="psych-source">Kahneman &amp; Tversky</div>
+        <div class="psych-title">Loss Aversion</div>
+        <p class="psych-desc">Loss framing is 2x more motivating than gain framing. Frame as what they are LOSING, not what they could gain. "Competitors will get these leads" beats "you could get new patients."</p>
+        <div class="psych-impl">"These 5 leads will go to your competitors if you don't reach out this week."</div>
+      </div>
+
+      <div class="psych-card reveal">
+        <span class="psych-number">04</span>
+        <div class="psych-source">Cialdini &mdash; Principle #3</div>
+        <div class="psych-title">Social Proof</div>
+        <p class="psych-desc">Industry-specific results carry 3x more weight than generic claims. "We helped a dental practice in Atlanta find 20 new patients" beats "we help businesses grow."</p>
+        <div class="psych-impl">Include competitor names, specific numbers, and industry-matched case studies.</div>
+      </div>
+
+      <div class="psych-card reveal">
+        <span class="psych-number">05</span>
+        <div class="psych-source">UserGems + Boomerang Studies</div>
+        <div class="psych-title">Trigger Event Timing</div>
+        <p class="psych-desc">Trigger-based outreach achieves 20&ndash;35% response vs. 5&ndash;10% for standard cold email. Timing the outreach to a hiring signal, bad review, or new competitor is a 4x multiplier.</p>
+        <div class="psych-impl">Detect: hiring, funding, bad reviews, new competition, seasonal peaks. Act within the buying window.</div>
+      </div>
+
+      <div class="psych-card reveal">
+        <span class="psych-number">06</span>
+        <div class="psych-source">85,000-Email Study Data</div>
+        <div class="psych-title">Optimal Mechanics</div>
+        <p class="psych-desc">50&ndash;125 words, 6&ndash;8 sentences. Send Tuesday 6&ndash;9 AM recipient's time. Follow-up cadence: Day 3, Day 10, Day 17. Max 3 follow-ups. Batch size &le;50 contacts.</p>
+        <div class="psych-impl">3&ndash;7&ndash;7 cadence captures 93% of total replies by Day 10. 4th follow-up = spam territory.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     COLD EMAIL STATISTICS
+     ============================ -->
+<section id="stats">
+  <div class="section-inner">
+    <div class="section-label reveal">06 / Cold Email Intelligence</div>
+    <h2 class="section-title reveal">Data-Driven Outreach Science</h2>
+    <p class="section-subtitle reveal">Key metrics distilled from Belkins, Martal, Snov.io, SalesBread, and an 85,000-email dataset. Every number drives a system decision.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card reveal">
+        <div class="stat-value highlight">2&ndash;3x</div>
+        <div class="stat-label">Personalized Reply Rate</div>
+        <div class="stat-detail">Personalized emails get 2&ndash;3x more replies. Campaigns &le;50 contacts = 18% reply rate vs. 1,000+ = 8%.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value">50&ndash;125</div>
+        <div class="stat-label">Optimal Word Count</div>
+        <div class="stat-detail">6&ndash;8 sentences. 6.9% reply rate at this range. 13+ sentences drops to 3.8%.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value">Tue</div>
+        <div class="stat-label">Best Send Day</div>
+        <div class="stat-detail">Tuesday is #1 overall. Monday strong for cold. Avoid Friday&ndash;Sunday. Morning 6&ndash;9 AM peak.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value highlight">+49%</div>
+        <div class="stat-label">1st Follow-Up Boost</div>
+        <div class="stat-detail">Reply rate jumps 49% after first follow-up. 60% of total replies come from follow-ups.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value">4&ndash;7</div>
+        <div class="stat-label">Subject Line Words</div>
+        <div class="stat-detail">Question format = 46% open rate. Personalized subjects +29%. Urgency words actively hurt.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value">3-7-7</div>
+        <div class="stat-label">Follow-Up Cadence</div>
+        <div class="stat-detail">Day 0 &rarr; Day 3 &rarr; Day 10 &rarr; Day 17. Captures 93% of replies by Day 10. Never send 4+.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value highlight">20&ndash;35%</div>
+        <div class="stat-label">Trigger-Based Response</div>
+        <div class="stat-detail">Trigger-based selling gets 20&ndash;35% response vs. 5&ndash;10% for standard cold outreach. 4x multiplier.</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-value">80%</div>
+        <div class="stat-label">Deals Need 5+ Touches</div>
+        <div class="stat-detail">Persistence pays. But only 3 follow-ups per thread. Multi-channel (email + social) for touches 4+.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     COMPETITOR COMPARISON
+     ============================ -->
+<section id="competitors">
+  <div class="section-inner">
+    <div class="section-label reveal">07 / Competitive Landscape</div>
+    <h2 class="section-title reveal">LeadDrop vs. The Market</h2>
+    <p class="section-subtitle reveal">How our AI-native, give-first system compares to the leading outreach platforms and AI SDR companies.</p>
+
+    <div class="comp-table-wrapper reveal">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>LeadDrop</th>
+            <th>Apollo.io</th>
+            <th>Clay.com</th>
+            <th>Instantly.ai</th>
+            <th>11x / Artisan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="us-row">
+            <td>Give-First Model (Free Leads)</td>
+            <td><span class="comp-check">&#10003;</span> Core strategy</td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+          </tr>
+          <tr>
+            <td>Claude-Quality Personalization</td>
+            <td><span class="comp-check">&#10003;</span> Full context</td>
+            <td><span class="comp-partial">~</span> Templates</td>
+            <td><span class="comp-partial">~</span> Variables</td>
+            <td><span class="comp-partial">~</span> AI write</td>
+            <td><span class="comp-partial">~</span> Fine-tuned</td>
+          </tr>
+          <tr>
+            <td>Full Website + Review Scraping</td>
+            <td><span class="comp-check">&#10003;</span> Firecrawl</td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-check">&#10003;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-partial">~</span></td>
+          </tr>
+          <tr>
+            <td>Local Business Specialization</td>
+            <td><span class="comp-check">&#10003;</span> Blue ocean</td>
+            <td><span class="comp-x">&#10007;</span> SaaS focus</td>
+            <td><span class="comp-x">&#10007;</span> Enterprise</td>
+            <td><span class="comp-partial">~</span> General</td>
+            <td><span class="comp-x">&#10007;</span> Enterprise</td>
+          </tr>
+          <tr>
+            <td>Behavioral Science Framework</td>
+            <td><span class="comp-check">&#10003;</span> Cialdini + Kahneman</td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-partial">~</span></td>
+          </tr>
+          <tr>
+            <td>Lead Scoring Algorithm</td>
+            <td><span class="comp-check">&#10003;</span> 7-dimension</td>
+            <td><span class="comp-check">&#10003;</span> Built-in</td>
+            <td><span class="comp-check">&#10003;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>MCP Ecosystem (34+ servers)</td>
+            <td><span class="comp-check">&#10003;</span> Native</td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+            <td><span class="comp-x">&#10007;</span></td>
+          </tr>
+          <tr>
+            <td>Pricing (Client)</td>
+            <td><strong>$200/mo</strong></td>
+            <td>$49&ndash;$99/mo</td>
+            <td>$149&ndash;$800/mo</td>
+            <td>$30&ndash;$97/mo</td>
+            <td>$500&ndash;$3,000/mo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal" style="font-size:1.15rem;font-weight:700;margin-bottom:1.25rem">5 Unfair Advantages</h3>
+    <div class="advantages-grid">
+      <div class="advantage-card reveal">
+        <div class="advantage-num">01</div>
+        <div class="advantage-title">Reciprocity-First Model</div>
+        <p class="advantage-desc">No other AI SDR gives free leads. We give before asking. The leads ARE the demo, pitch, and trust-builder.</p>
+      </div>
+      <div class="advantage-card reveal">
+        <div class="advantage-num">02</div>
+        <div class="advantage-title">Claude Personalization</div>
+        <p class="advantage-desc">Full website + reviews + tech stack + news context. Our emails read like 30 minutes of human research.</p>
+      </div>
+      <div class="advantage-card reveal">
+        <div class="advantage-num">03</div>
+        <div class="advantage-title">MCP Ecosystem</div>
+        <p class="advantage-desc">34+ MCP servers = data pipeline rivaling Clay.com's 100+ providers. Orchestrated by Claude Code natively.</p>
+      </div>
+      <div class="advantage-card reveal">
+        <div class="advantage-num">04</div>
+        <div class="advantage-title">Local Business Blue Ocean</div>
+        <p class="advantage-desc">Enterprise AI SDRs target SaaS. Nobody builds best-in-class AI sales for dental, law, HVAC.</p>
+      </div>
+      <div class="advantage-card reveal">
+        <div class="advantage-num">05</div>
+        <div class="advantage-title">Behavioral Science</div>
+        <p class="advantage-desc">Built on Cialdini + Kahneman + 85,000-email data. Peer-reviewed, not "best practices from blog posts."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     DAILY OPERATIONS
+     ============================ -->
+<section id="operations">
+  <div class="section-inner">
+    <div class="section-label reveal">08 / Daily Operations</div>
+    <h2 class="section-title reveal">The Morning Command Sequence</h2>
+    <p class="section-subtitle reveal">Four commands run every morning. The entire lead generation engine executes in under 90 minutes, fully automated.</p>
+
+    <div class="ops-grid">
+      <div class="timeline reveal">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">6:00 AM</div>
+          <div class="timeline-title">Lead Discovery &amp; Outreach</div>
+          <div class="timeline-cmd">/drop</div>
+          <p class="timeline-desc">50 businesses &times; 5 leads each. Scout &rarr; Enrich &rarr; Qualify &rarr; Compose &rarr; Dispatch. City &times; industry rotation from ROTATION.md. Free-value emails sent via Gmail MCP.</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">6:30 AM</div>
+          <div class="timeline-title">Client Intelligence</div>
+          <div class="timeline-cmd">/serve syba</div>
+          <p class="timeline-desc">Daily intelligence for active clients. 20 enriched leads, prospect briefs, outreach packages, dashboard update. Full pipeline logged to Supabase.</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">7:00 AM</div>
+          <div class="timeline-title">Follow-Up Sequences</div>
+          <div class="timeline-cmd">/follow-up</div>
+          <p class="timeline-desc">Automated Day 3 / Day 10 / Day 17 follow-ups. 3-7-7 cadence. Different value angle per touch. Breakup email on Day 17. Captures 93% of replies.</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">7:30 AM</div>
+          <div class="timeline-title">Content Distribution</div>
+          <div class="timeline-cmd">/content</div>
+          <p class="timeline-desc">Daily social media content. Case studies, tips, and value posts. Maintains authority positioning and drives inbound interest.</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">Ongoing</div>
+          <div class="timeline-title">Pipeline Dashboard</div>
+          <div class="timeline-cmd">/daily-hustle</div>
+          <p class="timeline-desc">Real-time pipeline visibility. Track opens, replies, bookings, conversions. All data flows through Supabase with Realtime enabled on leads and briefings tables.</p>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem;color:var(--text-secondary)">Daily Funnel Metrics</h3>
+        <div class="funnel">
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:100%;background:linear-gradient(90deg,var(--discovery),rgba(59,130,246,0.6))">50 Businesses Scraped</div>
+            <div class="funnel-label">Scout Phase &mdash; Apify + Firecrawl</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:88%;background:linear-gradient(90deg,var(--enrichment),rgba(16,185,129,0.6))">~44 Enriched Profiles</div>
+            <div class="funnel-label">Enrich Phase &mdash; Hunter + Apollo</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:60%;background:linear-gradient(90deg,var(--qualification),rgba(245,158,11,0.6))">~30 Qualified (60+ Score)</div>
+            <div class="funnel-label">Qualify Phase &mdash; Lead Scoring</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:56%;background:linear-gradient(90deg,var(--composition),rgba(139,92,246,0.6))">~28 Emails Composed</div>
+            <div class="funnel-label">Compose Phase &mdash; Claude PAS</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:56%;background:linear-gradient(90deg,var(--dispatch),rgba(239,68,68,0.6))">~28 Emails Dispatched</div>
+            <div class="funnel-label">Dispatch Phase &mdash; Gmail MCP</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:16%;background:linear-gradient(90deg,var(--active),rgba(16,185,129,0.6))">~5 Replies Expected</div>
+            <div class="funnel-label">18% Reply Rate (personalized batch &le;50)</div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-bar" style="width:6%;background:linear-gradient(90deg,#f59e0b,rgba(245,158,11,0.6))">~1&ndash;2 Bookings</div>
+            <div class="funnel-label">Calendly Conversion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     NEW MCPs
+     ============================ -->
+<section id="new-mcps">
+  <div class="section-inner">
+    <div class="section-label reveal">09 / Recommended New MCPs</div>
+    <h2 class="section-title reveal">Priority Installation Matrix</h2>
+    <p class="section-subtitle reveal">Three tiers of MCP servers to add. Priority 1 unlocks email verification and enterprise-grade enrichment immediately.</p>
+
+    <div class="priority-groups">
+      <div class="priority-group p1 reveal">
+        <div class="priority-group-title">Priority 1 &mdash; Install This Week</div>
+        <div class="priority-item">
+          <div class="priority-item-name">Hunter.io MCP</div>
+          <p class="priority-item-why">Email finder + verifier + domain search. Official, maintained. Eliminates bounces from the pipeline entirely.</p>
+          <span class="priority-item-cost">$49/mo (500 lookups)</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-item-name">Apollo.io MCP</div>
+          <p class="priority-item-why">275M+ contacts, 34+ tools. Enterprise-grade enrichment waterfall. Intent signals and sequence management.</p>
+          <span class="priority-item-cost">Free tier + $49/mo</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-item-name">Bright Data MCP</div>
+          <p class="priority-item-why">76.8% success rate scraping (highest benchmark). Proxy rotation, CAPTCHA solving. Fallback for hard-to-reach sites.</p>
+          <span class="priority-item-cost">5,000 free requests/mo</span>
+        </div>
+      </div>
+
+      <div class="priority-group p2 reveal">
+        <div class="priority-group-title">Priority 2 &mdash; Install This Month</div>
+        <div class="priority-item">
+          <div class="priority-item-name">SerpAPI MCP</div>
+          <p class="priority-item-why">Google Local Services, SERP data, local SEO signals. Complements Google Maps scraping for fuller coverage.</p>
+          <span class="priority-item-cost">$50/mo</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-item-name">Wappalyzer (Apify Actor)</div>
+          <p class="priority-item-why">Real-time tech stack detection. Powers "I see you're using WordPress" personalization angle.</p>
+          <span class="priority-item-cost">Pay-per-use</span>
+        </div>
+      </div>
+
+      <div class="priority-group p3 reveal">
+        <div class="priority-group-title">Priority 3 &mdash; Evaluate Later</div>
+        <div class="priority-item">
+          <div class="priority-item-name">HubSpot MCP</div>
+          <p class="priority-item-why">For clients already on HubSpot. Read-only CRM access or full CRUD with community server.</p>
+          <span class="priority-item-cost">Free</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-item-name">Pipedrive MCP</div>
+          <p class="priority-item-why">Alternative CRM for clients using Pipedrive. Most complete implementation available.</p>
+          <span class="priority-item-cost">Free</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-item-name">Explorium B2B MCP</div>
+          <p class="priority-item-why">Additional enrichment source. Company search, contact discovery, tech stack, funding data.</p>
+          <span class="priority-item-cost">TBD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     REFERENCES
+     ============================ -->
+<section id="references">
+  <div class="section-inner">
+    <div class="section-label reveal">10 / Scientific Sources &amp; References</div>
+    <h2 class="section-title reveal">Evidence-Based Foundation</h2>
+    <p class="section-subtitle reveal">Every system design decision is backed by published research, peer-reviewed papers, and large-scale empirical data.</p>
+
+    <div class="ref-grid">
+      <div class="ref-card reveal">
+        <div class="ref-type">Academic Paper</div>
+        <div class="ref-title">B2B Lead Scoring with Machine Learning</div>
+        <p class="ref-desc">Frontiers in AI (2025). ML-based scoring models significantly improve lead prioritization. Supervised techniques predict conversion probability.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Academic Paper</div>
+        <div class="ref-title">AI-Based Lead Generation: Scrapus Case Study</div>
+        <p class="ref-desc">Frontiers in AI (2025). RL + transformer NLP + knowledge graphs yield ~3x higher relevant lead yield vs. traditional crawling.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Behavioral Science</div>
+        <div class="ref-title">Cialdini's 7 Principles of Persuasion</div>
+        <p class="ref-desc">Reciprocity, Commitment, Social Proof, Authority, Liking, Scarcity, Unity. Our system is built on Principles #1, #3, and #6.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Behavioral Economics</div>
+        <div class="ref-title">Kahneman &amp; Tversky: Loss Aversion</div>
+        <p class="ref-desc">Prospect Theory. Losses are felt 2x more intensely than equivalent gains. Drives our email framing strategy.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Empirical Study</div>
+        <div class="ref-title">85,000-Email Dataset Analysis</div>
+        <p class="ref-desc">Belkins, Martal, Snov.io (2025-2026). Tuesday 6-9 AM send time, 50-125 word length, 3-7-7 cadence, 18% reply for batches &le;50.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Industry Report</div>
+        <div class="ref-title">Trigger-Based Selling (UserGems + Boomerang)</div>
+        <p class="ref-desc">Trigger-based outreach: 20-35% response. Standard cold: 5-10%. Key triggers: hiring, funding, bad reviews, new competitors.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Platform Data</div>
+        <div class="ref-title">SalesBread Follow-Up Cadence Research</div>
+        <p class="ref-desc">+49% reply rate after 1st follow-up. 60% of replies from follow-ups. 93% captured by Day 10. 4th follow-up = spam risk.</p>
+      </div>
+      <div class="ref-card reveal">
+        <div class="ref-type">Deliverability</div>
+        <div class="ref-title">Instantly + Mailshake 2026 Benchmarks</div>
+        <p class="ref-desc">SPF/DKIM/DMARC required. Warm-up: 5&rarr;50/day over 7 weeks. Variable sending volume. Link-free Day 1 messages.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     THE FORMULA
+     ============================ -->
+<section id="formula">
+  <div class="hero-content" style="position:relative;z-index:2">
+    <div class="formula-label reveal">11 / The Formula</div>
+    <h2 class="section-title reveal" style="text-align:center;margin-bottom:2rem">Best-in-World =</h2>
+
+    <div class="formula-eq reveal">
+      <span class="var v1">Claude Personalization</span>
+      <span class="op">+</span>
+      <span class="var v2">Reciprocity Model</span>
+      <span class="op">+</span><br>
+      <span class="var v3">MCP Pipeline</span>
+      <span class="op">+</span>
+      <span class="var v4">Behavioral Science</span>
+      <span class="op">+</span><br>
+      <span class="var v5">Blue Ocean</span>
+      <span class="op">+</span>
+      <span class="var v6">$200/mo</span>
+    </div>
+
+    <div class="formula-result reveal">THE WORLD'S BEST AI LEAD GEN SYSTEM</div>
+
+    <p class="formula-cta reveal">
+      While competitors charge $500&ndash;$3,000/mo for template-based outreach,
+      LeadDrop delivers Claude-quality personalization, give-first reciprocity,
+      and behavioral science optimization &mdash; for local businesses at scale.
+    </p>
+
+    <div class="formula-price reveal">
+      $300 setup + $200/mo
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     JAVASCRIPT
+     ============================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ----- Scroll reveal -----
+  var revealEls = document.querySelectorAll('.reveal');
+
+  function checkReveal() {
+    var windowHeight = window.innerHeight;
+    for (var i = 0; i < revealEls.length; i++) {
+      var el = revealEls[i];
+      var top = el.getBoundingClientRect().top;
+      if (top < windowHeight - 80) {
+        el.classList.add('visible');
+      }
+    }
+  }
+
+  // ----- Scoring bars animation -----
+  var factorBars = document.querySelectorAll('.factor-bar');
+
+  function checkBars() {
+    var windowHeight = window.innerHeight;
+    for (var i = 0; i < factorBars.length; i++) {
+      var bar = factorBars[i];
+      var top = bar.getBoundingClientRect().top;
+      if (top < windowHeight - 60) {
+        bar.classList.add('visible');
+      }
+    }
+  }
+
+  // ----- Nav scroll state -----
+  var nav = document.getElementById('navbar');
+
+  function checkNav() {
+    if (window.scrollY > 50) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+
+  // ----- Active nav link -----
+  var sections = document.querySelectorAll('section[id]');
+  var navLinks = document.querySelectorAll('.nav-links a');
+
+  function updateActiveLink() {
+    var scrollY = window.scrollY + 100;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      var section = sections[i];
+      if (scrollY >= section.offsetTop) {
+        var id = section.getAttribute('id');
+        for (var j = 0; j < navLinks.length; j++) {
+          navLinks[j].classList.remove('active');
+          if (navLinks[j].getAttribute('href') === '#' + id) {
+            navLinks[j].classList.add('active');
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // ----- Event listeners -----
+  function onScroll() {
+    checkReveal();
+    checkBars();
+    checkNav();
+    updateActiveLink();
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+
+  // Initial check
+  onScroll();
+})();
+</script>
+
+</body>
+</html>

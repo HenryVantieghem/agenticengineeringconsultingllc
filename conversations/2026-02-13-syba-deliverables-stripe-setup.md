@@ -41,7 +41,7 @@ Fix the SYBA dashboard (login flow, data loading, UI), create client-facing and 
 - **Google Doc (internal value)**: https://docs.google.com/document/d/1QDeGy7KuDqqpgVpjK-Wykbj8eIwQsi0rahpaKn4gQis/edit
 - **Stripe Setup Link (LIVE)**: https://buy.stripe.com/bJe7sK0O92mn1HZ9xEfjG02 ($300)
 - **Stripe Monthly Link (LIVE)**: https://buy.stripe.com/7sYaEWfJ3aSTfyPeRYfjG03 ($200/mo)
-- **Stripe Account**: acct_1RFfRWBQXryBTFI2 (Henry Vantieghem ACTMASTERCLASS)
+- **Stripe Account**: acct_1RFfRWBQXryBTFI2 (Henry Vantieghem — Agentic Engineering)
 - **Stripe CLI**: Installed via Homebrew, authenticated
 
 ## Commands & Skills Created

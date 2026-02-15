@@ -1,38 +1,40 @@
-# Follow-Up Sequence — Agentic Engineering Consulting
+# Follow-Up Sequence — Agentic Engineering / LeadDrop
 
-## Follow-Up #1 (3 days after initial contact)
+## Follow-Up #1 (Day 3 after initial contact)
 
 **Subject:** Following up — [Business Name]
 
 Hi [Name],
 
-Just following up on my note from [day]. I know [industry] gets busy, so I'll keep this short:
+Just following up on the leads I sent over [day]. Quick question — did any of those five prospects look like a good fit?
 
-I'd love to show you a 10-minute demo of how our AI phone system works for [industry] businesses. No pitch — just a live demo so you can hear it in action.
+I run these daily for businesses like yours in [City]. If you want to see what 20 scored, researched leads landing in your inbox every morning looks like, I can show you the full dashboard in 15 minutes.
 
-Here's my calendar if you want to grab a time: [Calendly link]
+Here's my calendar: https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min
+
+Either way, those leads are yours to keep.
 
 Best,
 Henry
 
-## Follow-Up #2 (7 days after initial contact)
+## Follow-Up #2 (Day 7 after initial contact)
 
 **Subject:** One more thing — [Business Name]
 
 Hi [Name],
 
-Last note from me — I promise.
+Last quick note — I ran the numbers for [industry] businesses in [City]:
 
-I ran some numbers for [industry] businesses your size in Auburn: the average business loses about $4,500/month from missed calls. That's appointments that go to competitors, questions that don't get answered, and after-hours leads that slip through.
+The average [industry] practice spends $1,200/mo on HubSpot + Apollo + ZoomInfo and still spends 3 hours/day researching prospects manually. My system replaces all three tools for $200/mo and delivers 20 scored leads to your dashboard every morning — zero manual research.
 
-Our system catches all of that for less than $500/month.
+One of my clients cancelled all three subscriptions and saved $3,600/year before counting the hours.
 
-If the timing isn't right, no worries. But if you're curious, here's a 10-minute demo slot: [Calendly link]
+If the timing isn't right, no worries. But if you're curious: https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min
 
 Talk soon,
 Henry
 
-## Follow-Up #3 (14 days after initial contact — final touch)
+## Follow-Up #3 (Day 14 after initial contact — final touch)
 
 **Subject:** Closing the loop — [Business Name]
 
@@ -40,15 +42,16 @@ Hi [Name],
 
 I'll take the hint — timing might not be right, and that's totally fine.
 
-I'm keeping a list of [industry] businesses in Auburn I'd love to work with, and [Business Name] is on it. If you ever feel like you're losing calls or want to explore automation, just reply to this email or book a time here: [Calendly link]
+I'm keeping a list of [industry] businesses in [City] I'd love to work with, and [Business Name] is on it. If you ever feel like you're spending too much time finding clients instead of serving them, just reply to this email or book a time here: https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min
 
-Wishing you a great [season],
+Wishing you a great week,
 Henry
 
 ---
 
 **Sequence Rules:**
 - Stop immediately if they respond (positive or negative)
-- If they book a meeting, mark as "Meeting Booked" in lead file
-- If they ask to stop, mark as "Opted Out" and never contact again
+- If they book a meeting, update status to "booked" in Supabase
+- If they ask to stop, update status to "declined" and never contact again
 - Max 3 touches per lead. Respect their time.
+- Use actual Calendly link in all emails (not placeholder)

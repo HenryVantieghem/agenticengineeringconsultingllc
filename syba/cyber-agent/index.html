@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber.io — AI-Powered Cybersecurity Intelligence</title>
+  <meta name="description" content="Our AI agent swarm analyzes your business, identifies vulnerabilities, and provides insurance coverage in seconds.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e94560'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>C</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__container">
+      <a href="#" class="nav__logo">Cyber.io</a>
+      <div class="nav__links">
+        <a href="#demo" class="nav__link">Demo</a>
+        <a href="#features" class="nav__link">Features</a>
+        <a href="#pricing" class="nav__link">Pricing</a>
+        <a href="#contact" class="nav__link nav__link--cta">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <span class="hero__badge">AI-Powered Cybersecurity</span>
+      <h1 class="hero__title">Your business deserves<br>an AI security team.</h1>
+      <p class="hero__subtitle">Our agent swarm analyzes your cybersecurity posture, identifies vulnerabilities, and recommends insurance coverage. All in seconds.</p>
+      <div class="hero__actions">
+        <a href="#demo" class="btn btn--primary">Try the Demo</a>
+        <a href="#features" class="btn btn--ghost">Learn More</a>
+      </div>
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <span class="hero__stat-value">6</span>
+          <span class="hero__stat-label">AI Sub-Agents</span>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">30s</span>
+          <span class="hero__stat-label">Full Analysis</span>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">$5M</span>
+          <span class="hero__stat-label">Max Coverage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo -->
+  <section class="demo" id="demo">
+    <div class="container">
+      <div class="demo__card">
+
+        <!-- Stage 1: Input -->
+        <div class="demo__stage" id="stageInput">
+          <div class="agent-chat">
+            <div class="agent-chat__avatar">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="agent-chat__bubble">
+              <p class="agent-chat__name">Cyber.io Agent</p>
+              <p class="agent-chat__message">I will analyze your business's cybersecurity posture. Enter your website or company name to begin.</p>
+            </div>
+          </div>
+          <div class="demo__input-wrap">
+            <input type="text" id="urlInput" class="demo__input" placeholder="e.g., acme-corp.com" autocomplete="off">
+            <button id="scanBtn" class="btn btn--primary demo__scan-btn">Scan</button>
+          </div>
+          <p class="demo__hint">Free analysis. No credit card required.</p>
+        </div>
+
+        <!-- Stage 2: Swarm Animation -->
+        <div class="demo__stage demo__stage--hidden" id="stageSwarm">
+          <div class="swarm" id="swarmContainer">
+            <div class="swarm__center">
+              <div class="swarm__core-ring"></div>
+              <svg class="swarm__core-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span class="swarm__core-label">Core Agent</span>
+            </div>
+            <!-- SVG lines drawn by JS -->
+            <svg class="swarm__lines" id="swarmLines"></svg>
+            <div class="swarm__nodes" id="swarmNodes">
+              <!-- 6 nodes positioned by JS -->
+            </div>
+          </div>
+          <p class="swarm__status" id="swarmStatus">Initializing agent swarm...</p>
+          <div class="scan-progress">
+            <div class="scan-progress__track">
+              <div class="scan-progress__fill" id="progressFill"></div>
+            </div>
+            <span class="scan-progress__pct" id="progressPct">0%</span>
+          </div>
+        </div>
+
+        <!-- Stage 3: Results -->
+        <div class="demo__stage demo__stage--hidden" id="stageResults">
+          <div class="results__header">
+            <h2 class="results__title">Your Cybersecurity Health</h2>
+            <p class="results__domain" id="resultsDomain"></p>
+          </div>
+
+          <!-- Score Ring -->
+          <div class="score-ring">
+            <svg class="score-ring__svg" viewBox="0 0 200 200">
+              <circle class="score-ring__bg" cx="100" cy="100" r="88"/>
+              <circle class="score-ring__fill" id="scoreRingFill" cx="100" cy="100" r="88"/>
+            </svg>
+            <div class="score-ring__center">
+              <span class="score-ring__number" id="scoreNumber">0</span>
+              <span class="score-ring__out-of">/100</span>
+            </div>
+          </div>
+
+          <!-- Grade -->
+          <div class="results__grade">
+            <div class="results__grade-letter" id="gradeLetter">--</div>
+            <p class="results__risk-level" id="riskLevel"></p>
+          </div>
+
+          <!-- Category Breakdown -->
+          <div class="breakdown" id="breakdownGrid">
+            <h3 class="breakdown__heading">Category Breakdown</h3>
+            <div class="breakdown__grid" id="breakdownCards">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Risks -->
+          <div class="risks" id="risksSection">
+            <h3 class="risks__heading">What Our AI Agent Found</h3>
+            <div class="risks__list" id="risksList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Insurance CTA -->
+          <div class="insurance-cta" id="insuranceCTA">
+            <h3 class="insurance-cta__title">Protect Your Business Today</h3>
+            <p class="insurance-cta__desc">Our AI agent can continuously monitor and fix these vulnerabilities, backed by up to $5M in cybersecurity insurance coverage.</p>
+            <div class="insurance-cta__actions">
+              <a href="#pricing" class="btn btn--primary">See Plans</a>
+              <button class="btn btn--ghost" id="retakeBtn">Scan Another</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2 class="section__title">AI-Powered Protection Plans</h2>
+      <p class="section__subtitle">Continuous monitoring, automated remediation, and insurance coverage.</p>
+      <div class="pricing__grid">
+
+        <div class="pricing__card">
+          <span class="pricing__tier">Starter</span>
+          <div class="pricing__price">
+            <span class="pricing__amount">$99</span>
+            <span class="pricing__period">/mo</span>
+          </div>
+          <p class="pricing__desc">AI monitoring with basic coverage</p>
+          <ul class="pricing__features">
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Weekly AI security scans
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Vulnerability alerts
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              $250K insurance coverage
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Email support
+            </li>
+          </ul>
+          <a class="btn btn--ghost pricing__btn" href="#contact">Get Started</a>
+        </div>
+
+        <div class="pricing__card pricing__card--featured">
+          <span class="pricing__badge">Most Popular</span>
+          <span class="pricing__tier">Business</span>
+          <div class="pricing__price">
+            <span class="pricing__amount">$299</span>
+            <span class="pricing__period">/mo</span>
+          </div>
+          <p class="pricing__desc">Full agent protection with $1M coverage</p>
+          <ul class="pricing__features">
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Daily AI security scans
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Automated remediation
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              $1M insurance coverage
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              24/7 incident response
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Compliance reporting
+            </li>
+          </ul>
+          <a class="btn btn--primary pricing__btn" href="#contact">Get Started</a>
+        </div>
+
+        <div class="pricing__card">
+          <span class="pricing__tier">Enterprise</span>
+          <div class="pricing__price">
+            <span class="pricing__amount">$999</span>
+            <span class="pricing__period">/mo</span>
+          </div>
+          <p class="pricing__desc">Dedicated agent team with $5M coverage</p>
+          <ul class="pricing__features">
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Continuous real-time monitoring
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Dedicated agent team
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              $5M insurance coverage
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Custom integrations
+            </li>
+            <li class="pricing__feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              White-glove onboarding
+            </li>
+          </ul>
+          <a class="btn btn--ghost pricing__btn" href="#contact">Contact Sales</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section__title">How the Agent Swarm Works</h2>
+      <p class="section__subtitle">Six specialized AI agents work in parallel to assess every dimension of your security posture.</p>
+      <div class="features__grid">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="feature-card__title">Network Scanner</h3>
+          <p class="feature-card__desc">Analyzes your network perimeter, open ports, DNS configuration, and firewall rules for potential entry points.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3 class="feature-card__title">Vulnerability Detector</h3>
+          <p class="feature-card__desc">Scans for known CVEs, outdated software, misconfigured services, and common security weaknesses.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3 class="feature-card__title">Threat Intelligence</h3>
+          <p class="feature-card__desc">Cross-references your infrastructure against live threat feeds, dark web mentions, and active exploitation databases.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3 class="feature-card__title">Compliance Checker</h3>
+          <p class="feature-card__desc">Evaluates alignment with GDPR, NIS2, SOC 2, and ISO 27001 frameworks. Identifies compliance gaps automatically.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="feature-card__title">Data Protection</h3>
+          <p class="feature-card__desc">Audits encryption practices, access controls, data retention policies, and sensitive data exposure risks.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-4V4a2 2 0 0 0-4 0v6H6l6 8 6-8z"/><line x1="6" y1="22" x2="18" y2="22"/></svg>
+          </div>
+          <h3 class="feature-card__title">Insurance Evaluator</h3>
+          <p class="feature-card__desc">Calculates your risk profile and recommends optimal coverage level. Higher security score means lower premium.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / CTA -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <h2 class="section__title">Ready to secure your business?</h2>
+      <p class="section__subtitle">Talk to our team about which plan fits your needs.</p>
+      <a href="https://calendly.com/with-francis-at-syba-io/15min" target="_blank" rel="noopener" class="btn btn--primary btn--lg">Book a 15-Min Call</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__powered">Powered by <strong>SYBA.io</strong></p>
+      <div class="footer__links">
+        <a href="https://syba.io" class="footer__link" target="_blank" rel="noopener">syba.io</a>
+        <span class="footer__sep"></span>
+        <a href="#" class="footer__link">Privacy</a>
+        <span class="footer__sep"></span>
+        <a href="#" class="footer__link">Terms</a>
+        <span class="footer__sep"></span>
+        <a href="mailto:brigittev@syba.io" class="footer__link">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

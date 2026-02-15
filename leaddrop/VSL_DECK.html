@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadDrop — AI-Powered Lead Intelligence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a1a;
+    --bg-card: #12122a;
+    --accent: #00d4aa;
+    --accent-glow: rgba(0, 212, 170, 0.3);
+    --text: #ffffff;
+    --text-muted: #8888aa;
+    --text-dim: #555577;
+    --success: #00d97e;
+    --danger: #ff4d6a;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* --- SLIDES --- */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    position: relative;
+    scroll-snap-align: start;
+  }
+
+  .slide-inner {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  /* --- NAVIGATION DOTS --- */
+  .nav-dots {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 100;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-dot.active,
+  .nav-dot:hover {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: scale(1.3);
+  }
+
+  /* --- TYPOGRAPHY --- */
+  h1 {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 1.35rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+
+  .accent { color: var(--accent); }
+  .success { color: var(--success); }
+  .danger { color: var(--danger); }
+
+  .label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    background: rgba(0, 212, 170, 0.12);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* --- BIG NUMBER --- */
+  .big-number {
+    font-size: 5rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .big-number.counter {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- CARDS --- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px 28px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .card .icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* --- VS LAYOUT --- */
+  .vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 50px;
+  }
+
+  .vs-block {
+    text-align: center;
+  }
+
+  .vs-label {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+
+  .vs-divider {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* --- STAT ROW --- */
+  .stat-row {
+    display: flex;
+    gap: 60px;
+    margin-top: 50px;
+    flex-wrap: wrap;
+  }
+
+  .stat-block {
+    text-align: center;
+  }
+
+  .stat-block .stat-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .stat-block .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 180px;
+  }
+
+  /* --- CHECKLIST --- */
+  .checklist {
+    list-style: none;
+    margin-top: 30px;
+  }
+
+  .checklist li {
+    font-size: 1.2rem;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .checklist li .check {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(0, 212, 170, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* --- CTA BUTTON --- */
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #0a0a1a;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 18px 48px;
+    border-radius: 12px;
+    text-decoration: none;
+    margin-top: 40px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px var(--accent-glow);
+  }
+
+  /* --- FOOTER --- */
+  .footer-text {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 20px;
+  }
+
+  /* --- ANIMATIONS --- */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .fade-up.delay-1 { transition-delay: 0.1s; }
+  .fade-up.delay-2 { transition-delay: 0.2s; }
+  .fade-up.delay-3 { transition-delay: 0.3s; }
+  .fade-up.delay-4 { transition-delay: 0.4s; }
+
+  /* --- KEYBOARD HINT --- */
+  .key-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 768px) {
+    .slide { padding: 40px 24px; }
+    h1 { font-size: 2.4rem; }
+    h2 { font-size: 1.8rem; }
+    .big-number { font-size: 3rem; }
+    .vs-container { flex-direction: column; gap: 30px; }
+    .stat-row { gap: 30px; justify-content: center; }
+    .stat-block .stat-value { font-size: 2.4rem; }
+    .nav-dots { right: 12px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .subtitle { font-size: 1.1rem; }
+    .cta-btn { padding: 16px 32px; font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION DOTS -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<div class="key-hint">Arrow keys or scroll to navigate</div>
+
+<!-- ========== SLIDE 1: TITLE ========== -->
+<section class="slide" id="slide-0">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">Agentic Engineering Consulting</span>
+    </div>
+    <h1 class="fade-up delay-1">10 Scored Leads.<br>Every Morning.<br><span class="accent">Before Coffee.</span></h1>
+    <p class="subtitle fade-up delay-2" style="margin: 0 auto;">
+      AI-powered lead intelligence that replaced HubSpot + Apollo + ZoomInfo<br>for a fraction of the cost.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 2: THE PROBLEM ========== -->
+<section class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">The Problem</span>
+    </div>
+    <h2 class="fade-up delay-1">You're Paying $1,200/mo<br><span class="danger">And Still Googling for Leads</span></h2>
+    <div class="card-grid">
+      <div class="card fade-up delay-1">
+        <span class="icon">&#128176;</span>
+        <h3>$1,200/mo in Tools</h3>
+        <p>HubSpot, Apollo, ZoomInfo — three subscriptions, three logins, three dashboards. And you still spend hours piecing together prospect lists.</p>
+      </div>
+      <div class="card fade-up delay-2">
+        <span class="icon">&#9200;</span>
+        <h3>3 Hours/Day Manual Research</h3>
+        <p>Searching LinkedIn, Googling companies, copying data into spreadsheets. Time you could spend closing deals or serving clients.</p>
+      </div>
+      <div class="card fade-up delay-3">
+        <span class="icon">&#128200;</span>
+        <h3>Zero Intelligence</h3>
+        <p>Raw contact info isn't intelligence. You need to know WHY someone needs you TODAY — the trigger event, the pain point, the opening.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 3: OLD WAY VS NEW WAY ========== -->
+<section class="slide" id="slide-2">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">The Comparison</span>
+    </div>
+    <h2 class="fade-up delay-1">The Old Way vs. <span class="accent">The New Way</span></h2>
+    <div class="vs-container fade-up delay-2">
+      <div class="vs-block">
+        <div class="big-number danger counter" data-target="1200" data-prefix="$" data-suffix="/mo">$0/mo</div>
+        <p class="vs-label">3 tools + 3 hours/day</p>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div class="vs-block">
+        <div class="big-number success counter" data-target="200" data-prefix="$" data-suffix="/mo">$0/mo</div>
+        <p class="vs-label">1 dashboard + 0 hours/day</p>
+      </div>
+    </div>
+    <p class="subtitle fade-up delay-3" style="margin: 40px auto 0; text-align: center; max-width: 650px;">
+      One dashboard. One email. Zero manual research.<br>Your entire sales pipeline — <strong style="color: #fff;">automated</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 4: LIVE DASHBOARD DEMO ========== -->
+<section class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">Live Demo</span>
+    </div>
+    <h2 class="fade-up delay-1">Your Dashboard.<br><span class="accent">Every Morning.</span></h2>
+    <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+      <div class="card fade-up delay-1">
+        <span class="icon">&#127919;</span>
+        <h3>Fit Score 1-10</h3>
+        <p>Every lead scored on how well they match your ideal customer profile. Focus on 8+ scores first.</p>
+      </div>
+      <div class="card fade-up delay-2">
+        <span class="icon">&#127758;</span>
+        <h3>Multi-Region</h3>
+        <p>Belgium, Europe, USA — or whatever markets you serve. Leads tagged by region automatically.</p>
+      </div>
+      <div class="card fade-up delay-3">
+        <span class="icon">&#127991;</span>
+        <h3>ICP Segments</h3>
+        <p>Insurance brokers, law firms, HVAC, dental — segmented by the industries you actually want.</p>
+      </div>
+      <div class="card fade-up delay-4">
+        <span class="icon">&#9993;</span>
+        <h3>Ready-to-Send Outreach</h3>
+        <p>Cold email, Day 3 follow-up, Day 7 follow-up, Day 14 follow-up. Personalized. Written. Done.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 5: LEAD INTELLIGENCE DETAIL ========== -->
+<section class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">Deep Intelligence</span>
+    </div>
+    <h2 class="fade-up delay-1">Click Any Lead.<br><span class="accent">Full Package.</span></h2>
+    <ul class="checklist">
+      <li class="fade-up delay-1"><span class="check">&#10003;</span> Company overview — what they do, how big, where they operate</li>
+      <li class="fade-up delay-1"><span class="check">&#10003;</span> Decision-maker identified — name, title, LinkedIn, email</li>
+      <li class="fade-up delay-2"><span class="check">&#10003;</span> Pain points — specific problems they're facing right now</li>
+      <li class="fade-up delay-2"><span class="check">&#10003;</span> Trigger events — why TODAY is the right day to reach out</li>
+      <li class="fade-up delay-3"><span class="check">&#10003;</span> Personalized cold email — ready to copy-paste and send</li>
+      <li class="fade-up delay-3"><span class="check">&#10003;</span> 3-touch follow-up sequence — Day 3, Day 7, Day 14</li>
+      <li class="fade-up delay-4"><span class="check">&#10003;</span> Prospect brief — one-page intelligence dossier for your files</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== SLIDE 6: DAILY BRIEFING ========== -->
+<section class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="fade-up">
+      <span class="label">Daily Intelligence</span>
+    </div>
+    <h2 class="fade-up delay-1">Your Morning Briefing.<br><span class="accent">One Email. Everything.</span></h2>
+    <div class="card-grid">
+      <div class="card fade-up delay-1">
+        <span class="icon">&#128293;</span>
+        <h3>Top 5 Hottest Leads</h3>
+        <p>Ranked by fit score and recency. These are the ones to call first — before your competitors find them.</p>
+      </div>
+      <div class="card fade-up delay-2">
+        <span class="icon">&#128240;</span>
+        <h3>Industry Triggers</h3>
+        <p>Funding rounds, leadership changes, expansion announcements — signals that someone needs what you sell.</p>
+      </div>
+      <div class="card fade-up delay-3">
+        <span class="icon">&#128203;</span>
+        <h3>Action Items</h3>
+        <p>Exactly what to do today. Who to call, what to say, which follow-ups are due. No guesswork.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 7: CASE STUDY RESULTS ========== -->
+<section class="slide" id="slide-6">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">Proof It Works</span>
+    </div>
+    <h2 class="fade-up delay-1">SYBA Cybersecurity — <span class="accent">Real Results</span></h2>
+    <div class="stat-row fade-up delay-2" style="justify-content: center;">
+      <div class="stat-block">
+        <div class="stat-value accent counter" data-target="50">0</div>
+        <div class="stat-label">Leads delivered in 48 hours</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value accent counter" data-target="6">0</div>
+        <div class="stat-label">ICP segments covered</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value accent counter" data-target="3">0</div>
+        <div class="stat-label">Regions (Belgium, Europe, USA)</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value success counter" data-target="0" data-prefix="$">$0</div>
+        <div class="stat-label">Manual research time</div>
+      </div>
+    </div>
+    <p class="subtitle fade-up delay-3" style="margin: 50px auto 0; text-align: center; max-width: 700px;">
+      Replaced HubSpot + Apollo + ZoomInfo. One dashboard. One daily email.<br>Saved <strong style="color: #fff;">$3,600/year</strong> in subscriptions alone — before counting the hours.
+    </p>
+  </div>
+</section>
+
+<!-- ========== SLIDE 8: CTA ========== -->
+<section class="slide" id="slide-7">
+  <div class="slide-inner" style="text-align: center;">
+    <div class="fade-up">
+      <span class="label">Get Started</span>
+    </div>
+    <h1 class="fade-up delay-1">$300 Setup. $200/mo.<br><span class="accent">48 Hours to Launch.</span></h1>
+    <p class="subtitle fade-up delay-2" style="margin: 0 auto;">
+      Book 15 minutes. I'll show you exactly what your dashboard would look like — with real leads from your industry. Those 5 leads I already sent you? Yours to keep either way.
+    </p>
+    <a href="https://calendly.com/henryvantieghem-agenticengineeringconsultingllc/30min" target="_blank" class="cta-btn fade-up delay-3">
+      Book Your Free Strategy Call
+    </a>
+    <p class="footer-text fade-up delay-4">Henry Vantieghem &middot; Agentic Engineering Consulting &middot; henry@agenticengineering.com</p>
+  </div>
+</section>
+
+<script>
+  // --- NAVIGATION DOTS ---
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot';
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => {
+      slides[i].scrollIntoView({ behavior: 'smooth' });
+    });
+    navDots.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll('.nav-dot');
+
+  // --- INTERSECTION OBSERVER (visibility + dots) ---
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Activate fade-ups
+        entry.target.querySelectorAll('.fade-up').forEach(el => el.classList.add('visible'));
+
+        // Update dots
+        const idx = Array.from(slides).indexOf(entry.target);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+        // Trigger counters
+        entry.target.querySelectorAll('.counter').forEach(startCounter);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // --- ANIMATED COUNTERS ---
+  const countedSet = new Set();
+
+  function startCounter(el) {
+    if (countedSet.has(el)) return;
+    countedSet.add(el);
+
+    const target = parseFloat(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = (target * eased).toFixed(decimals);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  // --- KEYBOARD NAVIGATION ---
+  let currentSlide = 0;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      currentSlide = Math.min(currentSlide + 1, slides.length - 1);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      currentSlide = Math.max(currentSlide - 1, 0);
+      slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Keep currentSlide in sync with scroll
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        currentSlide = Array.from(slides).indexOf(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => scrollObserver.observe(s));
+</script>
+
+</body>
+</html>
